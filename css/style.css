@@ -1,0 +1,538 @@
+/* ============================================================
+   Frank Le — Portfolio
+   Style system: book-paper black & white, editorial serif +
+   functional grotesk, asymmetric grid, generous whitespace,
+   smooth restrained motion. See /structure/style-direction.md
+   and /structure/creative-brief.md in the project for the
+   full design rationale behind every choice below.
+   ============================================================ */
+
+:root {
+  /* Color — "open book" palette: off-white paper, near-black ink.
+     Not pure #FFFFFF/#000000 on purpose. */
+  --paper: #f5f2ea;
+  --paper-dim: #ece7da;
+  --ink: #16140f;
+  --ink-soft: #55503f;
+  --line: #d8d2c1;
+
+  /* Type — split-role system:
+     serif = literary/humanist voice (headlines, bio, narrative)
+     grotesk = structural voice (nav, labels, metadata) */
+  --serif: "Times New Roman", Times, Georgia, "Noto Serif", serif;
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+
+  /* Scale — large overall register, restrained/consistent jumps */
+  --step-0: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  --step-2: clamp(1.75rem, 1.4rem + 1.2vw, 2.4rem);
+  --step-3: clamp(2.4rem, 1.8rem + 2vw, 3.6rem);
+  --step-4: clamp(3rem, 2.2rem + 3vw, 5.2rem);
+
+  --max-w: 1440px;
+  --gutter: clamp(1.25rem, 3vw, 3rem);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video { max-width: 100%; display: block; }
+
+a { color: inherit; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Nav (v1 placeholder — node-tree diagram is a planned
+   upgrade, see structure/sitemap.md) ---------- */
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem var(--gutter);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
+}
+
+.site-nav__mark {
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-nav__links {
+  display: flex;
+  gap: clamp(1rem, 2.5vw, 2.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav__links a {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease);
+}
+
+.site-nav__links a:hover,
+.site-nav__links a[aria-current="page"] {
+  border-bottom-color: var(--ink);
+}
+
+/* ---------- Layout shell ---------- */
+
+main { display: block; }
+
+.section {
+  padding: clamp(3rem, 8vw, 7rem) var(--gutter);
+}
+
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+  max-width: var(--max-w);
+  margin-inline: auto;
+}
+
+/* ---------- Homepage hero (asymmetric placement is the brutalist
+   move — type itself stays calm/restrained) ---------- */
+
+.hero {
+  padding-block: clamp(4rem, 12vw, 9rem) clamp(3rem, 8vw, 6rem);
+}
+
+.hero__line {
+  grid-column: 3 / span 8;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: var(--step-4);
+  line-height: 1.08;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .hero__line { grid-column: 1 / -1; }
+}
+
+.hero__meta {
+  grid-column: 3 / span 5;
+  margin-top: 1.5rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 720px) {
+  .hero__meta { grid-column: 1 / -1; }
+}
+
+/* ---------- Featured carousel ----------
+   Native scroll-snap placeholder — Frank plans to bring in an
+   external carousel component; this keeps the same markup hooks
+   (.carousel / .carousel__track / .carousel__item) so swapping
+   the library later doesn't require restructuring the page. */
+
+.carousel-heading {
+  grid-column: 1 / -1;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 1.25rem;
+}
+
+.carousel {
+  grid-column: 1 / -1;
+}
+
+.carousel__track {
+  display: flex;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.75rem;
+  scrollbar-width: thin;
+}
+
+.carousel__item {
+  scroll-snap-align: start;
+  flex: 0 0 clamp(260px, 32vw, 460px);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.media-frame {
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  overflow: hidden;
+  background: var(--paper-dim);
+}
+
+.media-frame img,
+.media-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+
+.carousel__item:hover .media-frame img,
+.carousel__item:hover .media-frame video {
+  transform: scale(1.04);
+}
+
+.media-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  border: 1px dashed var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.carousel__caption {
+  margin-top: 0.85rem;
+  font-family: var(--serif);
+  font-size: var(--step-1);
+}
+
+.carousel__caption small {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ---------- About ---------- */
+
+.about-grid {
+  align-items: start;
+}
+
+.about__headshot {
+  grid-column: 1 / span 5;
+}
+
+.about__headshot .media-frame { aspect-ratio: 3 / 4; }
+
+.about__copy {
+  grid-column: 7 / span 6;
+  font-size: var(--step-1);
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .about__headshot, .about__copy { grid-column: 1 / -1; }
+  .about__copy { margin-top: 2rem; }
+}
+
+.about__copy p { margin: 0 0 1.25rem; }
+
+/* ---------- Works grid + filters ---------- */
+
+.filters {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  font-family: var(--sans);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-group__label {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-right: 0.25rem;
+}
+
+.filter-btn {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.filter-btn:hover { border-color: var(--ink); }
+
+.filter-btn[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.works-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.work-card {
+  grid-column: span 6;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* Asymmetric rhythm: every 3rd item runs wider, breaking the tidy grid */
+.work-card:nth-child(3n) { grid-column: span 8; }
+.work-card:nth-child(3n + 1) { grid-column: span 4; }
+
+@media (max-width: 860px) {
+  .work-card,
+  .work-card:nth-child(3n),
+  .work-card:nth-child(3n + 1) { grid-column: 1 / -1; }
+}
+
+.work-card .media-frame { aspect-ratio: 4 / 3; }
+
+.work-card__title {
+  margin-top: 0.85rem;
+  font-family: var(--serif);
+  font-size: var(--step-1);
+}
+
+.work-card__meta {
+  margin-top: 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.works-empty {
+  grid-column: 1 / -1;
+  font-family: var(--sans);
+  color: var(--ink-soft);
+  padding: 3rem 0;
+}
+
+/* ---------- Work detail (flexible template) ---------- */
+
+.work-detail__head {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.work-detail__back {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-soft);
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.work-detail__title {
+  font-size: var(--step-3);
+  margin: 0 0 1rem;
+  max-width: 16ch;
+}
+
+.work-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.work-detail__meta dt { font-weight: 600; color: var(--ink); }
+.work-detail__meta dt::after { content: ":"; margin-right: 0.35em; }
+.work-detail__meta > div { display: flex; gap: 0.25em; }
+
+.work-detail__media {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.work-detail__media .media-frame {
+  aspect-ratio: 16 / 9;
+  margin-bottom: clamp(1rem, 2vw, 1.75rem);
+}
+
+.insight {
+  grid-column: 2 / span 9;
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3rem);
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+@media (max-width: 860px) { .insight { grid-column: 1 / -1; } }
+
+.insight__beat dt {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
+}
+
+.insight__beat dd {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+.work-detail__credits {
+  grid-column: 2 / span 9;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 860px) { .work-detail__credits { grid-column: 1 / -1; } }
+
+.work-detail__credits dt { font-weight: 600; color: var(--ink); display: inline; }
+.work-detail__credits dd { display: inline; margin: 0 1.5rem 0 0.4em; }
+
+/* ---------- Contact ---------- */
+
+.contact-grid { align-items: start; }
+
+.contact__block {
+  grid-column: 1 / span 7;
+}
+
+@media (max-width: 860px) { .contact__block { grid-column: 1 / -1; } }
+
+.contact__name {
+  font-size: var(--step-2);
+  margin: 0 0 2rem;
+}
+
+.contact__list {
+  list-style: none;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  font-size: var(--step-1);
+}
+
+.contact__list li { margin-bottom: 0.9rem; }
+
+.contact__list a { text-decoration-color: var(--line); text-underline-offset: 4px; }
+.contact__list a:hover { text-decoration-color: var(--ink); }
+
+.contact__label {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.15rem;
+}
+
+.cv-slot {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-block;
+  border: 1px solid var(--line);
+  padding: 0.7rem 1.25rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding: 2rem var(--gutter) 3rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+
+.site-footer a {
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}

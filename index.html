@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frank Le — Filmmaker &amp; Designer</title>
+<meta name="description" content="Lê Vũ Xuân Anh (Frank Le) — filmmaker and designer. Director, screenwriter, editor, and UI/UX designer.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-nav-current="home">
+
+<header class="site-nav">
+  <a class="site-nav__mark" href="index.html">Frank Le</a>
+  <ul class="site-nav__links">
+    <li><a href="index.html" data-nav="home">Home</a></li>
+    <li><a href="about.html" data-nav="about">About</a></li>
+    <li><a href="works.html" data-nav="works">Works</a></li>
+    <li><a href="contact.html" data-nav="contact">Contact</a></li>
+  </ul>
+</header>
+
+<main>
+  <section class="section hero">
+    <div class="grid-12">
+      <p class="hero__line">
+        Lê Vũ Xuân Anh (Frank Le) is a young Vietnamese filmmaker and designer, with working experience in art, fashion commercials, academia, and more.
+      </p>
+      <p class="hero__meta">Director · Screenwriter · Editor · UI/UX Designer</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="grid-12">
+      <h2 class="carousel-heading">Featured Work</h2>
+      <div class="carousel">
+        <div class="carousel__track">
+          <!-- populated by js/home.js from data/works.json (featured: true) -->
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <a href="contact.html">frank.lvxa@gmail.com</a>
+</footer>
+
+<script src="js/site.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

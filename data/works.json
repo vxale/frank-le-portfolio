@@ -1,0 +1,52 @@
+[
+  {
+    "id": "placeholder-short-film",
+    "title": "PLACEHOLDER — Short Film Title",
+    "type": "film",
+    "year": 2025,
+    "commercial": false,
+    "featured": true,
+    "role": "Director, Writer, Editor",
+    "tools": "Camera, Premiere Pro",
+    "credits": [
+      { "role": "Director", "name": "Frank Le" },
+      { "role": "Cinematographer", "name": "TBD" }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "Replace with a one-line description of what this piece actually is.",
+      "problem": "What was it trying to solve, say, or explore?",
+      "audience": "Who is it made for?",
+      "process": "How did you actually make it — approach, constraints, decisions?",
+      "result": "What happened — screened where, reaction, outcome, what you learned?"
+    },
+    "media": [
+      { "type": "image", "src": "", "alt": "" }
+    ]
+  },
+  {
+    "id": "placeholder-design-project",
+    "title": "PLACEHOLDER — Design/UI Project",
+    "type": "design",
+    "year": 2025,
+    "commercial": true,
+    "featured": true,
+    "role": "UI/UX Designer",
+    "tools": "Figma",
+    "credits": [
+      { "role": "Designer", "name": "Frank Le" },
+      { "role": "Client", "name": "TBD" }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "Replace with a one-line description of what this piece actually is.",
+      "problem": "What was it trying to solve?",
+      "audience": "Who is it for?",
+      "process": "How did you approach it?",
+      "result": "What was the outcome?"
+    },
+    "media": [
+      { "type": "image", "src": "", "alt": "" }
+    ]
+  }
+]

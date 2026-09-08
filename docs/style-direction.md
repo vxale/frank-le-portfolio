@@ -125,7 +125,7 @@ This section describes the system as it stands. The dated revision notes above a
 
 - **One typeface, every job.** `--font: "Times New Roman", Times, Georgia, serif`. The split serif/grotesk system is gone and the `--serif`/`--sans` tokens no longer exist — small tracked caps in the same face carry everything the grotesk used to do (labels, captions, metadata, the corner marks). Still a system font on purpose; don't swap in a webfont, and don't reintroduce a second family, without asking.
 - **One modular ladder, ratio 1.2, nine rungs** (`--step-0` … `--step-8`), anchored on body at `--step-2`. There are no hand-picked font sizes left in the stylesheet — the only non-token size is the node tree's `+`/`−` glyph at `0.75em`, which is relative to its own node on purpose. Steps 3, 5 and 7 are deliberately spare. The full table and the reasoning are under "Type scale" above.
-- **No monumental tier.** The 135–188px display sizes from the second and third revision passes were reversed on Frank's instruction; the ladder tops out at `--step-8` (47.8–53.8px). Boldness lives in the canvas being the first thing you meet, not in type size.
+- **No monumental tier.** The 135–188px display sizes from the second and third revision passes were reversed on Frank's instruction; the ladder now tops out at `--step-8`, in a normal editorial range. (Deliberately not quoting the pixel values here — the ladder has been re-anchored more than once and the table above is the one place they should live.) Boldness lives in the canvas being the first thing you meet, not in type size.
 - Personality: refined editorial typography (not a loud poster/condensed/grid-breaking face).
 
 ## Layout & Grid (decided)

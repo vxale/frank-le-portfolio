@@ -42,22 +42,31 @@
      which is what a tight ratio buys you. Each step is 1.2x the one
      below, at BOTH ends of its clamp, so the ratio holds at every
      viewport rather than only at one width. Body is --step-2, and
-     the ladder is anchored there: 16px on a phone, 18px on a desk.
+     the ladder is anchored there: 15px on a phone, 16.5px on a desk.
+
+     That anchor came down from 16/18px on Frank's instruction (Sept 8
+     2026) — the site read too large. Because every rung is derived
+     from the base, moving it moved all nine together and the
+     proportions are untouched; this is the only place to change if
+     the whole site should get bigger or smaller again. Do NOT nudge
+     one rung on its own — that snaps it out of the 1.2 relationship
+     with its neighbours and puts us back to the ad-hoc scale this
+     ladder replaced.
 
      In use today: 0 (micro labels), 1 (small text and controls),
      2 (body), 4 (node d1, card titles), 6 (node d0, section titles),
      8 (page titles). Steps 3, 5 and 7 are the headroom the tighter
      ratio creates — real rungs, not yet needed. Reach for one of
      them before inventing a number. */
-  --step-0: clamp(0.694rem, 0.669rem + 0.113vw, 0.781rem); /* 11.1 - 12.5px */
-  --step-1: clamp(0.833rem, 0.803rem + 0.135vw, 0.938rem); /* 13.3 - 15.0px */
-  --step-2: clamp(1rem,     0.964rem + 0.161vw, 1.125rem); /* 16.0 - 18.0px */
-  --step-3: clamp(1.2rem,   1.156rem + 0.194vw, 1.35rem);  /* 19.2 - 21.6px */
-  --step-4: clamp(1.44rem,  1.388rem + 0.232vw, 1.62rem);  /* 23.0 - 25.9px */
-  --step-5: clamp(1.728rem, 1.665rem + 0.279vw, 1.944rem); /* 27.6 - 31.1px */
-  --step-6: clamp(2.074rem, 1.999rem + 0.334vw, 2.333rem); /* 33.2 - 37.3px */
-  --step-7: clamp(2.488rem, 2.398rem + 0.401vw, 2.799rem); /* 39.8 - 44.8px */
-  --step-8: clamp(2.986rem, 2.878rem + 0.481vw, 3.359rem); /* 47.8 - 53.8px */
+  --step-0: clamp(0.651rem, 0.632rem + 0.084vw, 0.716rem); /* 10.4 - 11.5px */
+  --step-1: clamp(0.781rem, 0.758rem + 0.101vw, 0.859rem); /* 12.5 - 13.8px */
+  --step-2: clamp(0.938rem, 0.911rem + 0.120vw, 1.031rem); /* 15.0 - 16.5px */
+  --step-3: clamp(1.125rem, 1.092rem + 0.146vw, 1.238rem); /* 18.0 - 19.8px */
+  --step-4: clamp(1.35rem,  1.311rem + 0.174vw, 1.485rem); /* 21.6 - 23.8px */
+  --step-5: clamp(1.62rem,  1.573rem + 0.209vw, 1.782rem); /* 25.9 - 28.5px */
+  --step-6: clamp(1.944rem, 1.888rem + 0.250vw, 2.138rem); /* 31.1 - 34.2px */
+  --step-7: clamp(2.333rem, 2.265rem + 0.301vw, 2.566rem); /* 37.3 - 41.1px */
+  --step-8: clamp(2.799rem, 2.718rem + 0.361vw, 3.079rem); /* 44.8 - 49.3px */
 
   --max-w: none;
   --gutter: clamp(1.25rem, 3vw, 3rem);

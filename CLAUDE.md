@@ -9,7 +9,7 @@ Lê Vũ Xuân Anh ("Frank Le") — 4th-year Global Business & Digital Arts stude
 A single unified portfolio (not split by discipline) covering both his design work and his filmmaking, aimed at landing design job/internship opportunities and film-industry contacts. Recruiters are expected to skim, not read deeply — content and layout should favor skimmability over density.
 
 ## Structure (see docs/sitemap.md for full detail)
-- `index.html` — Homepage: **the node-tree canvas, and nothing else** (see "Canvas rebuild" below). Full-viewport, no scroll, no footer. The hero and the `#work-grid` slot were both removed Sept 8 2026 when the canvas replaced them — don't rebuild them.
+- `index.html` — Homepage: the node-tree canvas, which is also the site's only menu. Root "Frank Le" (portrait slot + a caption of disciplines) branches to: the bio passage (expands to "Get to know more" → about.html), Film / Design / Photography (each expanding straight to its projects — there is deliberately no "Works" level in between), All works → works.html, and Contact. Structure comes from `data/works.json`; see `js/node-tree.js`.
 - `about.html` — headshot + expanded bio + a skimmable facts capsule.
 - `works.html` — grid of all works, filterable by type / year / commercial, reads `data/works.json`.
 - `work.html?id=<id>` — one flexible detail template (not a separate file per project) driven by the same JSON. Content order: title/role/tools metadata → credits → awards slot → five-beat insight passage (what / problem / audience / process / result) → full-bleed media → next-project pager.

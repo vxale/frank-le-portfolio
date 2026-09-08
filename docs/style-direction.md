@@ -59,6 +59,19 @@ Two supporting changes fell out of the media work:
 - **Node separation now measures the boxes** instead of treating every node as a point 92px across. A node with a picture in it is a box, not a word, and long project titles were already wide enough to overlap. Separation is axis-aligned and resolves along whichever axis needs the smaller shove.
 - **The corner marks push nodes away.** They join the same separation pass as fixed obstacles, so an auto-placed node no longer lands on top of the bio or the email. Nodes the visitor has dragged are exempt — putting one wherever you like is the point of the canvas.
 
+## Canvas revision (Sept 8 2026, fifth) — Frank's direction
+Structural pass on the tree and the canvas furniture:
+
+- **The "Works" level is gone.** Film, Design and Photography hang off the root directly. That middle node only ever contained other nodes, so it cost a click and told the visitor nothing. "All works" survives as a root-level leaf so `works.html` — the filterable grid — stays reachable.
+- **The bio is a node now, not a corner mark.** It replaces the old "About" node: the full sentence sits on the canvas as a passage node and expands to a single child, "Get to know more", which opens `about.html`. The `.mark--line` block added in the previous pass was removed in the same move — the bio exists once, as a node.
+- **Two corner marks removed.** The top-left nameplate went (the root node says the name), and the role line went (it became the root's caption, below).
+- **The root has a caption.** "Creative Direction · Filmmaking · Screenwriting · Design", replacing the old "Director · Screenwriter · Editor / UI/UX Designer" corner mark. It sits inside the node element, below the name, so separation and edge-drawing account for it automatically. Kept to two lines (`max-width: min(18rem, 62vw)`); wider and it drags the root's centring off, narrower and it breaks into five cramped lines.
+
+Three things the passage node forced, worth knowing before touching this again:
+- A branch node is a `<button>`, and buttons centre their text. Fine for one word, wrong for a paragraph — `.node--passage .node__hit` sets `text-align: left` explicitly.
+- The passage needs a measure (`max-width: 30ch`, `white-space: normal`) since every other node is a nowrap label, and `align-items: flex-end` so the +/− settles with the last line instead of floating beside the first.
+- **Children aimed off the paper now mirror their angle** instead of being flattened by the position clamp. The bio node is tall and sits high in the fan, so its child was landing hard against the top edge, close enough to its parent that the connector was suppressed — it read as a label floating loose from the tree. `layoutChildren` now tries the vertically mirrored angle first and only clamps if that is off-paper too.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

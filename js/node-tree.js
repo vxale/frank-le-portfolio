@@ -43,6 +43,15 @@
      play on hover rather than autoplaying. */
   const ROOT_MEDIA = { type: 'image', src: '', alt: '' };
 
+  /* The bio is a node, not a corner mark — it hangs off the root and
+     branches to the About page. The caption sits under the root's own
+     name. Both are copy, so they live here where they can be edited
+     without reading the layout code. */
+  const BIO =
+    'Lê Vũ Xuân Anh (Frank Le) is a young Vietnamese filmmaker and designer, ' +
+    'with working experience in art, fashion commercials, academia, and more.';
+  const ROOT_CAPTION = 'Creative Direction · Filmmaking · Screenwriting · Design';
+
   const ENTER_MS = 260;   // under 300ms — this is UI, not marketing
   const EXIT_MS = 170;    // exits are faster than entrances
   const STAGGER_MS = 45;
@@ -57,12 +66,14 @@
   // ---------- Building the tree data ----------
 
   let nextId = 0;
-  function makeNode({ label, href, media, children, navKey }) {
+  function makeNode({ label, href, media, caption, passage, children, navKey }) {
     const node = {
       uid: `n${nextId++}`,
       label,
       href: href || null,
       media: media && media.src ? media : null,
+      caption: caption || null,
+      passage: Boolean(passage),
       navKey: navKey || null,
       childSpecs: children || [],
       children: [],
@@ -109,16 +120,22 @@
         })),
     }));
 
-    const worksChildren = typeSpecs.concat(
-      works.length ? [{ label: 'All works', href: 'works.html', navKey: 'works' }] : []
-    );
-
+    /* Film / Design / Photography sit directly under the root: the
+       "Works" node in between was a level that only ever held other
+       nodes, so it cost a click and said nothing. "All works" keeps
+       works.html — the filterable grid — reachable from the canvas. */
     root = specToTree({
       label: 'Frank Le',
       media: ROOT_MEDIA,
+      caption: ROOT_CAPTION,
       children: [
-        { label: 'About', href: 'about.html', navKey: 'about' },
-        { label: 'Works', children: worksChildren },
+        {
+          label: BIO,
+          passage: true,
+          children: [{ label: 'Get to know more', href: 'about.html', navKey: 'about' }],
+        },
+        ...typeSpecs,
+        ...(works.length ? [{ label: 'All works', href: 'works.html', navKey: 'works' }] : []),
         { label: 'Contact', href: 'contact.html', navKey: 'contact' },
       ],
     }, null);
@@ -134,12 +151,20 @@
   /** Nodes never leave the canvas, and never sit tight against an
       edge — the padding is what keeps this feeling like paper with
       margins rather than a viewport with things jammed into it. */
-  function clampPosition(node) {
+  function pads() {
     const { w, h } = bounds();
-    const padX = Math.min(140, w * 0.12);
-    const padY = Math.min(90, h * 0.12);
+    return { w, h, padX: Math.min(140, w * 0.12), padY: Math.min(90, h * 0.12) };
+  }
+
+  function clampPosition(node) {
+    const { w, h, padX, padY } = pads();
     node.x = Math.max(padX, Math.min(w - padX, node.x));
     node.y = Math.max(padY, Math.min(h - padY, node.y));
+  }
+
+  function onPaper(x, y) {
+    const { w, h, padX, padY } = pads();
+    return x >= padX && x <= w - padX && y >= padY && y <= h - padY;
   }
 
   function placeRoot() {
@@ -169,8 +194,22 @@
       if (kid.pinned) return;
       const t = kids.length === 1 ? 0.5 : i / (kids.length - 1);
       const angle = base - spread / 2 + spread * t;
-      kid.x = parent.x + Math.cos(angle) * reach;
-      kid.y = parent.y + Math.sin(angle) * reach;
+      let x = parent.x + Math.cos(angle) * reach;
+      let y = parent.y + Math.sin(angle) * reach;
+
+      /* A child aimed off the paper gets its angle mirrored back
+         across the horizontal instead of being flattened against the
+         edge by the clamp. A node pressed into the ceiling sits too
+         close to its parent to keep a connector, so it reads as
+         floating loose rather than as part of the tree. */
+      if (!onPaper(x, y)) {
+        const mx = parent.x + Math.cos(-angle) * reach;
+        const my = parent.y + Math.sin(-angle) * reach;
+        if (onPaper(mx, my)) { x = mx; y = my; }
+      }
+
+      kid.x = x;
+      kid.y = y;
       clampPosition(kid);
     });
 
@@ -326,6 +365,7 @@
   function createElement(node) {
     const el = document.createElement('div');
     el.className = `node node--d${Math.min(node.depth, 3)}`;
+    if (node.passage) el.classList.add('node--passage');
     el.dataset.uid = node.uid;
 
     const isBranch = node.childSpecs.length > 0;
@@ -360,6 +400,16 @@
     }
 
     el.appendChild(hit);
+
+    // Not part of the hit target: a caption describes the node, it
+    // isn't a second thing to click.
+    if (node.caption) {
+      const caption = document.createElement('span');
+      caption.className = 'node__caption';
+      caption.textContent = node.caption;
+      el.appendChild(caption);
+    }
+
     node.el = el;
     node.hit = hit;
 

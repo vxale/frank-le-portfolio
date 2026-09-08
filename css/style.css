@@ -2,9 +2,8 @@
    Frank Le — Portfolio
    Style system: book-paper black & white, editorial serif +
    functional grotesk, asymmetric grid, generous whitespace,
-   smooth restrained motion. See /structure/style-direction.md
-   and /structure/creative-brief.md in the project for the
-   full design rationale behind every choice below.
+   smooth restrained motion. See docs/style-direction.md and
+   docs/creative-brief.md for the rationale behind every choice.
    ============================================================ */
 
 :root {
@@ -73,16 +72,45 @@ a { color: inherit; }
   white-space: nowrap;
 }
 
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -100%;
+  z-index: 50;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.7rem 1rem;
+}
+
+.skip-link:focus { top: 0.5rem; }
+
+/* Small structural label, used for eyebrows and section headings —
+   the grotesk "structure" voice. */
+.label {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 /* ---------- Nav (v1 placeholder — node-tree diagram is a planned
-   upgrade, see structure/sitemap.md) ---------- */
+   upgrade, see docs/sitemap.md) ---------- */
 
 .site-nav {
   position: sticky;
   top: 0;
   z-index: 20;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
   padding: 1.1rem var(--gutter);
   background: var(--paper);
   border-bottom: 1px solid var(--line);
@@ -99,7 +127,7 @@ a { color: inherit; }
 
 .site-nav__links {
   display: flex;
-  gap: clamp(1rem, 2.5vw, 2.25rem);
+  gap: clamp(0.9rem, 2.5vw, 2.25rem);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -128,6 +156,9 @@ main { display: block; }
   padding: clamp(3rem, 8vw, 7rem) var(--gutter);
 }
 
+.section--tight { padding-block: clamp(2rem, 5vw, 4rem); }
+.section--flush-top { padding-top: 0; }
+
 .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -136,39 +167,111 @@ main { display: block; }
   margin-inline: auto;
 }
 
+.rule {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 0;
+}
+
+/* ---------- Section headings ---------- */
+
+.section-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.85rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.section-head__link {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+  transition: border-color 0.3s var(--ease);
+}
+
+.section-head__link:hover { border-bottom-color: var(--ink); }
+
 /* ---------- Homepage hero (asymmetric placement is the brutalist
    move — type itself stays calm/restrained) ---------- */
 
 .hero {
-  padding-block: clamp(4rem, 12vw, 9rem) clamp(3rem, 8vw, 6rem);
+  padding-block: clamp(3.5rem, 11vw, 8rem) clamp(3rem, 8vw, 6rem);
+}
+
+.hero__slate {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 2rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: clamp(2rem, 6vw, 4rem);
+  border-bottom: 1px solid var(--line);
 }
 
 .hero__line {
-  grid-column: 3 / span 8;
+  grid-column: 3 / span 9;
   font-family: var(--serif);
   font-weight: 400;
   font-size: var(--step-4);
   line-height: 1.08;
   margin: 0;
-}
-
-@media (max-width: 720px) {
-  .hero__line { grid-column: 1 / -1; }
+  text-wrap: balance;
 }
 
 .hero__meta {
   grid-column: 3 / span 5;
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
   font-family: var(--sans);
   font-size: 0.85rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
+  line-height: 1.7;
 }
 
-@media (max-width: 720px) {
-  .hero__meta { grid-column: 1 / -1; }
+.hero__actions {
+  grid-column: 9 / span 4;
+  align-self: end;
+  margin-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
 }
+
+@media (max-width: 860px) {
+  .hero__line,
+  .hero__meta,
+  .hero__actions { grid-column: 1 / -1; }
+}
+
+/* Text link with a rule that draws itself on hover */
+.link-line {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 3px;
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  transition: background-size 0.45s var(--ease);
+}
+
+.link-line:hover { background-size: 0 1px; }
 
 /* ---------- Featured carousel ----------
    Native scroll-snap placeholder — Frank plans to bring in an
@@ -176,36 +279,69 @@ main { display: block; }
    (.carousel / .carousel__track / .carousel__item) so swapping
    the library later doesn't require restructuring the page. */
 
-.carousel-heading {
-  grid-column: 1 / -1;
-  font-family: var(--sans);
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 0 0 1.25rem;
-}
-
 .carousel {
   grid-column: 1 / -1;
 }
 
 .carousel__track {
   display: flex;
-  gap: clamp(1rem, 2vw, 1.75rem);
+  align-items: flex-start;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
   padding-bottom: 0.75rem;
   scrollbar-width: thin;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .carousel__track { scroll-behavior: auto; }
+}
+
 .carousel__item {
   scroll-snap-align: start;
-  flex: 0 0 clamp(260px, 32vw, 460px);
+  flex: 0 0 clamp(240px, 30vw, 380px);
   text-decoration: none;
   color: inherit;
   display: block;
 }
+
+/* Uneven widths and film-ish aspect variety keep the strip from
+   reading as a tidy row of equal thumbnails. */
+.carousel__item:nth-child(even) { flex-basis: clamp(280px, 44vw, 580px); }
+.carousel__item:nth-child(even) .media-frame { aspect-ratio: 16 / 9; }
+.carousel__item:nth-child(3n) { margin-top: clamp(1rem, 4vw, 3rem); }
+
+.carousel__controls {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.carousel__btn {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  width: 2.6rem;
+  height: 2.6rem;
+  cursor: pointer;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+
+.carousel__btn:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.carousel__btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ---------- Media ---------- */
 
 .media-frame {
   aspect-ratio: 4 / 5;
@@ -219,13 +355,11 @@ main { display: block; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
+  transition: transform 0.7s var(--ease);
 }
 
-.carousel__item:hover .media-frame img,
-.carousel__item:hover .media-frame video {
-  transform: scale(1.04);
-}
+a:hover .media-frame img,
+a:hover .media-frame video { transform: scale(1.03); }
 
 .media-placeholder {
   width: 100%;
@@ -243,33 +377,98 @@ main { display: block; }
   color: var(--ink-soft);
 }
 
-.carousel__caption {
+/* ---------- Card caption (shared by carousel + works grid) ---------- */
+
+.caption {
   margin-top: 0.85rem;
-  font-family: var(--serif);
-  font-size: var(--step-1);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 0.9rem;
+  align-items: baseline;
 }
 
-.carousel__caption small {
-  display: block;
-  margin-top: 0.25rem;
+.caption__index {
   font-family: var(--sans);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.caption__title {
+  font-family: var(--serif);
+  font-size: var(--step-1);
+  line-height: 1.25;
+}
+
+.caption__meta {
+  grid-column: 2;
+  margin-top: 0.3rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
+/* ---------- Homepage index list (the "straight to the point"
+   half of the page — every project visible without a click) ---------- */
+
+.index-list {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.index-list a {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 0.25rem 1.5rem;
+  align-items: baseline;
+  padding: clamp(0.9rem, 2vw, 1.4rem) 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  transition: padding-left 0.4s var(--ease), background-color 0.4s var(--ease);
+}
+
+.index-list a:hover { padding-left: 1rem; background-color: var(--paper-dim); }
+
+.index-list__num,
+.index-list__meta {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.index-list__title {
+  font-family: var(--serif);
+  font-size: var(--step-1);
+  line-height: 1.2;
+}
+
+@media (max-width: 620px) {
+  .index-list a { grid-template-columns: 2.25rem minmax(0, 1fr); }
+  .index-list__meta { grid-column: 2; }
+}
+
 /* ---------- About ---------- */
 
-.about-grid {
-  align-items: start;
-}
+.about-grid { align-items: start; }
 
-.about__headshot {
-  grid-column: 1 / span 5;
-}
-
+.about__headshot { grid-column: 1 / span 5; }
 .about__headshot .media-frame { aspect-ratio: 3 / 4; }
+
+.about__caption {
+  margin-top: 0.75rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
 
 .about__copy {
   grid-column: 7 / span 6;
@@ -277,12 +476,41 @@ main { display: block; }
   line-height: 1.6;
 }
 
-@media (max-width: 860px) {
-  .about__headshot, .about__copy { grid-column: 1 / -1; }
-  .about__copy { margin-top: 2rem; }
+.about__copy p { margin: 0 0 1.25rem; }
+.about__copy p:first-child { margin-top: -0.35em; }
+
+.about__facts {
+  grid-column: 7 / span 6;
+  margin: clamp(1.5rem, 4vw, 2.5rem) 0 0;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
 }
 
-.about__copy p { margin: 0 0 1.25rem; }
+.about__facts > div {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.about__facts dt {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.35rem;
+}
+
+.about__facts dd { margin: 0; font-size: var(--step-0); }
+
+@media (max-width: 860px) {
+  .about__headshot,
+  .about__copy,
+  .about__facts { grid-column: 1 / -1; }
+  .about__copy { margin-top: 2rem; }
+  .about__facts { grid-template-columns: 1fr; }
+}
 
 /* ---------- Works grid + filters ---------- */
 
@@ -290,8 +518,10 @@ main { display: block; }
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
+  gap: 0.75rem 2rem;
+  padding-bottom: 1.25rem;
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  border-bottom: 1px solid var(--line);
   font-family: var(--sans);
 }
 
@@ -303,7 +533,7 @@ main { display: block; }
 }
 
 .filter-group__label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -312,7 +542,7 @@ main { display: block; }
 
 .filter-btn {
   font-family: var(--sans);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   background: none;
@@ -320,7 +550,7 @@ main { display: block; }
   color: var(--ink);
   padding: 0.4rem 0.85rem;
   cursor: pointer;
-  transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
 }
 
 .filter-btn:hover { border-color: var(--ink); }
@@ -331,11 +561,21 @@ main { display: block; }
   color: var(--paper);
 }
 
+.works-count {
+  grid-column: 1 / -1;
+  margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 .works-grid {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: clamp(1rem, 2vw, 1.75rem);
+  gap: clamp(2rem, 5vw, 4rem) clamp(1rem, 2vw, 1.75rem);
 }
 
 .work-card {
@@ -345,31 +585,28 @@ main { display: block; }
   display: block;
 }
 
-/* Asymmetric rhythm: every 3rd item runs wider, breaking the tidy grid */
-.work-card:nth-child(3n) { grid-column: span 8; }
-.work-card:nth-child(3n + 1) { grid-column: span 4; }
+/* Broken rhythm: a repeating four-item pattern of uneven spans,
+   offsets and aspect ratios. This is where the "unconventional"
+   energy lives, since type and motion stay calm. */
+.work-card:nth-child(4n + 1) { grid-column: 1 / span 7; }
+.work-card:nth-child(4n + 2) { grid-column: 9 / span 4; margin-top: clamp(2rem, 8vw, 7rem); }
+.work-card:nth-child(4n + 3) { grid-column: 2 / span 5; }
+.work-card:nth-child(4n)     { grid-column: 8 / span 5; margin-top: clamp(1rem, 4vw, 3.5rem); }
+
+.work-card:nth-child(4n + 1) .media-frame { aspect-ratio: 16 / 9; }
+.work-card:nth-child(4n + 2) .media-frame { aspect-ratio: 3 / 4; }
+.work-card:nth-child(4n + 3) .media-frame { aspect-ratio: 4 / 3; }
+.work-card:nth-child(4n)     .media-frame { aspect-ratio: 1 / 1; }
 
 @media (max-width: 860px) {
   .work-card,
-  .work-card:nth-child(3n),
-  .work-card:nth-child(3n + 1) { grid-column: 1 / -1; }
-}
-
-.work-card .media-frame { aspect-ratio: 4 / 3; }
-
-.work-card__title {
-  margin-top: 0.85rem;
-  font-family: var(--serif);
-  font-size: var(--step-1);
-}
-
-.work-card__meta {
-  margin-top: 0.25rem;
-  font-family: var(--sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+  .work-card:nth-child(4n + 1),
+  .work-card:nth-child(4n + 2),
+  .work-card:nth-child(4n + 3),
+  .work-card:nth-child(4n) {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
 }
 
 .works-empty {
@@ -379,63 +616,131 @@ main { display: block; }
   padding: 3rem 0;
 }
 
-/* ---------- Work detail (flexible template) ---------- */
-
-.work-detail__head {
-  grid-column: 1 / -1;
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
-}
+/* ---------- Work detail (flexible template) ----------
+   Content order follows docs/sitemap.md: metadata → credits →
+   awards → five-beat insight → full-bleed media. */
 
 .work-detail__back {
+  grid-column: 1 / -1;
   font-family: var(--sans);
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--ink-soft);
-  display: inline-block;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
+
+.work-detail__back:hover { color: var(--ink); }
+
+.work-detail__head { grid-column: 1 / span 9; }
+
+@media (max-width: 860px) { .work-detail__head { grid-column: 1 / -1; } }
 
 .work-detail__title {
   font-size: var(--step-3);
-  margin: 0 0 1rem;
-  max-width: 16ch;
+  font-weight: 400;
+  line-height: 1.05;
+  margin: 0 0 1.5rem;
+  max-width: 18ch;
 }
 
 .work-detail__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1.25rem 1.5rem;
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
   font-family: var(--sans);
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
+}
+
+.work-detail__meta dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.35rem;
+}
+
+.work-detail__meta dd {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* Credits + awards */
+.work-detail__credits {
+  grid-column: 1 / span 9;
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+@media (max-width: 860px) { .work-detail__credits { grid-column: 1 / -1; } }
+
+.credit-block h2 {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 400;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.credit-block dl { margin: 0; font-family: var(--sans); font-size: 0.85rem; }
+
+.credit-block dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-.work-detail__meta dt { font-weight: 600; color: var(--ink); }
-.work-detail__meta dt::after { content: ":"; margin-right: 0.35em; }
-.work-detail__meta > div { display: flex; gap: 0.25em; }
+.credit-block dd { margin: 0 0 0.85rem; }
 
-.work-detail__media {
-  grid-column: 1 / -1;
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+.credit-block ul { margin: 0; padding-left: 1.1rem; font-family: var(--sans); font-size: 0.85rem; }
+
+.credit-block--empty p {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
 
-.work-detail__media .media-frame {
-  aspect-ratio: 16 / 9;
-  margin-bottom: clamp(1rem, 2vw, 1.75rem);
-}
-
+/* Five-beat insight passage — labelled blocks, not running prose,
+   so a recruiter can skim to the beat they care about. */
 .insight {
   grid-column: 2 / span 9;
   display: grid;
   gap: clamp(1.75rem, 4vw, 3rem);
-  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  margin: clamp(3rem, 8vw, 6rem) 0 0;
+  counter-reset: beat;
 }
 
 @media (max-width: 860px) { .insight { grid-column: 1 / -1; } }
+
+.insight__beat {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: 0 1rem;
+  counter-increment: beat;
+}
+
+.insight__beat::before {
+  content: "0" counter(beat);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  padding-top: 0.35em;
+}
+
+.insight__beat dl { margin: 0; }
 
 .insight__beat dt {
   font-family: var(--sans);
@@ -443,7 +748,7 @@ main { display: block; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
 .insight__beat dd {
@@ -453,33 +758,53 @@ main { display: block; }
   max-width: 58ch;
 }
 
-.work-detail__credits {
-  grid-column: 2 / span 9;
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  border-top: 1px solid var(--line);
-  padding-top: 1.5rem;
+@media (max-width: 620px) {
+  .insight__beat { grid-template-columns: 1fr; }
+  .insight__beat::before { padding: 0 0 0.4rem; }
 }
 
-@media (max-width: 860px) { .work-detail__credits { grid-column: 1 / -1; } }
+/* Full-bleed media stack */
+.work-detail__media { margin-top: clamp(3rem, 8vw, 6rem); }
 
-.work-detail__credits dt { font-weight: 600; color: var(--ink); display: inline; }
-.work-detail__credits dd { display: inline; margin: 0 1.5rem 0 0.4em; }
+.work-detail__media .media-frame {
+  aspect-ratio: 16 / 9;
+  margin-bottom: clamp(1rem, 3vw, 2.5rem);
+}
+
+.work-detail__media .media-frame:last-child { margin-bottom: 0; }
+
+/* Next-project pager */
+.pager {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.pager__title { font-family: var(--serif); font-size: var(--step-2); }
+.pager:hover .pager__title { text-decoration: underline; text-underline-offset: 6px; }
 
 /* ---------- Contact ---------- */
 
 .contact-grid { align-items: start; }
 
-.contact__block {
-  grid-column: 1 / span 7;
-}
+.contact__block { grid-column: 1 / span 7; }
+.contact__aside { grid-column: 9 / span 4; }
 
-@media (max-width: 860px) { .contact__block { grid-column: 1 / -1; } }
+@media (max-width: 860px) {
+  .contact__block, .contact__aside { grid-column: 1 / -1; }
+  .contact__aside { margin-top: 2.5rem; }
+}
 
 .contact__name {
   font-size: var(--step-2);
-  margin: 0 0 2rem;
+  font-weight: 400;
+  margin: 0 0 2.5rem;
 }
 
 .contact__list {
@@ -487,52 +812,138 @@ main { display: block; }
   margin: 0 0 2.5rem;
   padding: 0;
   font-size: var(--step-1);
+  border-top: 1px solid var(--line);
 }
 
-.contact__list li { margin-bottom: 0.9rem; }
+.contact__list li {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--line);
+}
 
-.contact__list a { text-decoration-color: var(--line); text-underline-offset: 4px; }
+.contact__list a { text-decoration-color: var(--line); text-underline-offset: 5px; }
 .contact__list a:hover { text-decoration-color: var(--ink); }
 
 .contact__label {
   display: block;
   font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.3rem;
 }
 
 .cv-slot {
   font-family: var(--sans);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   display: inline-block;
   border: 1px solid var(--line);
-  padding: 0.7rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   color: var(--ink-soft);
+  text-decoration: none;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
-/* ---------- Footer ---------- */
+a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
-.site-footer {
-  padding: 2rem var(--gutter) 3rem;
+.contact__note {
   font-family: var(--sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  line-height: 1.7;
   color: var(--ink-soft);
   border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+  margin: 0;
 }
 
-.site-footer a {
+/* ---------- Footer (end card — the one inverted surface on the
+   site, so every page closes like a title card) ---------- */
+
+.site-footer {
+  background: var(--ink);
+  color: var(--paper);
+  padding: clamp(3rem, 8vw, 6rem) var(--gutter) clamp(2rem, 4vw, 3rem);
+}
+
+.site-footer__inner {
+  max-width: var(--max-w);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.site-footer__label {
+  grid-column: 1 / -1;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  opacity: 0.6;
+  margin: 0 0 1rem;
+}
+
+.site-footer__mail {
+  grid-column: 1 / span 8;
+  font-family: var(--serif);
+  font-size: var(--step-3);
+  line-height: 1.1;
   text-decoration: none;
-  border-bottom: 1px solid var(--ink-soft);
+  word-break: break-word;
+  background-image: linear-gradient(var(--paper), var(--paper));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size 0.5s var(--ease);
 }
 
-/* Respect reduced motion */
+.site-footer__mail:hover { background-size: 100% 1px; }
+
+.site-footer__links {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.75rem;
+  list-style: none;
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(245, 242, 234, 0.25);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.site-footer__links a { text-decoration: none; opacity: 0.75; transition: opacity 0.3s var(--ease); }
+.site-footer__links a:hover { opacity: 1; }
+
+.site-footer__links li:last-child { margin-left: auto; opacity: 0.5; }
+
+.site-footer :focus-visible { outline-color: var(--paper); }
+
+@media (max-width: 860px) {
+  .site-footer__mail { grid-column: 1 / -1; }
+  .site-footer__links li:last-child { margin-left: 0; }
+}
+
+/* ---------- Motion: scroll reveals ----------
+   Smooth and slow, per the brief — content lifts into place rather
+   than snapping. The .reveal class is added by js/site.js to any
+   [data-reveal] element, so with JS off nothing is ever hidden. */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.reveal.is-in { opacity: 1; transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; }
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .reveal { opacity: 1; transform: none; }
 }

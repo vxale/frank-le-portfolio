@@ -34,6 +34,7 @@ All project content lives in `data/works.json` — one entry per project (id, ti
 - Homepage carousel is native scroll-snap for now; Frank plans to bring in an external carousel library — markup hooks (`.carousel`, `.carousel__track`, `.carousel__item`) are there so this should be a styling swap, not a rebuild.
 - Node-tree navigation is unbuilt by design (v2).
 - Two small open questions from the brief (docs/creative-brief.md, sections 3 and 9) were answered with Claude's stated default assumptions — flagged inline, worth confirming with Frank rather than silently changing.
+- Some site copy was drafted rather than supplied by Frank and needs his sign-off: the footer line "Open to design internships and film collaborations", the About page facts capsule (disciplines / studying / tools / based in), and the Contact page note. Bio, contact details and page structure all come from `docs/`.
 
 ## Working style
 Frank reviews and gives direction; explain non-obvious technical decisions in plain terms rather than assuming familiarity with the codebase. No build tools/framework by design (plain HTML/CSS/JS) — keep it that way unless Frank explicitly asks to add one.

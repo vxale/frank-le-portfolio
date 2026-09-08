@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const grid = document.querySelector('.works-grid');
   const filterBar = document.querySelector('.filters');
+  const count = document.querySelector('.works-count');
   if (!grid) return;
 
   let works = [];
@@ -17,26 +18,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       return true;
     });
 
+    if (count) {
+      count.textContent = filtered.length === works.length
+        ? `${works.length} project${works.length === 1 ? '' : 's'}`
+        : `${filtered.length} of ${works.length} projects`;
+    }
+
     if (!filtered.length) {
       grid.innerHTML = '<p class="works-empty">No work matches these filters yet.</p>';
       return;
     }
 
-    grid.innerHTML = filtered.map((w) => `
-      <a class="work-card" href="work.html?id=${encodeURIComponent(w.id)}">
-        <div class="media-frame">${mediaFrameInner(w.media && w.media[0], w.title)}</div>
-        <div class="work-card__title">${w.title}</div>
-        <div class="work-card__meta">${workMetaLine(w)}</div>
-      </a>
-    `).join('');
+    grid.innerHTML = filtered.map((w, i) => cardMarkup(w, i, 'work-card')).join('');
+    grid.querySelectorAll('.work-card').forEach((card) => card.setAttribute('data-reveal', ''));
+    initReveals(grid);
   }
 
   function buildFilterGroup(label, key, options) {
     const group = document.createElement('div');
     group.className = 'filter-group';
-    group.innerHTML = `<span class="filter-group__label">${label}</span>`;
-    const allBtn = makeButton('All', key, 'all');
-    group.appendChild(allBtn);
+    group.innerHTML = `<span class="filter-group__label">${esc(label)}</span>`;
+    group.appendChild(makeButton('All', key, 'all'));
     options.forEach((opt) => group.appendChild(makeButton(opt.label, key, opt.value)));
     return group;
   }
@@ -67,13 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     filterBar.appendChild(buildFilterGroup('Type', 'type', types));
     filterBar.appendChild(buildFilterGroup('Year', 'year', years));
-    filterBar.appendChild(buildFilterGroup('Commercial', 'commercial', [
+    filterBar.appendChild(buildFilterGroup('Made for', 'commercial', [
       { label: 'Commercial', value: 'commercial' },
       { label: 'Personal', value: 'personal' },
     ]));
 
     render();
   } catch (err) {
-    grid.innerHTML = `<p class="works-empty">Couldn't load work (${err.message}).</p>`;
+    grid.innerHTML = `<p class="works-empty">Couldn't load work (${esc(err.message)}).</p>`;
   }
 });

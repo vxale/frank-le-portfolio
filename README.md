@@ -14,9 +14,10 @@ Then visit `http://localhost:8080/`.
 ## Structure
 - `index.html`, `about.html`, `works.html`, `work.html`, `contact.html` — pages
 - `css/style.css` — the whole design system (palette, type, grid, motion)
-- `js/` — page behavior (fetches and renders `data/works.json`)
+- `js/site.js` — shared helpers (fetch, card/row markup, scroll reveals, nav state)
+- `js/home.js`, `js/works.js`, `js/work-detail.js`, `js/about.js` — per-page behavior
 - `data/works.json` — all project content; edit this to add/update work samples
-- `assets/` — images, video, headshot, CV (currently empty — placeholders in use)
+- `assets/` — images, video, headshot, CV (only `favicon.svg` so far — placeholders in use everywhere else)
 - `docs/` — the full design brief, sitemap, bio, and contact content that shaped this build
 
 See `CLAUDE.md` for a condensed project brief if you're picking this up with Claude Code.

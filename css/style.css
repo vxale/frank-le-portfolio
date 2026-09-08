@@ -11,12 +11,15 @@
    ============================================================ */
 
 :root {
-  /* Color — "open book" palette: off-white paper, near-black ink.
-     Not pure #FFFFFF/#000000 on purpose. */
-  --paper: #f5f2ea;
-  --paper-dim: #ece7da;
+  /* Color — Frank's call (Sept 2026): paper is now pure #FFFFFF,
+     reversing the earlier warm off-white. Ink stays a near-black
+     rather than #000 so the page reads as printed, not clinical.
+     The two grays were retoned neutral at the same time — the old
+     warm tan/olive pair looked dirty against a pure white sheet. */
+  --paper: #ffffff;
+  --paper-dim: #f1f1f1;
   --ink: #16140f;
-  --ink-soft: #55503f;
+  --ink-soft: #5c5a55;
   --line: var(--ink); /* stark hairlines, not a soft gray — Sept 2026 revision */
 
   /* Type — split-role system:
@@ -45,7 +48,12 @@
      between every section on every page reads as excessive here) */
   --section-gap: clamp(3rem, 11vw, 12.5rem);
 
+  /* Motion. --ease is the slow, editorial curve for content
+     entering on scroll; --ease-out is the punchier UI curve for
+     things the visitor operates directly (menu, toggle, buttons),
+     which stay under 250ms so the interface never feels laggy. */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 * { box-sizing: border-box; }
@@ -113,10 +121,15 @@ a { color: inherit; }
   color: var(--ink-soft);
 }
 
-/* ---------- Nav (v1 placeholder — node-tree diagram is a planned
-   upgrade, see docs/sitemap.md). Sept 2026: dropped the sticky
-   bordered bar — it read as conventional UI chrome. Nav is now
-   just type floating on the paper, no box around it. ---------- */
+/* ---------- Nav ----------
+   Two display modes the visitor chooses between, remembered in
+   localStorage: "list" (classic inline links) and "tree" (a literal
+   branching node diagram, opened as a full-page panel — the concept
+   from docs/sitemap.md, finally built). The toggle and the panel are
+   injected by js/nav.js; the plain links live in the HTML so that
+   with JS off the site still has working navigation.
+   Sept 2026: no sticky bordered bar — nav is type floating on the
+   paper, no box around it. ---------- */
 
 .site-nav {
   display: flex;
@@ -154,10 +167,286 @@ a { color: inherit; }
   transition: border-color 0.3s var(--ease);
 }
 
-.site-nav__links a:hover,
-.site-nav__links a[aria-current="page"] {
-  border-bottom-color: var(--ink);
+.site-nav__links a[aria-current="page"] { border-bottom-color: var(--ink); }
+
+@media (hover: hover) and (pointer: fine) {
+  .site-nav__links a:hover { border-bottom-color: var(--ink); }
 }
+
+/* Right-hand nav cluster: the links (or the tree trigger) plus the
+   display-mode toggle. */
+.site-nav__right {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  flex-wrap: wrap;
+}
+
+/* In tree mode the inline links give way to the panel trigger. */
+[data-nav-mode="tree"] .site-nav__links { display: none; }
+[data-nav-mode="tree"] .nav-tree-open { display: inline-flex; }
+
+.nav-tree-open {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  padding: 0 0 2px;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.nav-tree-open:active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-tree-open:hover { border-bottom-color: var(--ink); }
+}
+
+/* The node glyph in the trigger — a two-node branch, drawn in type
+   rather than an icon file. */
+.nav-tree-open__glyph { font-size: 0.9em; letter-spacing: 0; }
+
+/* ---------- Nav display-mode toggle ---------- */
+
+.nav-mode {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--sans);
+}
+
+.nav-mode__label {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-right: 0.15rem;
+}
+
+.nav-mode__btn {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.nav-mode__btn:active { transform: scale(0.97); }
+
+.nav-mode__btn[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-mode__btn:not([aria-pressed="true"]):hover { background: var(--paper-dim); }
+}
+
+/* ---------- Node-tree panel ----------
+   A literal branching diagram: root -> pages -> work types -> the
+   projects themselves. Type branches expand in place so the visitor
+   clicks their way down the tree instead of being dumped into a
+   full sitemap. Connectors are CSS hairlines, not an SVG, so they
+   reflow with the type at any width. */
+
+.tree-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--paper);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.5rem var(--gutter) clamp(3rem, 8vw, 6rem);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  /* Exit is quicker than entry — the system responding should feel
+     faster than the visitor deciding. */
+  transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), visibility 0.15s;
+}
+
+.tree-panel.is-open {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-duration: 0.22s;
+}
+
+.tree-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.tree-panel__close {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.tree-panel__close:active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .tree-panel__close:hover { background: var(--ink); color: var(--paper); }
+}
+
+/* Root node */
+.tree__root {
+  font-family: var(--serif);
+  font-size: var(--step-2);
+  line-height: 1;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.tree__list,
+.tree__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Every level below the root is indented and wired back to its
+   parent with an elbow: a vertical spine plus a horizontal tick. */
+.tree__children > li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.tree__children > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.15em;
+  width: 1.25rem;
+  height: 1px;
+  background: var(--line);
+}
+
+.tree__children > li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+/* The spine stops at the last child's tick instead of running on. */
+.tree__children > li:last-child::after { bottom: auto; height: 1.15em; }
+
+.tree__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+}
+
+.tree__node {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out);
+}
+
+.tree__node[aria-current="page"] { border-bottom-color: var(--ink); }
+
+@media (hover: hover) and (pointer: fine) {
+  .tree__node:hover { border-bottom-color: var(--ink); }
+}
+
+/* Leaves are the actual projects — serif, because they're content,
+   not structure. */
+.tree__node--leaf {
+  font-family: var(--serif);
+  font-size: var(--step-1);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.2;
+}
+
+.tree__count {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.tree__toggle {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.tree__toggle:active { transform: scale(0.94); }
+
+@media (hover: hover) and (pointer: fine) {
+  .tree__toggle:hover { background: var(--ink); color: var(--paper); }
+}
+
+/* Branch open/close. grid-template-rows 0fr -> 1fr is the one way to
+   transition to a content-sized height without measuring it in JS. */
+.tree__branch {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s var(--ease-out);
+}
+
+.tree__branch > div { overflow: hidden; }
+
+.tree__list li.is-open > .tree__branch { grid-template-rows: 1fr; }
+
+/* Top-level branches cascade in as the panel opens. */
+.tree__list > li {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.tree-panel.is-open .tree__list > li { opacity: 1; transform: none; }
+.tree-panel.is-open .tree__list > li:nth-child(1) { transition-delay: 0.04s; }
+.tree-panel.is-open .tree__list > li:nth-child(2) { transition-delay: 0.08s; }
+.tree-panel.is-open .tree__list > li:nth-child(3) { transition-delay: 0.12s; }
+.tree-panel.is-open .tree__list > li:nth-child(4) { transition-delay: 0.16s; }
 
 /* ---------- Layout shell ---------- */
 
@@ -169,6 +458,10 @@ main { display: block; }
 
 .section--tight { padding-block: clamp(2rem, 5vw, 4rem); }
 .section--flush-top { padding-top: 0; }
+
+/* The homepage grid slot renders nothing until a third-party grid is
+   embedded in it — until then it shouldn't reserve section padding. */
+.section:empty { padding: 0; }
 
 .grid-12 {
   display: grid;
@@ -211,7 +504,9 @@ main { display: block; }
   transition: border-color 0.3s var(--ease);
 }
 
-.section-head__link:hover { border-bottom-color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .section-head__link:hover { border-bottom-color: var(--ink); }
+}
 
 /* ---------- Homepage hero (Sept 2026, deepened after reading the
    reference's full DESIGN.md/tokens, not just its vibe: hero is now
@@ -222,20 +517,6 @@ main { display: block; }
 
 .hero {
   padding-block: clamp(3.5rem, 11vw, 8rem) clamp(3rem, 10vw, 8rem);
-}
-
-.hero__slate {
-  /* row 2, not row 1 — row 1 is the headline's row, and this shares
-     its column range (1–4 sits inside 1–8), so aligning both to the
-     row's bottom edge collided them. Own row avoids that. */
-  grid-column: 1 / span 4;
-  grid-row: 2;
-  align-self: start;
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 2rem;
-  max-width: 32ch;
 }
 
 .hero__line {
@@ -264,9 +545,9 @@ main { display: block; }
 }
 
 .hero__actions {
-  grid-column: 9 / span 4;
+  grid-column: 1 / span 4;
   grid-row: 2;
-  margin-top: 1rem;
+  margin-top: clamp(2rem, 6vw, 4rem);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -274,7 +555,6 @@ main { display: block; }
 }
 
 @media (max-width: 860px) {
-  .hero__slate,
   .hero__line,
   .hero__meta,
   .hero__actions {
@@ -282,11 +562,6 @@ main { display: block; }
     grid-row: auto;
     align-self: auto;
     max-width: none;
-  }
-  .hero__slate {
-    padding-bottom: 1.25rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--line);
   }
 }
 
@@ -305,75 +580,9 @@ main { display: block; }
   transition: background-size 0.45s var(--ease);
 }
 
-.link-line:hover { background-size: 0 1px; }
-
-/* ---------- Featured carousel ----------
-   Native scroll-snap placeholder — Frank plans to bring in an
-   external carousel component; this keeps the same markup hooks
-   (.carousel / .carousel__track / .carousel__item) so swapping
-   the library later doesn't require restructuring the page. */
-
-.carousel {
-  grid-column: 1 / -1;
+@media (hover: hover) and (pointer: fine) {
+  .link-line:hover { background-size: 0 1px; }
 }
-
-.carousel__track {
-  display: flex;
-  align-items: flex-start;
-  gap: clamp(1rem, 2.5vw, 2.5rem);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scroll-behavior: smooth;
-  padding-bottom: 0.75rem;
-  scrollbar-width: thin;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .carousel__track { scroll-behavior: auto; }
-}
-
-.carousel__item {
-  scroll-snap-align: start;
-  flex: 0 0 clamp(240px, 30vw, 380px);
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-/* Uneven widths and film-ish aspect variety keep the strip from
-   reading as a tidy row of equal thumbnails. */
-.carousel__item:nth-child(even) { flex-basis: clamp(280px, 44vw, 580px); }
-.carousel__item:nth-child(even) .media-frame { aspect-ratio: 16 / 9; }
-.carousel__item:nth-child(3n) { margin-top: clamp(1rem, 4vw, 3rem); }
-
-.carousel__controls {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
-}
-
-.carousel__btn {
-  font-family: var(--sans);
-  font-size: 0.9rem;
-  line-height: 1;
-  background: none;
-  border: 1px solid var(--line);
-  color: var(--ink);
-  width: 2.6rem;
-  height: 2.6rem;
-  cursor: pointer;
-  transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease), opacity 0.3s var(--ease);
-}
-
-.carousel__btn:hover:not(:disabled) {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
-}
-
-.carousel__btn:disabled { opacity: 0.3; cursor: default; }
 
 /* ---------- Media ---------- */
 
@@ -393,8 +602,10 @@ main { display: block; }
   transition: transform 0.7s var(--ease);
 }
 
-a:hover .media-frame img,
-a:hover .media-frame video { transform: scale(1.03); }
+@media (hover: hover) and (pointer: fine) {
+  a:hover .media-frame img,
+  a:hover .media-frame video { transform: scale(1.03); }
+}
 
 .media-placeholder {
   width: 100%;
@@ -411,7 +622,7 @@ a:hover .media-frame video { transform: scale(1.03); }
   color: var(--ink-soft);
 }
 
-/* ---------- Card caption (shared by carousel + works grid) ---------- */
+/* ---------- Card caption (works grid) ---------- */
 
 .caption {
   margin-top: 0.85rem;
@@ -442,50 +653,6 @@ a:hover .media-frame video { transform: scale(1.03); }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
-}
-
-/* ---------- Homepage index list (the "straight to the point"
-   half of the page — every project visible without a click) ---------- */
-
-.index-list {
-  grid-column: 1 / -1;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-}
-
-.index-list a {
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) auto;
-  gap: 0.25rem 1.5rem;
-  align-items: baseline;
-  padding: clamp(0.9rem, 2vw, 1.4rem) 0;
-  border-bottom: 1px solid var(--line);
-  text-decoration: none;
-  transition: padding-left 0.4s var(--ease), background-color 0.4s var(--ease);
-}
-
-.index-list a:hover { padding-left: 1rem; background-color: var(--paper-dim); }
-
-.index-list__num,
-.index-list__meta {
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.index-list__title {
-  font-family: var(--serif);
-  font-size: var(--step-1);
-  line-height: 1.2;
-}
-
-@media (max-width: 620px) {
-  .index-list a { grid-template-columns: 2.25rem minmax(0, 1fr); }
-  .index-list__meta { grid-column: 2; }
 }
 
 /* ---------- About ---------- */
@@ -584,10 +751,14 @@ a:hover .media-frame video { transform: scale(1.03); }
   color: var(--ink);
   padding: 0.4rem 0.85rem;
   cursor: pointer;
-  transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
 }
 
-.filter-btn:hover { border-color: var(--ink); }
+.filter-btn:active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .filter-btn:hover { border-color: var(--ink); }
+}
 
 .filter-btn[aria-pressed="true"] {
   background: var(--ink);
@@ -665,7 +836,9 @@ a:hover .media-frame video { transform: scale(1.03); }
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
 
-.work-detail__back:hover { color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .work-detail__back:hover { color: var(--ink); }
+}
 
 .work-detail__head { grid-column: 1 / span 9; }
 
@@ -822,18 +995,18 @@ a:hover .media-frame video { transform: scale(1.03); }
 }
 
 .pager__title { font-family: var(--serif); font-size: var(--step-2); }
-.pager:hover .pager__title { text-decoration: underline; text-underline-offset: 6px; }
+@media (hover: hover) and (pointer: fine) {
+  .pager:hover .pager__title { text-decoration: underline; text-underline-offset: 6px; }
+}
 
 /* ---------- Contact ---------- */
 
 .contact-grid { align-items: start; }
 
 .contact__block { grid-column: 1 / span 7; }
-.contact__aside { grid-column: 9 / span 4; }
 
 @media (max-width: 860px) {
-  .contact__block, .contact__aside { grid-column: 1 / -1; }
-  .contact__aside { margin-top: 2.5rem; }
+  .contact__block { grid-column: 1 / -1; }
 }
 
 .contact__name {
@@ -856,7 +1029,9 @@ a:hover .media-frame video { transform: scale(1.03); }
 }
 
 .contact__list a { text-decoration-color: var(--line); text-underline-offset: 5px; }
-.contact__list a:hover { text-decoration-color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .contact__list a:hover { text-decoration-color: var(--ink); }
+}
 
 .contact__label {
   display: block;
@@ -881,16 +1056,8 @@ a:hover .media-frame video { transform: scale(1.03); }
   transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
-a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-
-.contact__note {
-  font-family: var(--sans);
-  font-size: 0.8rem;
-  line-height: 1.7;
-  color: var(--ink-soft);
-  border-top: 1px solid var(--line);
-  padding-top: 1.25rem;
-  margin: 0;
+@media (hover: hover) and (pointer: fine) {
+  a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 }
 
 /* ---------- Footer (end card — the one inverted surface on the
@@ -910,17 +1077,6 @@ a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(-
   gap: clamp(1rem, 2vw, 1.75rem);
 }
 
-.site-footer__label {
-  grid-column: 1 / -1;
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--paper);
-  opacity: 0.6;
-  margin: 0 0 1rem;
-}
-
 .site-footer__mail {
   /* full width, not span 8 — at the Sept 2026 --step-3 bump this no
      longer fit its old column and was breaking mid-word */
@@ -936,8 +1092,6 @@ a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(-
   background-size: 0 1px;
   transition: background-size 0.5s var(--ease);
 }
-
-.site-footer__mail:hover { background-size: 100% 1px; }
 
 .site-footer__links {
   grid-column: 1 / -1;
@@ -958,6 +1112,10 @@ a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(-
 .site-footer__links a:hover { opacity: 1; }
 
 .site-footer__links li:last-child { margin-left: auto; opacity: 0.5; }
+
+@media (hover: hover) and (pointer: fine) {
+  .site-footer__mail:hover { background-size: 100% 1px; }
+}
 
 .site-footer :focus-visible { outline-color: var(--paper); }
 

@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!grid) return;
 
   let works = [];
-  const active = { type: 'all', year: 'all', commercial: 'all' };
+  // ?type=film etc. lets the node-tree branches land on a filtered grid.
+  const requestedType = new URLSearchParams(window.location.search).get('type');
+  const active = { type: requestedType || 'all', year: 'all', commercial: 'all' };
 
   function render() {
     const filtered = works.filter((w) => {

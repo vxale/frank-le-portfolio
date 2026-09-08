@@ -23,8 +23,8 @@ Content per project, in order:
 4. A short insight passage, structured in five beats: what is the work? → what is it trying to solve? → who is it meant for? → how did I do it? → what was the result? Each beat should be presented as a short, clearly labeled/skimmable unit (not a dense paragraph) to stay consistent with "recruiters skim" — likely needs typographic treatment (e.g. each beat as its own short block) rather than running prose.
 5. Images/video, full-bleed.
 
-## Homepage carousel (decided)
+## Homepage carousel (SUPERSEDED Sept 8 2026 — removed; a third-party grid goes in the `#work-grid` slot instead)
 A `featured` flag (+ optional order field) on each Works entry — the carousel pulls flagged entries rather than maintaining a separately curated list. Frank plans to use an external/third-party carousel component — will likely need restyling to match the black-and-white editorial system rather than keeping default plugin styling.
 
-## Node-tree menu (decided: planned v2 upgrade)
+## Node-tree menu (BUILT Sept 8 2026 — shipped as one of two menu display modes, toggled by the visitor; see docs/style-direction.md)
 Frank's concept: a literal branching diagram the visitor clicks through, replacing/supplementing conventional nav. Confirmed as a "nice to have to design well" rather than a v1 blocker — v1 ships with a simpler placeholder nav (still on-brand), node-tree becomes a defined future upgrade rather than something solved before launch.

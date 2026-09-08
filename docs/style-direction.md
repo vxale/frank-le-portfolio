@@ -28,8 +28,20 @@ Two bugs surfaced and were fixed during this pass, worth knowing about before to
 - `.hero__slate` and `.hero__line` originally shared both a grid row *and* overlapping columns while both using `align-self: end` — they collided visually. Fixed by giving `.hero__slate` its own grid row below the headline instead of trying to share the headline's row.
 - `.site-footer__mail` reuses `--step-3` for its size (so the footer email reads at "monumental" scale too). The `--step-3` bump above made it too wide for its old `grid-column: 1 / span 8`, and it wrapped mid-word ("gmail.c" / "om") because the string has no spaces to break at. Fixed by widening it to `grid-column: 1 / -1`. If `--step-3` gets pushed larger again in the future, re-check this element specifically.
 
+## Redesign pass (Sept 8 2026, third) — Frank's direction
+Four instructions from Frank, all applied:
+
+- **Paper is now pure `#FFFFFF`.** This REVERSES the long-standing "not stark/clinical, open-book off-white" call recorded below — Frank asked for it directly, so the old `--paper: #f5f2ea` is gone. Two knock-on changes were made to keep the sheet coherent: `--paper-dim` (media placeholder fill) went from warm tan `#ece7da` to neutral `#f1f1f1`, and `--ink-soft` (labels/metadata) from warm olive `#55503f` to neutral `#5c5a55`, because the warm grays read as dirty against pure white. `--ink` stays `#16140f` — a near-black, so the page still reads as printed rather than clinical. If Frank wants the warm grays back, those are two token lines.
+- **Node-tree navigation shipped, as a display mode rather than a replacement.** The menu now has a toggle — `List` (classic inline links) vs `Tree` (a literal branching diagram in a full-page panel). The choice persists in `localStorage` under `nav-mode`, and an inline script in each page's `<head>` applies it before first paint so tree mode doesn't flash the list first. The tree is built from `data/works.json` by `js/nav.js`: root (Frank Le) → About / Works / Contact, with Works branching into type nodes (Film / Design / Photography, each showing a count and deep-linking to `works.html?type=…`) which expand in place to the projects themselves. Connectors are CSS hairline elbows, not SVG, so they reflow with the type at any width. The plain `<ul>` links stay in the HTML, so with JS off the site still has working navigation.
+- **Homepage work highlights removed.** The featured carousel and the full text index are both gone — Frank is embedding a third-party grid component there instead. `index.html` keeps an empty `<section id="work-grid">` as the marked embed point (`.section:empty` zeroes its padding so it costs nothing until filled). The `.carousel*` CSS and `js/home.js` were deleted with it; the "keep the carousel markup hooks for a library swap" plan below is therefore obsolete.
+- **Dead copy and duplicate sections cut.** The homepage hero slate (name / "Film & Design" / location / "Portfolio 2026") duplicated the nameplate and the headline; the footer's "Open to design internships and film collaborations" line and its repeated page links duplicated the nav; the About page's selected-work index duplicated Works (the node tree covers that job now); the Contact page's aside note restated its own labels. All removed. The footer is now the email at monumental scale, LinkedIn, and a copyright line.
+
+Motion added in this pass follows a split: content entering on scroll keeps the slow editorial `--ease` curve, while anything the visitor operates directly (menu toggle, tree panel, expand buttons, filters) uses a new `--ease-out` (`cubic-bezier(0.23, 1, 0.32, 1)`) at 140–220ms, with exits faster than entries and `scale(0.97)` press feedback. Hover effects are gated behind `@media (hover: hover) and (pointer: fine)` so they stop firing on tap.
+
+Still no framework: React/Next were authorized for this pass, but Node isn't installed on Frank's machine, and a five-page static site whose only stateful piece is this menu doesn't need one. See CLAUDE.md.
+
 ## Color (decided)
-Strictly black and white — no accent color, reaffirmed during the Sept 2026 revision above. Specifically not stark/clinical digital pure white/black: Frank's reference is the paper of an open book — white to fairly off-white paper with black ink. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
+Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.
 
 ## Typography (decided)
@@ -54,11 +66,14 @@ Assumed (Claude default, unconfirmed): no functional meaning for color — inter
 ## Motion & Interaction (decided)
 - Scroll behaviors and hover effects as the main interaction language (implemented as IntersectionObserver-based `.reveal` fades, see js/site.js).
 - Smooth/fluid motion (not snappy/abrupt) — this did NOT change in the Sept 2026 revision; the reference's brutalism comes from layout/type/hairlines, not from abrupt motion.
-- Frank plans to use an external/third-party carousel component for the homepage highlight carousel — current build uses native CSS scroll-snap with markup hooks (`.carousel`/`.carousel__track`/`.carousel__item`) designed to make swapping in a library later a styling change, not a rebuild.
+- Homepage highlights were removed entirely in the Sept 8 2026 pass (see above) — the carousel and its markup hooks are gone, and a third-party grid component goes into the `#work-grid` slot instead.
 
-## Navigation (decided)
-- Long-term concept: a literal branching node-tree diagram the visitor clicks through, as the site's nav pattern.
-- v1 (current build, revised Sept 2026): a simple text nav with no sticky bar, background, or border — just nameplate + links floating on the paper, no boxed chrome. Closer to the reference's "no conventional UI chrome" nav, short of actually building the node-tree diagram (still a v2 upgrade, not a launch blocker).
+## Navigation (decided — node tree BUILT as of Sept 8 2026)
+- Nameplate + controls float on the paper: no sticky bar, background, or border.
+- Two display modes, chosen by the visitor and remembered (`localStorage` key `nav-mode`):
+  - **List** — the classic inline text links. The default, and the no-JS fallback.
+  - **Tree** — the literal branching node diagram Frank has wanted since the start, opened as a full-page panel. Root → About / Works / Contact; Works expands into type branches, which expand into the projects.
+- Built in `js/nav.js`; styles under "Nav" and "Node-tree panel" in `css/style.css`. The tree reads `data/works.json`, so adding a project adds a node — nothing to maintain by hand.
 
 ## Reference sites
 Sourced Sept 2026 — worth spot-checking as brutalist sites redesign often:

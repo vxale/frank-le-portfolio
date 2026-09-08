@@ -7,6 +7,7 @@
 <meta name="description" content="Project detail — Lê Vũ Xuân Anh (Frank Le).">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
+<script>try{if(localStorage.getItem('nav-mode')==='tree')document.documentElement.dataset.navMode='tree';}catch(e){}</script>
 </head>
 <body data-nav-current="works">
 
@@ -14,14 +15,19 @@
 
 <header class="site-nav">
   <a class="site-nav__mark" href="index.html">Frank Le</a>
-  <nav aria-label="Main">
-    <ul class="site-nav__links">
-      <li><a href="index.html" data-nav="home">Home</a></li>
-      <li><a href="about.html" data-nav="about">About</a></li>
-      <li><a href="works.html" data-nav="works">Works</a></li>
-      <li><a href="contact.html" data-nav="contact">Contact</a></li>
-    </ul>
-  </nav>
+  <div class="site-nav__right">
+    <nav aria-label="Main">
+      <ul class="site-nav__links">
+        <li><a href="index.html" data-nav="home">Home</a></li>
+        <li><a href="about.html" data-nav="about">About</a></li>
+        <li><a href="works.html" data-nav="works">Works</a></li>
+        <li><a href="contact.html" data-nav="contact">Contact</a></li>
+      </ul>
+    </nav>
+    <!-- js/nav.js injects the display-mode toggle (list / node tree)
+         and the tree trigger here. The links above stay in the HTML so
+         navigation still works with JavaScript off. -->
+  </div>
 </header>
 
 <!-- One flexible template for every project — content order follows
@@ -54,20 +60,16 @@
 
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <p class="site-footer__label">Open to design internships and film collaborations</p>
     <a class="site-footer__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
     <ul class="site-footer__links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="works.html">Works</a></li>
-      <li><a href="contact.html">Contact</a></li>
       <li><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a></li>
-      <li>© 2026 Lê Vũ Xuân Anh</li>
+      <li>&copy; 2026 Lê Vũ Xuân Anh</li>
     </ul>
   </div>
 </footer>
 
 <script src="js/site.js"></script>
+<script src="js/nav.js"></script>
 <script src="js/work-detail.js"></script>
 </body>
 </html>

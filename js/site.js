@@ -67,20 +67,6 @@ function cardMarkup(work, index, className) {
   `;
 }
 
-/** Text-only row used by the homepage index list — every project
-    visible without a click, per the "straight to the point" brief. */
-function indexRowMarkup(work, index) {
-  return `
-    <li>
-      <a href="${workHref(work)}">
-        <span class="index-list__num">${workNumber(index)}</span>
-        <span class="index-list__title">${esc(work.title)}</span>
-        <span class="index-list__meta">${esc(workMetaLine(work))}</span>
-      </a>
-    </li>
-  `;
-}
-
 /** Scroll reveals. The .reveal class is added here rather than in the
     HTML, so with JS off (or reduced motion on) nothing is ever hidden. */
 function initReveals(root) {

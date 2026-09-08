@@ -37,6 +37,12 @@
   const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   const reduceMotion = () => motionQuery.matches;
 
+  /* Small portrait shown beside the root node. Put a file in /assets
+     and name it here; leave src empty and the root stays type-only.
+     Videos work too — { type: 'video', src: 'assets/reel.mp4' } — and
+     play on hover rather than autoplaying. */
+  const ROOT_MEDIA = { type: 'image', src: '', alt: '' };
+
   const ENTER_MS = 260;   // under 300ms — this is UI, not marketing
   const EXIT_MS = 170;    // exits are faster than entrances
   const STAGGER_MS = 45;
@@ -51,12 +57,12 @@
   // ---------- Building the tree data ----------
 
   let nextId = 0;
-  function makeNode({ label, href, count, children, navKey }) {
+  function makeNode({ label, href, media, children, navKey }) {
     const node = {
       uid: `n${nextId++}`,
       label,
       href: href || null,
-      count: count === undefined ? null : count,
+      media: media && media.src ? media : null,
       navKey: navKey || null,
       childSpecs: children || [],
       children: [],
@@ -91,10 +97,16 @@
     const types = [...new Set(works.map((w) => w.type))];
     const typeSpecs = types.map((type) => ({
       label: typeLabel(type),
-      count: works.filter((w) => w.type === type).length,
       children: works
         .filter((w) => w.type === type)
-        .map((w) => ({ label: w.title, href: workHref(w) })),
+        // A project shows a still or clip beside its title as soon as
+        // one exists: "thumb" if the entry names one, otherwise its
+        // first media item. No media, no frame — the node is just type.
+        .map((w) => ({
+          label: w.title,
+          href: workHref(w),
+          media: w.thumb || (w.media && w.media[0]),
+        })),
     }));
 
     const worksChildren = typeSpecs.concat(
@@ -103,9 +115,10 @@
 
     root = specToTree({
       label: 'Frank Le',
+      media: ROOT_MEDIA,
       children: [
         { label: 'About', href: 'about.html', navKey: 'about' },
-        { label: 'Works', count: works.length, children: worksChildren },
+        { label: 'Works', children: worksChildren },
         { label: 'Contact', href: 'contact.html', navKey: 'contact' },
       ],
     }, null);
@@ -165,26 +178,72 @@
   }
 
   /** A few passes of pushing overlapping nodes apart. Not physics —
-      just enough to stop labels landing on top of each other. */
+      just enough to stop nodes landing on top of each other. Sizes are
+      measured rather than assumed: a long title is a wide node, and a
+      node with a picture in it is a box, not a word. */
+  /** The corner marks — name, bio, role, email — are page furniture
+      rather than tree, but a node landing on top of the bio reads as
+      a bug. They join the separation pass as obstacles that push and
+      are never pushed. A node the visitor has dragged is left alone;
+      putting one wherever they like is the point. */
+  function markObstacles() {
+    const marks = document.querySelectorAll('.canvas__marks .mark');
+    if (!marks.length) return [];
+    const c = canvas.getBoundingClientRect();
+    const out = [];
+    marks.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return; // hidden at this breakpoint
+      out.push({
+        node: null,
+        pinned: true,
+        x: r.left - c.left + r.width / 2,
+        y: r.top - c.top + r.height / 2,
+        hw: r.width / 2 + 14,
+        hh: r.height / 2 + 12,
+      });
+    });
+    return out;
+  }
+
   function relax() {
     const live = allNodes.filter((n) => n.el);
-    const minGap = 92;
+    const items = live.map((n) => {
+      const r = n.el.getBoundingClientRect();
+      return { node: n, pinned: n.pinned, hw: r.width / 2 + 12, hh: r.height / 2 + 10 };
+    }).concat(markObstacles());
+
+    // Real nodes keep their coordinates on the node itself; obstacles
+    // carry their own. Either way the box has .x/.y.
+    const at = (item) => item.node || item;
+
     for (let pass = 0; pass < 12; pass++) {
       let moved = false;
-      for (let i = 0; i < live.length; i++) {
-        for (let j = i + 1; j < live.length; j++) {
-          const a = live[i];
-          const b = live[j];
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const a = items[i];
+          const b = items[j];
           if (a.pinned && b.pinned) continue;
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const dist = Math.hypot(dx, dy) || 0.01;
-          if (dist >= minGap) continue;
-          const push = (minGap - dist) / 2;
-          const ux = (dx / dist) * push;
-          const uy = (dy / dist) * push;
-          if (!a.pinned) { a.x -= ux; a.y -= uy; clampPosition(a); }
-          if (!b.pinned) { b.x += ux; b.y += uy; clampPosition(b); }
+
+          const pa = at(a);
+          const pb = at(b);
+          const dx = pb.x - pa.x;
+          const dy = pb.y - pa.y;
+          // How far the two boxes overlap on each axis.
+          const gapX = a.hw + b.hw - Math.abs(dx);
+          const gapY = a.hh + b.hh - Math.abs(dy);
+          if (gapX <= 0 || gapY <= 0) continue;
+
+          // Separate along whichever axis needs the smaller shove.
+          let ux = 0;
+          let uy = 0;
+          if (gapX < gapY) ux = (dx >= 0 ? 1 : -1) * gapX / 2;
+          else uy = (dy >= 0 ? 1 : -1) * gapY / 2;
+
+          // One side being fixed means the other takes the whole move.
+          const share = (a.pinned || b.pinned) ? 2 : 1;
+          if (!a.pinned) { pa.x -= ux * share; pa.y -= uy * share; clampPosition(pa); }
+          if (!b.pinned) { pb.x += ux * share; pb.y += uy * share; clampPosition(pb); }
           moved = true;
         }
       }
@@ -282,17 +341,15 @@
       if (node.navKey) hit.dataset.nav = node.navKey;
     }
 
+    if (node.media) {
+      hit.classList.add('node__hit--media');
+      hit.appendChild(mediaFrame(node.media, hit));
+    }
+
     const label = document.createElement('span');
     label.className = 'node__label';
     label.textContent = node.label;
     hit.appendChild(label);
-
-    if (node.count !== null) {
-      const count = document.createElement('span');
-      count.className = 'node__count';
-      count.textContent = node.count;
-      hit.appendChild(count);
-    }
 
     if (isBranch) {
       const glyph = document.createElement('span');
@@ -319,6 +376,42 @@
     layer.appendChild(el);
     applyPosition(node);
     return el;
+  }
+
+  /** The still or clip that sits beside a node's title. Images are
+      decorative here — the node's own text already names the thing —
+      so they carry an empty alt. Video plays on hover/focus only: a
+      canvas of autoplaying clips is a lot of moving parts for a menu,
+      and on touch the poster frame stands in. */
+  function mediaFrame(media, hit) {
+    const frame = document.createElement('span');
+    frame.className = 'node__media';
+
+    if (media.type === 'video') {
+      const video = document.createElement('video');
+      video.src = media.src;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      frame.appendChild(video);
+
+      const play = () => { const p = video.play(); if (p) p.catch(() => {}); };
+      const stop = () => video.pause();
+      hit.addEventListener('pointerenter', play);
+      hit.addEventListener('pointerleave', stop);
+      hit.addEventListener('focus', play);
+      hit.addEventListener('blur', stop);
+    } else {
+      const img = document.createElement('img');
+      img.src = media.src;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.draggable = false; // or the browser drags the picture, not the node
+      frame.appendChild(img);
+    }
+
+    return frame;
   }
 
   function createEdge(parent, child) {

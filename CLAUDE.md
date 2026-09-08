@@ -50,7 +50,9 @@ Node-tree implementation notes worth knowing before editing `js/node-tree.js`:
 - With JS off the tree can't exist, so `index.html` carries a `<noscript>` list of the three page links. It is not a visible menu — it's the dead-end guard.
 
 ## Content model
-All project content lives in `data/works.json` — one entry per project (id, title, type, year, commercial, featured, role, tools, credits, awards, insight {what/problem/audience/process/result}, media[]). Adding or editing a project is editing this file; no new HTML per project. Current entries are placeholders clearly marked `PLACEHOLDER` — real content (Frank's actual projects, images/video, headshot) has not been delivered yet as of this repo's creation.
+All project content lives in `data/works.json` — one entry per project (id, title, type, year, commercial, featured, role, tools, credits, awards, insight {what/problem/audience/process/result}, media[], optional thumb).
+
+`thumb` is optional and only affects the node tree: a project node shows `thumb` if present, otherwise `media[0]`, beside its title. No media, no frame — the node stays type-only. The root "Frank Le" node has its own portrait slot, set by the `ROOT_MEDIA` constant at the top of `js/node-tree.js` (a path in `/assets`; empty means no frame). Both accept `{ type: "image" | "video", src, alt }`; videos play on hover/focus rather than autoplaying. Adding or editing a project is editing this file; no new HTML per project. Current entries are placeholders clearly marked `PLACEHOLDER` — real content (Frank's actual projects, images/video, headshot) has not been delivered yet as of this repo's creation.
 
 ## Known gaps / next steps
 - Real work-sample content (3–6 projects) and headshot still need to be added to `data/works.json` / `assets/`.

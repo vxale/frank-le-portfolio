@@ -48,6 +48,17 @@ Frank's direction: bring the hero line back down, delete the list menu entirely,
 - **No boxes on anything pressable.** Filters and the CV slot lost their borders and their filled selected state; a rule under the word and a shift to full ink carry state instead.
 - **Navigation is spatial, not a list.** See the Navigation section below.
 
+## Canvas revision (Sept 8 2026, fourth) — Frank's direction
+Three changes to the canvas homepage and the node tree:
+
+- **Branch counts removed.** Nodes were reading "Works 6", "Film 2". Frank cut them — the tree shows what it contains by branching, so the number was restating the diagram.
+- **The bio line is back, top right.** The full sentence ("Lê Vũ Xuân Anh (Frank Le) is a young Vietnamese filmmaker and designer…") returns to the canvas as `.mark--line`, right-aligned in the top-right corner opposite the nameplate. Unlike the other corner marks it is set in reading case at `--step-1` rather than as uppercase micro-type, because it is the one full sentence on the page. Note it repeats the name already in the top-left `.mark--name`; that duplication is deliberate on Frank's instruction, not an oversight.
+- **Nodes can carry a still or a clip beside the title.** Project nodes take `thumb` from `data/works.json` if present, otherwise `media[0]`; the root node takes the `ROOT_MEDIA` constant at the top of `js/node-tree.js`, intended for Frank's portrait. Frames are sized in `em`, so they scale with the node's depth automatically — the root's is a 3:4 portrait, everything below is 4:3 landscape. Images are decorative (`alt=""`, the node's own text names the thing) and non-draggable, or the browser would drag the picture instead of the node. Videos are muted/looped and play on hover or focus rather than autoplaying: a canvas of running clips is a lot of moving parts for a menu, and on touch the poster frame stands in. A node with no media renders as type only, so the canvas stays clean until real assets land.
+
+Two supporting changes fell out of the media work:
+- **Node separation now measures the boxes** instead of treating every node as a point 92px across. A node with a picture in it is a box, not a word, and long project titles were already wide enough to overlap. Separation is axis-aligned and resolves along whichever axis needs the smaller shove.
+- **The corner marks push nodes away.** They join the same separation pass as fixed obstacles, so an auto-placed node no longer lands on top of the bio or the email. Nodes the visitor has dragged are exempt — putting one wherever you like is the point of the canvas.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

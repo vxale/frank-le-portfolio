@@ -40,11 +40,19 @@ Motion added in this pass follows a split: content entering on scroll keeps the 
 
 Still no framework: React/Next were authorized for this pass, but Node isn't installed on Frank's machine, and a five-page static site whose only stateful piece is this menu doesn't need one. See CLAUDE.md.
 
+## Canvas rebuild (Sept 8 2026, fourth pass)
+Frank's direction: bring the hero line back down, delete the list menu entirely, make the node tree the site's navigation and its main feature on a blank canvas with draggable nodes, use a single typeface throughout, and take the boxes off buttons. Worked against the `emil-design-eng` design-engineering skill.
+
+- **Typography is now a single family.** `--font` (Times) sets everything — headlines, labels, metadata, the tree. The split serif/grotesk system is retired. This is the harder discipline: with no second family to signal "this is structural", hierarchy has to come from size, case and letter-spacing alone. Small tracked caps in the serif do the job the grotesk used to.
+- **Scale came down.** The monumental 135-188px tier is gone; `--step-3`/`--step-4` sit in a normal editorial range. The site's boldness now lives in the canvas being the first thing you meet, not in type size. This reverses the second and third passes above.
+- **No boxes on anything pressable.** Filters and the CV slot lost their borders and their filled selected state; a rule under the word and a shift to full ink carry state instead.
+- **Navigation is spatial, not a list.** See the Navigation section below.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.
 
-## Typography (decided)
+## Typography (decided — single family as of Sept 8 2026)
 - Split-role system:
   - Serif, used big/blunt/unstyled (Times New Roman-like), for headlines/bio/narrative content — the literary/humanist voice.
   - Neutral grotesk (Helvetica-family), small and functional, for nav/filters/captions/metadata — the structural voice.
@@ -68,7 +76,13 @@ Assumed (Claude default, unconfirmed): no functional meaning for color — inter
 - Smooth/fluid motion (not snappy/abrupt) — this did NOT change in the Sept 2026 revision; the reference's brutalism comes from layout/type/hairlines, not from abrupt motion.
 - Homepage highlights were removed entirely in the Sept 8 2026 pass (see above) — the carousel and its markup hooks are gone, and a third-party grid component goes into the `#work-grid` slot instead.
 
-## Navigation (decided — node tree BUILT as of Sept 8 2026)
+## Navigation (decided — node-tree canvas IS the site, Sept 8 2026)
+The homepage is a blank canvas holding a branching node diagram. Nodes can be dragged anywhere; clicking a branch reveals its children, clicking a leaf opens that page. It is generated from `data/works.json`, so the menu and the work stay in sync automatically. There is no list menu anywhere on the site — inner pages carry a nameplate and one link back to the canvas.
+
+Motion decisions behind it (all from the design-engineering framework): children grow outward from the parent that spawned them rather than fading in where they land; entering takes 260ms and leaving 170ms, because expanding is the visitor deciding and collapsing is the system responding; dragging has no transition at all so a node tracks the hand exactly; press feedback is a 0.97 scale on the label; hover rules are gated to fine pointers; and under `prefers-reduced-motion` nodes still appear and disappear, they just don't travel to do it.
+
+### Superseded — the previous panel version
+
 - Nameplate + controls float on the paper: no sticky bar, background, or border.
 - Two display modes, chosen by the visitor and remembered (`localStorage` key `nav-mode`):
   - **List** — the classic inline text links. The default, and the no-JS fallback.

@@ -1,14 +1,14 @@
 # Site Map
 
 ## Pages
-- **Homepage** — the anchor page. Hero line (short bio) + a highlight-work carousel, pulling from Works entries flagged `featured` (see Carousel below). Links out to About, Works, Contact.
+- **Homepage** — the anchor page, and as of Sept 8 2026 it is *only* the node-tree canvas: a full-viewport blank sheet with the draggable branching diagram on it, plus four quiet corner marks (name, role line, drag hint, email). No hero, no sections, no footer, no scroll. The hero line and the `#work-grid` slot were both removed when the canvas replaced them.
 - **About** — headshot + expanded/longer bio.
 - **Works** — grid of all works, with filtering by: type (design/film/etc.), year, and commercial vs. non-commercial. Each item links to its own dedicated work/case-study page.
   - **Work detail (per project)** — one flexible template that adapts per project (film short vs. UI/UX case study need different content blocks: video/credits vs. process shots/write-up). Content should stay tidy, concise, and skimmable — Frank expects recruiters to skim rather than read in depth, so the template should favor visual/structural clarity over long text.
 - **Contact** — contact info (see docs/contact.md): email, LinkedIn, CV download slot.
 
 ## Navigation rule
-Every page must retain a way back to the Homepage (persistent nav element / button) — always circular back to the anchor page, not forward-only. Navigation for v1 is a straightforward/conventional nav (see Node-tree menu below for the planned upgrade).
+Every page must retain a way back to the Homepage — still true, now via `.page-head`: the nameplate and a single `← Node tree` link, on every page that isn't the canvas. There is no list menu anywhere on the site as of Sept 8 2026; the canvas is the menu.
 
 ## Works grid filters (decided)
 Filter by: type, year, commercial/non-commercial.

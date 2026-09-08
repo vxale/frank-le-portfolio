@@ -726,9 +726,10 @@
     void root.el.offsetHeight;
     root.el.style.transition = '';
 
-    // Open one level immediately: a single word on a blank page
-    // doesn't read as a menu.
-    expand(root);
+    /* The tree loads closed (Frank's call, Sept 8 2026): the root
+       alone on the paper with its "+" inviting the first click. The
+       corner hint carries the instruction, so the page doesn't have
+       to prove it is a menu by opening itself. */
     requestSync(600);
   })();
 })();

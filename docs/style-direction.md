@@ -121,12 +121,12 @@ Strictly black and white — no accent color, reaffirmed during the Sept 2026 re
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.
 
 ## Typography (decided — single family as of Sept 8 2026)
-- Split-role system:
-  - Serif, used big/blunt/unstyled (Times New Roman-like), for headlines/bio/narrative content — the literary/humanist voice.
-  - Neutral grotesk (Helvetica-family), small and functional, for nav/filters/captions/metadata — the structural voice.
+This section describes the system as it stands. The dated revision notes above are the history of how it got here — where they disagree with this, this wins.
+
+- **One typeface, every job.** `--font: "Times New Roman", Times, Georgia, serif`. The split serif/grotesk system is gone and the `--serif`/`--sans` tokens no longer exist — small tracked caps in the same face carry everything the grotesk used to do (labels, captions, metadata, the corner marks). Still a system font on purpose; don't swap in a webfont, and don't reintroduce a second family, without asking.
+- **One modular ladder, ratio 1.2, nine rungs** (`--step-0` … `--step-8`), anchored on body at `--step-2`. There are no hand-picked font sizes left in the stylesheet — the only non-token size is the node tree's `+`/`−` glyph at `0.75em`, which is relative to its own node on purpose. Steps 3, 5 and 7 are deliberately spare. The full table and the reasoning are under "Type scale" above.
+- **No monumental tier.** The 135–188px display sizes from the second and third revision passes were reversed on Frank's instruction; the ladder tops out at `--step-8` (47.8–53.8px). Boldness lives in the canvas being the first thing you meet, not in type size.
 - Personality: refined editorial typography (not a loud poster/condensed/grid-breaking face).
-- Scale (revised Sept 2026): monumental display vs. quiet labels, with an extreme jump between them rather than a graduated staircase — see the Art-direction revision note above. This reverses the original "restrained and consistent" call; the boldness now lives in BOTH layout and type scale.
-- Implemented in code as: `"Times New Roman", Times, Georgia, serif` (--serif) and `"Helvetica Neue", Helvetica, Arial, sans-serif` (--sans) — literal system fonts, deliberately unstyled/default rather than a licensed webfont, which is itself part of the brutalist-editorial statement.
 
 ## Layout & Grid (decided)
 - Deliberately "broken"/asymmetric grid — this is where the "unconventional" energy lives.

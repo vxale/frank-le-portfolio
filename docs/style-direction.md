@@ -116,6 +116,14 @@ The type scale rebuilt in "one 1.2 ladder" left the tree crowded: with nodes on 
 
 Result at 1440x900 with every branch open: 13 nodes, no overlaps, nothing off-canvas. At 375x812 nothing runs off the edge; two nodes sit close enough to touch, which is what the drag is for.
 
+## Canvas revision (Sept 8 2026, eighth) — the bio node and its child
+- **The tree loads closed.** No level opens itself; the root sits alone with its "+" and the corner hint carries the instruction.
+- **"Get to know more" sits beside the bio, not under it.** A node's children normally fan out along the direction the parent itself came from, which sent the bio's single child diagonally down under the paragraph. A passage node now fans horizontally (base angle 0), so its child lands level with the text. Gated to viewports ≥720px: on a phone the paragraph and its child side by side are wider than the paper, so below that the child goes back to following the fan.
+- **The bio's measure is wider** — 30ch → 42ch (28ch on mobile), four lines instead of six.
+- **Branch length now clears both boxes.** Reach is measured centre to centre, so a wide parent used to start its branch inside itself: at 493px the bio left roughly 6px between its own edge and its child. `layoutChildren` now takes the larger of the nominal reach and (parent extent + child extent + 56px) along the branch angle. This helps every wide node, not just the bio.
+
+Note that the child is level *as placed*; with several branches open the separation pass may nudge it by about a line to keep clear of a neighbouring project title. That is the pass doing its job — pinning the child's y would trade a tidy line-up for an overlap.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

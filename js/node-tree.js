@@ -196,6 +196,14 @@
     clampPosition(root);
   }
 
+  /** How far a node's own box reaches in a given direction. */
+  function extentAlong(el, angle) {
+    if (!el) return 0;
+    const r = el.getBoundingClientRect();
+    return Math.abs(Math.cos(angle)) * (r.width / 2)
+      + Math.abs(Math.sin(angle)) * (r.height / 2);
+  }
+
   /** Children fan out along an arc pointing away from the parent's
       own parent, so the tree keeps growing outward instead of
       doubling back over itself. */
@@ -204,9 +212,17 @@
     if (!kids.length) return;
 
     const { w, h } = bounds();
-    const base = parent.parent
-      ? Math.atan2(parent.y - parent.parent.y, parent.x - parent.parent.x)
-      : 0.35; // root fans right and slightly down
+    const base = parent.passage && w >= 720
+      // The bio's child sits beside it, level with the text, rather
+      // than continuing the direction the bio itself came out at —
+      // which sent it diagonally off under the paragraph. Only where
+      // there's width for it: on a phone the paragraph and its child
+      // side by side are wider than the paper, so below 720px the
+      // child goes back to following the fan.
+      ? 0
+      : parent.parent
+        ? Math.atan2(parent.y - parent.parent.y, parent.x - parent.parent.x)
+        : 0.35; // root fans right and slightly down
 
     /* Longer branches and a wider fan than the tree started with. The
        labels are words, not dots — "PLACEHOLDER — Identity / Brand
@@ -227,8 +243,14 @@
       if (kid.pinned) return;
       const t = kids.length === 1 ? 0.5 : i / (kids.length - 1);
       const angle = base - spread / 2 + spread * t;
-      let x = parent.x + Math.cos(angle) * reach;
-      let y = parent.y + Math.sin(angle) * reach;
+      /* Long enough to clear both boxes, not just to satisfy the
+         nominal reach. Measuring from centre to centre means a wide
+         parent — the bio passage is 500px across — would otherwise
+         start its branch inside itself. */
+      const clearance = extentAlong(parent.el, angle) + extentAlong(kid.el, angle) + 56;
+      const radius = Math.max(reach, clearance);
+      let x = parent.x + Math.cos(angle) * radius;
+      let y = parent.y + Math.sin(angle) * radius;
 
       /* A child aimed off the paper gets its angle mirrored back
          across the horizontal instead of being flattened against the
@@ -236,8 +258,8 @@
          close to its parent to keep a connector, so it reads as
          floating loose rather than as part of the tree. */
       if (!onPaper(x, y)) {
-        const mx = parent.x + Math.cos(-angle) * reach;
-        const my = parent.y + Math.sin(-angle) * reach;
+        const mx = parent.x + Math.cos(-angle) * radius;
+        const my = parent.y + Math.sin(-angle) * radius;
         if (onPaper(mx, my)) { x = mx; y = my; }
       }
 

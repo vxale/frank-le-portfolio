@@ -988,7 +988,7 @@ a.cv-slot:active { transform: scale(0.97); }
 .node--passage .node__hit {
   align-items: flex-end;
   white-space: normal;
-  max-width: 30ch;
+  max-width: 42ch; /* a wider measure — this is the one paragraph on the canvas */
   text-align: left; /* a button centres its text; a paragraph shouldn't */
   line-height: 1.3;
   letter-spacing: -0.005em;
@@ -1063,7 +1063,7 @@ a.cv-slot:active { transform: scale(0.97); }
 
 @media (max-width: 720px) {
   .mark--mail { display: none; } /* the Contact node covers it */
-  .node--passage .node__hit { max-width: 24ch; }
+  .node--passage .node__hit { max-width: 28ch; }
   .node--d0 .node__hit { font-size: var(--step-4); }
   .node--d1 .node__hit { font-size: var(--step-2); }
   .node--d2 .node__hit,

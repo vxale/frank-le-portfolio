@@ -84,7 +84,7 @@ function initReveals(root) {
       .forEach((entry, i) => {
         // Small stagger so a group of siblings arrives in sequence
         // rather than all at once.
-        entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 4) * 0.09}s`);
+        entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 4) * 0.06}s`);
         entry.target.classList.add('is-in');
         obs.unobserve(entry.target);
       });

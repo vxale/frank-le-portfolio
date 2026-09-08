@@ -74,13 +74,15 @@
 
   async function openPanel() {
     if (!panel) buildPanel();
-    if (!treeBuilt) await buildTree();
     lastFocused = document.activeElement;
     panel.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
     const first = panel.querySelector('.tree-panel__close');
     if (first) first.focus();
+    // Built after the panel is up, not before: waiting on the fetch
+    // first makes the trigger look dead on a slow connection.
+    if (!treeBuilt) await buildTree();
   }
 
   function closePanel() {
@@ -139,6 +141,23 @@
 
   const current = document.body.dataset.navCurrent;
 
+  /** Opens or closes one branch. Pass animate: false to set the state
+      without running the height transition — used for the branch that
+      starts open, which the visitor never asked to see move. */
+  function setBranchOpen(li, btn, branch, open, animate) {
+    if (animate === false) branch.style.transition = 'none';
+    li.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', `${open ? 'Collapse' : 'Expand'} ${btn.dataset.label}`);
+    btn.textContent = open ? '\u2212' : '+';
+    // Collapsed content must not stay in the tab order.
+    branch.inert = !open;
+    if (animate === false) {
+      void branch.offsetHeight; // flush before transitions come back
+      branch.style.transition = '';
+    }
+  }
+
   /** One node: a link, an optional count, and an optional branch of
       children that expands in place. */
   function node({ label, href, navKey, count, leaf, children }) {
@@ -176,17 +195,10 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'tree__toggle';
-      btn.setAttribute('aria-expanded', 'false');
-      btn.setAttribute('aria-label', `Expand ${label}`);
-      btn.textContent = '+';
-      // Collapsed content must not stay in the tab order.
-      branch.inert = true;
+      btn.dataset.label = label;
+      setBranchOpen(li, btn, branch, false, false);
       btn.addEventListener('click', () => {
-        const open = li.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', String(open));
-        btn.setAttribute('aria-label', `${open ? 'Collapse' : 'Expand'} ${label}`);
-        btn.textContent = open ? '−' : '+';
-        branch.inert = !open;
+        setBranchOpen(li, btn, branch, !li.classList.contains('is-open'), true);
       });
       row.appendChild(btn);
     }
@@ -236,7 +248,8 @@
     // moment it appears, rather than three closed labels.
     const worksLi = list.children[1];
     const worksToggle = worksLi && worksLi.querySelector('.tree__toggle');
-    if (worksToggle) worksToggle.click();
+    const worksBranch = worksLi && worksLi.querySelector('.tree__branch');
+    if (worksToggle && worksBranch) setBranchOpen(worksLi, worksToggle, worksBranch, true, false);
 
     treeBuilt = true;
   }

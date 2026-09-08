@@ -61,6 +61,9 @@
 html {
   color-scheme: light;
   scroll-behavior: smooth;
+  /* The tree panel locks body scroll while it's open; reserving the
+     gutter stops the page jumping sideways as the scrollbar goes. */
+  scrollbar-gutter: stable;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -417,7 +420,7 @@ a { color: inherit; }
   transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
 }
 
-.tree__toggle:active { transform: scale(0.94); }
+.tree__toggle:active { transform: scale(0.96); }
 
 @media (hover: hover) and (pointer: fine) {
   .tree__toggle:hover { background: var(--ink); color: var(--paper); }
@@ -577,7 +580,7 @@ main { display: block; }
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 100% 1px;
-  transition: background-size 0.45s var(--ease);
+  transition: background-size 0.25s var(--ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -599,7 +602,7 @@ main { display: block; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.7s var(--ease);
+  transition: transform 0.4s var(--ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1053,8 +1056,10 @@ main { display: block; }
   padding: 0.75rem 1.25rem;
   color: var(--ink-soft);
   text-decoration: none;
-  transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
 }
+
+a.cv-slot:active { transform: scale(0.97); }
 
 @media (hover: hover) and (pointer: fine) {
   a.cv-slot:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
@@ -1090,7 +1095,7 @@ main { display: block; }
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 0 1px;
-  transition: background-size 0.5s var(--ease);
+  transition: background-size 0.3s var(--ease);
 }
 
 .site-footer__links {
@@ -1132,13 +1137,34 @@ main { display: block; }
 .reveal {
   opacity: 0;
   transform: translateY(1.5rem);
-  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
   transition-delay: var(--reveal-delay, 0s);
 }
 
 .reveal.is-in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  /* Gentler, not zero. Fades and color changes stay — they carry
+     meaning and don't cause motion sickness. Everything that MOVES
+     is switched off. */
+  *, *::before, *::after {
+    transition-property: opacity, color, background-color, border-color, text-decoration-color !important;
+    transition-duration: 0.2s !important;
+    animation-duration: 0.01ms !important;
+  }
+
   .reveal { opacity: 1; transform: none; }
+  .tree-panel { transform: none; }
+  .tree__branch { transition: none; }
+  .tree__list > li { transform: none; }
+
+  .nav-tree-open:active,
+  .nav-mode__btn:active,
+  .tree-panel__close:active,
+  .tree__toggle:active,
+  .filter-btn:active,
+  a.cv-slot:active { transform: none; }
+
+  a:hover .media-frame img,
+  a:hover .media-frame video { transform: none; }
 }

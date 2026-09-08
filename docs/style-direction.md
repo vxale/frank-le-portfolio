@@ -72,6 +72,16 @@ Three things the passage node forced, worth knowing before touching this again:
 - The passage needs a measure (`max-width: 30ch`, `white-space: normal`) since every other node is a nowrap label, and `align-items: flex-end` so the +/− settles with the last line instead of floating beside the first.
 - **Children aimed off the paper now mirror their angle** instead of being flattened by the position clamp. The bio node is tall and sits high in the fan, so its child was landing hard against the top edge, close enough to its parent that the connector was suppressed — it read as a label floating loose from the tree. `layoutChildren` now tries the vertically mirrored angle first and only clamps if that is off-paper too.
 
+## Canvas revision (Sept 8 2026, sixth) — root placement
+The root node's home is now hard left, vertically centred: its left edge sits on the canvas margin (`padX`, the same inset the nodes are clamped to) and its centre on the vertical midline. This replaces the earlier deliberately off-centre placement (`0.28w / 0.34h`, with a separate `0.5w / 0.22h` case under 720px) — one rule at every width now.
+
+Three details behind it:
+- Nodes are drawn centred on their coordinates (`translate(-50%, -50%)`), so "left edge on the margin" means offsetting by half the node's own width. That width is **measured**, not assumed, because the caption and the portrait slot both change it — which is why `createElement(root)` now runs before `placeRoot()` at startup.
+- The transition is suppressed for that first placement, or the root visibly slides in from the top-left corner on load.
+- The root is an anchor in the separation pass: it holds its position and the rest of the tree arranges itself around it. Without that, expanding a branch could shove the root off its home.
+
+Resize still re-places it, and a root the visitor has dragged still stays where they put it — the existing `if (!root.pinned) placeRoot()` rule is unchanged.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

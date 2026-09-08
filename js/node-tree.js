@@ -167,11 +167,17 @@
     return x >= padX && x <= w - padX && y >= padY && y <= h - padY;
   }
 
+  /** The root's home, and where it returns on any resize: hard left,
+      vertically centred, its left edge sitting on the canvas margin.
+      Nodes are drawn centred on their coordinates, so "left edge on
+      the margin" means offsetting by half the node's own width —
+      measured rather than assumed, because the caption and the
+      portrait slot both change how wide the root is. */
   function placeRoot() {
-    const { w, h } = bounds();
-    // Deliberately off-centre — the asymmetry is the house style.
-    root.x = w * (w < 720 ? 0.5 : 0.28);
-    root.y = h * (w < 720 ? 0.22 : 0.34);
+    const { w, h, padX } = pads();
+    const half = root.el ? root.el.getBoundingClientRect().width / 2 : 0;
+    root.x = Math.min(padX + half, w * 0.5);
+    root.y = h * 0.5;
     clampPosition(root);
   }
 
@@ -249,7 +255,14 @@
     const live = allNodes.filter((n) => n.el);
     const items = live.map((n) => {
       const r = n.el.getBoundingClientRect();
-      return { node: n, pinned: n.pinned, hw: r.width / 2 + 12, hh: r.height / 2 + 10 };
+      // The root is an anchor: it holds its home position and the rest
+      // of the tree arranges itself around it.
+      return {
+        node: n,
+        pinned: n.pinned || n === root,
+        hw: r.width / 2 + 12,
+        hh: r.height / 2 + 10,
+      };
     }).concat(markObstacles());
 
     // Real nodes keep their coordinates on the node itself; obstacles
@@ -671,8 +684,17 @@
   (async () => {
     await buildData();
     canvas.classList.add('is-ready');
-    placeRoot();
+
+    /* The element comes first so placeRoot can measure it, and the
+       transition is held off for that one placement — otherwise the
+       root visibly slides in from the top-left corner on load. */
     createElement(root);
+    root.el.style.transition = 'none';
+    placeRoot();
+    applyPosition(root);
+    void root.el.offsetHeight;
+    root.el.style.transition = '';
+
     // Open one level immediately: a single word on a blank page
     // doesn't read as a menu.
     expand(root);

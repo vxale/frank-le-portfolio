@@ -1,9 +1,13 @@
 /* ============================================================
    Frank Le — Portfolio
    Style system: book-paper black & white, editorial serif +
-   functional grotesk, asymmetric grid, generous whitespace,
-   smooth restrained motion. See docs/style-direction.md and
-   docs/creative-brief.md for the rationale behind every choice.
+   functional grotesk, asymmetric full-bleed grid, monumental
+   display type against quiet functional labels (extreme scale
+   contrast, no intermediate tier), stark ink hairlines, smooth
+   restrained motion. See docs/style-direction.md and
+   docs/creative-brief.md for the rationale behind every choice,
+   including the Sept 2026 art-direction revision toward a more
+   brutalist/unconventional layout.
    ============================================================ */
 
 :root {
@@ -13,7 +17,7 @@
   --paper-dim: #ece7da;
   --ink: #16140f;
   --ink-soft: #55503f;
-  --line: #d8d2c1;
+  --line: var(--ink); /* stark hairlines, not a soft gray — Sept 2026 revision */
 
   /* Type — split-role system:
      serif = literary/humanist voice (headlines, bio, narrative)
@@ -21,14 +25,20 @@
   --serif: "Times New Roman", Times, Georgia, "Noto Serif", serif;
   --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
 
-  /* Scale — large overall register, restrained/consistent jumps */
+  /* Scale — Sept 2026 revision: monumental display vs. quiet
+     labels, nothing in between. --step-0/1/2 stay put for reading
+     copy (body prose, card metadata) since a working multi-page
+     site still needs a legible reading size; --step-3/4 are the
+     "monumental" tier (page titles / hero) and were pushed hard
+     toward the reference's 135-188px range. The scale JUMP, not a
+     graduated staircase, is the brutalist move now. */
   --step-0: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
   --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
   --step-2: clamp(1.75rem, 1.4rem + 1.2vw, 2.4rem);
-  --step-3: clamp(2.4rem, 1.8rem + 2vw, 3.6rem);
-  --step-4: clamp(3rem, 2.2rem + 3vw, 5.2rem);
+  --step-3: clamp(2.8rem, 1.6rem + 6vw, 6.5rem);
+  --step-4: clamp(3.5rem, 1.5rem + 9vw, 10rem);
 
-  --max-w: 1440px;
+  --max-w: none;
   --gutter: clamp(1.25rem, 3vw, 3rem);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -100,20 +110,17 @@ a { color: inherit; }
 }
 
 /* ---------- Nav (v1 placeholder — node-tree diagram is a planned
-   upgrade, see docs/sitemap.md) ---------- */
+   upgrade, see docs/sitemap.md). Sept 2026: dropped the sticky
+   bordered bar — it read as conventional UI chrome. Nav is now
+   just type floating on the paper, no box around it. ---------- */
 
 .site-nav {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: 1.1rem var(--gutter);
-  background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  padding: 1.5rem var(--gutter) 1rem;
   font-family: var(--sans);
 }
 
@@ -202,8 +209,9 @@ main { display: block; }
 
 .section-head__link:hover { border-bottom-color: var(--ink); }
 
-/* ---------- Homepage hero (asymmetric placement is the brutalist
-   move — type itself stays calm/restrained) ---------- */
+/* ---------- Homepage hero (Sept 2026: asymmetric placement AND
+   monumental scale now both carry the brutalist move — see the
+   --step-4 note above) ---------- */
 
 .hero {
   padding-block: clamp(3.5rem, 11vw, 8rem) clamp(3rem, 8vw, 6rem);
@@ -224,7 +232,8 @@ main { display: block; }
   font-family: var(--serif);
   font-weight: 400;
   font-size: var(--step-4);
-  line-height: 1.08;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
   margin: 0;
   text-wrap: balance;
 }
@@ -348,6 +357,7 @@ main { display: block; }
   width: 100%;
   overflow: hidden;
   background: var(--paper-dim);
+  border: 1px solid var(--ink); /* square-cornered, hairline-bordered — Sept 2026 revision */
 }
 
 .media-frame img,
@@ -369,7 +379,6 @@ a:hover .media-frame video { transform: scale(1.03); }
   justify-content: center;
   text-align: center;
   padding: 1rem;
-  border: 1px dashed var(--ink-soft);
   font-family: var(--sans);
   font-size: 0.7rem;
   letter-spacing: 0.06em;
@@ -640,9 +649,10 @@ a:hover .media-frame video { transform: scale(1.03); }
 .work-detail__title {
   font-size: var(--step-3);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
   margin: 0 0 1.5rem;
-  max-width: 18ch;
+  max-width: 20ch;
 }
 
 .work-detail__meta {

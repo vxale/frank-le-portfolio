@@ -158,8 +158,23 @@
 
   function clampPosition(node) {
     const { w, h, padX, padY } = pads();
-    node.x = Math.max(padX, Math.min(w - padX, node.x));
-    node.y = Math.max(padY, Math.min(h - padY, node.y));
+
+    /* Clamp the node's BOX inside the margins, not its centre point.
+       A node is drawn centred on its coordinates, so clamping the
+       centre let a 230px-wide project title hang half off the right
+       edge on a phone. A node too wide to fit between the margins
+       gets centred instead of pushed off one side. */
+    const r = node.el ? node.el.getBoundingClientRect() : null;
+    const hw = r ? r.width / 2 : 0;
+    const hh = r ? r.height / 2 : 0;
+
+    const minX = Math.min(padX + hw, w / 2);
+    const maxX = Math.max(w - padX - hw, w / 2);
+    const minY = Math.min(padY + hh, h / 2);
+    const maxY = Math.max(h - padY - hh, h / 2);
+
+    node.x = Math.max(minX, Math.min(maxX, node.x));
+    node.y = Math.max(minY, Math.min(maxY, node.y));
   }
 
   function onPaper(x, y) {
@@ -193,8 +208,20 @@
       ? Math.atan2(parent.y - parent.parent.y, parent.x - parent.parent.x)
       : 0.35; // root fans right and slightly down
 
-    const spread = Math.min(Math.PI * 0.85, 0.34 * (kids.length - 1) + 0.55);
-    const reach = Math.max(120, Math.min(w, h) * (parent.depth === 0 ? 0.3 : 0.26));
+    /* Longer branches and a wider fan than the tree started with. The
+       labels are words, not dots — "PLACEHOLDER — Identity / Brand
+       System" is 330px wide — so siblings an old-style 120px apart
+       read as a tangle no matter how the separation pass shuffles
+       them afterwards. Distance between levels is what makes a
+       diagram legible. */
+    const spread = Math.min(Math.PI * 0.9, 0.4 * (kids.length - 1) + 0.6)
+      // Deeper levels fan tighter. The root wants a wide sweep, but two
+      // neighbouring branches each opening a wide cone throws their
+      // children into the same band of the page, and the lines cross
+      // over each other. Narrow cones keep a branch's children reading
+      // as that branch's children.
+      * (parent.depth === 0 ? 1 : 0.55);
+    const reach = Math.max(150, Math.min(w, h) * (parent.depth === 0 ? 0.34 : 0.32));
 
     kids.forEach((kid, i) => {
       if (kid.pinned) return;
@@ -257,11 +284,15 @@
       const r = n.el.getBoundingClientRect();
       // The root is an anchor: it holds its home position and the rest
       // of the tree arranges itself around it.
+      /* Padding is deliberately lopsided. These boxes are wide and
+         short, so they mostly end up stacked vertically, and it is
+         the vertical gap that reads as air between nodes — 10px of
+         it left them looking like lines of a paragraph. */
       return {
         node: n,
         pinned: n.pinned || n === root,
-        hw: r.width / 2 + 12,
-        hh: r.height / 2 + 10,
+        hw: r.width / 2 + 18,
+        hh: r.height / 2 + 26,
       };
     }).concat(markObstacles());
 

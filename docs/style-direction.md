@@ -104,6 +104,16 @@ One modular ladder, ratio **1.2**, nine rungs, anchored on body text at `--step-
 
 **Rules for adding type.** Use a rung. If none fits, the answer is almost always that the wrong rung was chosen for a neighbouring element, not that the ladder needs a new value — three spares exist precisely so there is somewhere to go. A raw `rem` font-size anywhere in `css/style.css` is a bug.
 
+## Canvas revision (Sept 8 2026, seventh) — untangling the expanded tree
+The type scale rebuilt in "one 1.2 ladder" left the tree crowded: with nodes on step-6/4/2, an expanded branch put 330px-wide project titles about 56px apart vertically — exactly the minimum the separation pass allowed — so they stacked like lines of a paragraph and neighbouring branches interleaved, crossing their own connectors. Four geometry changes, no type changes:
+
+- **Longer branches.** Reach went from `0.3/0.26` of the smaller viewport dimension to `0.34/0.32`, floor 120 → 150. Distance between levels is what makes a diagram legible; these labels are words, not dots.
+- **A wider fan at the root, tighter cones below.** Spread went from `0.34(n-1)+0.55` to `0.4(n-1)+0.6`, but everything below the root now takes 55% of that. Two neighbouring branches each opening a wide cone throw their children into the same band of the page — narrowing the cone is what stops Film's projects and Design's projects interleaving.
+- **Lopsided separation padding**, 12/10 → 18/26. These boxes are wide and short, so they end up stacked vertically, and it is the vertical gap that reads as air between nodes.
+- **`clampPosition` clamps the box, not the centre.** Nodes are drawn centred on their coordinates, so clamping the centre to the margins let a 230px-wide project title hang half off the right edge on a phone — visible as soon as the longer reach pushed nodes outward. A node too wide to fit between the margins is now centred rather than pushed off one side.
+
+Result at 1440x900 with every branch open: 13 nodes, no overlaps, nothing off-canvas. At 375x812 nothing runs off the edge; two nodes sit close enough to touch, which is what the drag is for.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

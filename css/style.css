@@ -31,17 +31,33 @@
      without asking — it undoes the whole idea. */
   --font: "Times New Roman", Times, Georgia, "Noto Serif", serif;
 
-  /* Scale — brought back down (Frank's call, Sept 2026: the
-     monumental hero "wasn't working"). The extreme 135-188px tier
-     is gone. What's left is a confident editorial scale that still
-     reads as considered at the top end without shouting, and the
-     site's boldness moved back into layout and into the node tree
-     being the first thing you meet. */
-  --step-0: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
-  --step-2: clamp(1.6rem, 1.35rem + 1vw, 2.2rem);
-  --step-3: clamp(2rem, 1.5rem + 1.9vw, 3.1rem);
-  --step-4: clamp(2.4rem, 1.75rem + 2.6vw, 4rem);
+  /* Scale — one modular ladder, ratio 1.2 (Sept 8 2026 rebuild).
+     Every size on the site comes from this ladder; there are no
+     hand-picked font-sizes left in the file. Before this there were
+     five tokens and thirty-three one-off values clustered so tightly
+     (0.7 / 0.72 / 0.75 / 0.78 / 0.8 / 0.85rem) that no one could
+     tell them apart — a scale on paper that the CSS ignored.
+
+     The range is the same as before; the rungs are twice as dense,
+     which is what a tight ratio buys you. Each step is 1.2x the one
+     below, at BOTH ends of its clamp, so the ratio holds at every
+     viewport rather than only at one width. Body is --step-2, and
+     the ladder is anchored there: 16px on a phone, 18px on a desk.
+
+     In use today: 0 (micro labels), 1 (small text and controls),
+     2 (body), 4 (node d1, card titles), 6 (node d0, section titles),
+     8 (page titles). Steps 3, 5 and 7 are the headroom the tighter
+     ratio creates — real rungs, not yet needed. Reach for one of
+     them before inventing a number. */
+  --step-0: clamp(0.694rem, 0.669rem + 0.113vw, 0.781rem); /* 11.1 - 12.5px */
+  --step-1: clamp(0.833rem, 0.803rem + 0.135vw, 0.938rem); /* 13.3 - 15.0px */
+  --step-2: clamp(1rem,     0.964rem + 0.161vw, 1.125rem); /* 16.0 - 18.0px */
+  --step-3: clamp(1.2rem,   1.156rem + 0.194vw, 1.35rem);  /* 19.2 - 21.6px */
+  --step-4: clamp(1.44rem,  1.388rem + 0.232vw, 1.62rem);  /* 23.0 - 25.9px */
+  --step-5: clamp(1.728rem, 1.665rem + 0.279vw, 1.944rem); /* 27.6 - 31.1px */
+  --step-6: clamp(2.074rem, 1.999rem + 0.334vw, 2.333rem); /* 33.2 - 37.3px */
+  --step-7: clamp(2.488rem, 2.398rem + 0.401vw, 2.799rem); /* 39.8 - 44.8px */
+  --step-8: clamp(2.986rem, 2.878rem + 0.481vw, 3.359rem); /* 47.8 - 53.8px */
 
   --max-w: none;
   --gutter: clamp(1.25rem, 3vw, 3rem);
@@ -82,7 +98,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
-  font-size: var(--step-0);
+  font-size: var(--step-2);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -107,7 +123,7 @@ a { color: inherit; }
   background: var(--ink);
   color: var(--paper);
   font-family: var(--font);
-  font-size: 0.78rem;
+  font-size: var(--step-1);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
@@ -120,7 +136,7 @@ a { color: inherit; }
    the grotesk "structure" voice. */
 .label {
   font-family: var(--font);
-  font-size: 0.75rem;
+  font-size: var(--step-0);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -173,7 +189,7 @@ main { display: block; }
 
 .section-head__link {
   font-family: var(--font);
-  font-size: 0.75rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
@@ -189,7 +205,7 @@ main { display: block; }
 /* Text link with a rule that draws itself on hover */
 .link-line {
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: var(--step-1);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
@@ -237,7 +253,7 @@ main { display: block; }
   text-align: center;
   padding: 1rem;
   font-family: var(--font);
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -255,14 +271,14 @@ main { display: block; }
 
 .caption__index {
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.1em;
   color: var(--ink-soft);
 }
 
 .caption__title {
   font-family: var(--font);
-  font-size: var(--step-1);
+  font-size: var(--step-4);
   line-height: 1.25;
 }
 
@@ -270,7 +286,7 @@ main { display: block; }
   grid-column: 2;
   margin-top: 0.3rem;
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -286,7 +302,7 @@ main { display: block; }
 .about__caption {
   margin-top: 0.75rem;
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -294,7 +310,7 @@ main { display: block; }
 
 .about__copy {
   grid-column: 7 / span 6;
-  font-size: var(--step-1);
+  font-size: var(--step-4);
   line-height: 1.6;
 }
 
@@ -317,14 +333,14 @@ main { display: block; }
 
 .about__facts dt {
   font-family: var(--font);
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
   margin-bottom: 0.35rem;
 }
 
-.about__facts dd { margin: 0; font-size: var(--step-0); }
+.about__facts dd { margin: 0; font-size: var(--step-2); }
 
 @media (max-width: 860px) {
   .about__headshot,
@@ -355,7 +371,7 @@ main { display: block; }
 }
 
 .filter-group__label {
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -366,7 +382,7 @@ main { display: block; }
   /* No box (Frank's call, Sept 2026). State is carried by the rule
      under the word and by ink weight, not by a container. */
   font-family: var(--font);
-  font-size: 0.78rem;
+  font-size: var(--step-1);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background: none;
@@ -396,7 +412,7 @@ main { display: block; }
   grid-column: 1 / -1;
   margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -454,7 +470,7 @@ main { display: block; }
 .work-detail__back {
   grid-column: 1 / -1;
   font-family: var(--font);
-  font-size: 0.78rem;
+  font-size: var(--step-1);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
@@ -471,7 +487,7 @@ main { display: block; }
 @media (max-width: 860px) { .work-detail__head { grid-column: 1 / -1; } }
 
 .work-detail__title {
-  font-size: var(--step-3);
+  font-size: var(--step-8);
   font-weight: 400;
   line-height: 1.04;
   letter-spacing: -0.01em;
@@ -490,7 +506,7 @@ main { display: block; }
 }
 
 .work-detail__meta dt {
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -499,7 +515,7 @@ main { display: block; }
 
 .work-detail__meta dd {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--step-1);
   line-height: 1.45;
 }
 
@@ -516,7 +532,7 @@ main { display: block; }
 
 .credit-block h2 {
   font-family: var(--font);
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -526,10 +542,10 @@ main { display: block; }
   border-bottom: 1px solid var(--line);
 }
 
-.credit-block dl { margin: 0; font-family: var(--font); font-size: 0.85rem; }
+.credit-block dl { margin: 0; font-family: var(--font); font-size: var(--step-1); }
 
 .credit-block dt {
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -537,12 +553,12 @@ main { display: block; }
 
 .credit-block dd { margin: 0 0 0.85rem; }
 
-.credit-block ul { margin: 0; padding-left: 1.1rem; font-family: var(--font); font-size: 0.85rem; }
+.credit-block ul { margin: 0; padding-left: 1.1rem; font-family: var(--font); font-size: var(--step-1); }
 
 .credit-block--empty p {
   margin: 0;
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: var(--step-1);
   color: var(--ink-soft);
 }
 
@@ -568,7 +584,7 @@ main { display: block; }
 .insight__beat::before {
   content: "0" counter(beat);
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.1em;
   color: var(--ink-soft);
   padding-top: 0.35em;
@@ -578,7 +594,7 @@ main { display: block; }
 
 .insight__beat dt {
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -587,7 +603,7 @@ main { display: block; }
 
 .insight__beat dd {
   margin: 0;
-  font-size: var(--step-1);
+  font-size: var(--step-4);
   line-height: 1.55;
   max-width: 58ch;
 }
@@ -620,7 +636,7 @@ main { display: block; }
   text-decoration: none;
 }
 
-.pager__title { font-family: var(--font); font-size: var(--step-2); }
+.pager__title { font-family: var(--font); font-size: var(--step-6); }
 @media (hover: hover) and (pointer: fine) {
   .pager:hover .pager__title { text-decoration: underline; text-underline-offset: 6px; }
 }
@@ -636,7 +652,7 @@ main { display: block; }
 }
 
 .contact__name {
-  font-size: var(--step-2);
+  font-size: var(--step-6);
   font-weight: 400;
   margin: 0 0 2.5rem;
 }
@@ -645,7 +661,7 @@ main { display: block; }
   list-style: none;
   margin: 0 0 2.5rem;
   padding: 0;
-  font-size: var(--step-1);
+  font-size: var(--step-4);
   border-top: 1px solid var(--line);
 }
 
@@ -662,7 +678,7 @@ main { display: block; }
 .contact__label {
   display: block;
   font-family: var(--font);
-  font-size: 0.7rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -672,7 +688,7 @@ main { display: block; }
 .cv-slot {
   /* No box — see .filter-btn. */
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: var(--step-1);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   display: inline-block;
@@ -712,7 +728,7 @@ a.cv-slot:active { transform: scale(0.97); }
      longer fit its old column and was breaking mid-word */
   grid-column: 1 / -1;
   font-family: var(--font);
-  font-size: var(--step-3);
+  font-size: var(--step-8);
   line-height: 1.1;
   text-decoration: none;
   word-break: break-word;
@@ -733,7 +749,7 @@ a.cv-slot:active { transform: scale(0.97); }
   padding-top: 1.25rem;
   border-top: 1px solid rgba(245, 242, 234, 0.25);
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -896,10 +912,14 @@ a.cv-slot:active { transform: scale(0.97); }
 
 /* Size carries depth — the one hierarchy signal left now that
    everything is set in the same face. */
-.node--d0 .node__hit { font-size: var(--step-2); }
-.node--d1 .node__hit { font-size: var(--step-1); }
-.node--d2 .node__hit { font-size: 1.1rem; }
-.node--d3 .node__hit { font-size: 0.95rem; color: var(--ink-soft); }
+/* Two rungs between each depth (a 1.44x jump) so the branch levels
+   read as clearly different, then only one rung down to the leaves —
+   project titles are the point of the tree and shouldn't shrink out
+   of reading size just to complete a pattern. */
+.node--d0 .node__hit { font-size: var(--step-6); }
+.node--d1 .node__hit { font-size: var(--step-4); }
+.node--d2 .node__hit { font-size: var(--step-2); }
+.node--d3 .node__hit { font-size: var(--step-1); color: var(--ink-soft); }
 
 .node__label {
   border-bottom: 1px solid transparent;
@@ -970,7 +990,7 @@ a.cv-slot:active { transform: scale(0.97); }
   margin-top: 0.4rem;
   padding-left: 0.15rem;
   max-width: min(18rem, 62vw); /* two lines under the name, not five */
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.14em;
   line-height: 1.5;
   text-transform: uppercase;
@@ -999,7 +1019,7 @@ a.cv-slot:active { transform: scale(0.97); }
   position: absolute;
   margin: 0;
   font-family: var(--font);
-  font-size: 0.72rem;
+  font-size: var(--step-0);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -1035,10 +1055,10 @@ a.cv-slot:active { transform: scale(0.97); }
 @media (max-width: 720px) {
   .mark--mail { display: none; } /* the Contact node covers it */
   .node--passage .node__hit { max-width: 24ch; }
-  .node--d0 .node__hit { font-size: var(--step-1); }
-  .node--d1 .node__hit { font-size: 1.1rem; }
+  .node--d0 .node__hit { font-size: var(--step-4); }
+  .node--d1 .node__hit { font-size: var(--step-2); }
   .node--d2 .node__hit,
-  .node--d3 .node__hit { font-size: 0.9rem; }
+  .node--d3 .node__hit { font-size: var(--step-0); }
 }
 
 /* Reduced motion: nodes still appear and disappear, they just don't
@@ -1065,7 +1085,7 @@ a.cv-slot:active { transform: scale(0.97); }
 
 .page-head__mark {
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: var(--step-1);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink);

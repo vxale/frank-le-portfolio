@@ -82,6 +82,28 @@ Three details behind it:
 
 Resize still re-places it, and a root the visitor has dragged still stays where they put it — the existing `if (!root.pinned) placeRoot()` rule is unchanged.
 
+
+## Type scale (rebuilt Sept 8 2026 — this is the whole system)
+One modular ladder, ratio **1.2**, nine rungs, anchored on body text at `--step-2` (16px on a phone, 18px on a desktop). Every step is 1.2x the one below **at both ends of its clamp**, so the ratio holds at every viewport width rather than only at one.
+
+| token | size | used for |
+|---|---|---|
+| `--step-0` | 11.1 – 12.5px | tracked uppercase labels, metadata, captions |
+| `--step-1` | 13.3 – 15.0px | controls (filters, CV link, back links), small text, leaf node labels |
+| `--step-2` | 16.0 – 18.0px | body copy |
+| `--step-3` | 19.2 – 21.6px | *spare* |
+| `--step-4` | 23.0 – 25.9px | branch nodes, card titles, pager |
+| `--step-5` | 27.6 – 31.1px | *spare* |
+| `--step-6` | 33.2 – 37.3px | root node, section titles |
+| `--step-7` | 39.8 – 44.8px | *spare* |
+| `--step-8` | 47.8 – 53.8px | page titles, footer email |
+
+**Why it was rebuilt.** The previous version had five tokens *and* thirty-three hand-picked `font-size` values, nine of them clustered between 0.7rem and 0.95rem — differences of half a pixel that nobody could see and no rule explained. The scale existed on paper while the CSS ignored it. All thirty-two of those (one `em` value stayed, correctly) now resolve to a rung.
+
+**The range didn't change; the rungs got denser.** Every old token maps to the new one at double its index — old `--step-0` is now `--step-2`, old `--step-3` is now `--step-8` — so sizes barely moved. What's new is the odd-numbered rungs in between, which is what a tighter ratio buys you. The old `--step-4` (the last survivor of the monumental era, 64px) was referenced by nothing and is gone.
+
+**Rules for adding type.** Use a rung. If none fits, the answer is almost always that the wrong rung was chosen for a neighbouring element, not that the ladder needs a new value — three spares exist precisely so there is somewhere to go. A raw `rem` font-size anywhere in `css/style.css` is a bug.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

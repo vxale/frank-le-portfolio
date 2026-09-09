@@ -81,6 +81,7 @@
      which stay under 250ms so the interface never feels laggy. */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 * { box-sizing: border-box; }
@@ -237,7 +238,6 @@ main { display: block; }
   width: 100%;
   overflow: hidden;
   background: var(--paper-dim);
-  border: 1px solid var(--ink); /* square-cornered, hairline-bordered — Sept 2026 revision */
 }
 
 .media-frame img,
@@ -299,64 +299,6 @@ main { display: block; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
-}
-
-/* ---------- About ---------- */
-
-.about-grid { align-items: start; }
-
-.about__headshot { grid-column: 1 / span 5; }
-.about__headshot .media-frame { aspect-ratio: 3 / 4; }
-
-.about__caption {
-  margin-top: 0.75rem;
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.about__copy {
-  grid-column: 7 / span 6;
-  font-size: var(--step-4);
-  line-height: 1.6;
-}
-
-.about__copy p { margin: 0 0 1.25rem; }
-.about__copy p:first-child { margin-top: -0.35em; }
-
-.about__facts {
-  grid-column: 7 / span 6;
-  margin: clamp(1.5rem, 4vw, 2.5rem) 0 0;
-  border-top: 1px solid var(--line);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-}
-
-.about__facts > div {
-  padding: 1.1rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.about__facts dt {
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 0.35rem;
-}
-
-.about__facts dd { margin: 0; font-size: var(--step-2); }
-
-@media (max-width: 860px) {
-  .about__headshot,
-  .about__copy,
-  .about__facts { grid-column: 1 / -1; }
-  .about__copy { margin-top: 2rem; }
-  .about__facts { grid-template-columns: 1fr; }
 }
 
 /* ---------- Works grid + filters ---------- */
@@ -470,249 +412,6 @@ main { display: block; }
   font-family: var(--font);
   color: var(--ink-soft);
   padding: 3rem 0;
-}
-
-/* ---------- Work detail (flexible template) ----------
-   Content order follows docs/sitemap.md: metadata → credits →
-   awards → five-beat insight → full-bleed media. */
-
-.work-detail__back {
-  grid-column: 1 / -1;
-  font-family: var(--font);
-  font-size: var(--step-1);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--ink-soft);
-  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .work-detail__back:hover { color: var(--ink); }
-}
-
-.work-detail__head { grid-column: 1 / span 9; }
-
-@media (max-width: 860px) { .work-detail__head { grid-column: 1 / -1; } }
-
-.work-detail__title {
-  font-size: var(--step-8);
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -0.01em;
-  margin: 0 0 1.5rem;
-  max-width: 24ch;
-}
-
-.work-detail__meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 1.25rem 1.5rem;
-  margin: 0;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  font-family: var(--font);
-}
-
-.work-detail__meta dt {
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 0.35rem;
-}
-
-.work-detail__meta dd {
-  margin: 0;
-  font-size: var(--step-1);
-  line-height: 1.45;
-}
-
-/* Credits + awards */
-.work-detail__credits {
-  grid-column: 1 / span 9;
-  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: clamp(1.5rem, 4vw, 3rem);
-}
-
-@media (max-width: 860px) { .work-detail__credits { grid-column: 1 / -1; } }
-
-.credit-block h2 {
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  font-weight: 400;
-  margin: 0 0 0.85rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.credit-block dl { margin: 0; font-family: var(--font); font-size: var(--step-1); }
-
-.credit-block dt {
-  font-size: var(--step-0);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.credit-block dd { margin: 0 0 0.85rem; }
-
-.credit-block ul { margin: 0; padding-left: 1.1rem; font-family: var(--font); font-size: var(--step-1); }
-
-.credit-block--empty p {
-  margin: 0;
-  font-family: var(--font);
-  font-size: var(--step-1);
-  color: var(--ink-soft);
-}
-
-/* Five-beat insight passage — labelled blocks, not running prose,
-   so a recruiter can skim to the beat they care about. */
-.insight {
-  grid-column: 2 / span 9;
-  display: grid;
-  gap: clamp(1.75rem, 4vw, 3rem);
-  margin: clamp(3rem, 8vw, 6rem) 0 0;
-  counter-reset: beat;
-}
-
-@media (max-width: 860px) { .insight { grid-column: 1 / -1; } }
-
-.insight__beat {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: 0 1rem;
-  counter-increment: beat;
-}
-
-.insight__beat::before {
-  content: "0" counter(beat);
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.1em;
-  color: var(--ink-soft);
-  padding-top: 0.35em;
-}
-
-.insight__beat dl { margin: 0; }
-
-.insight__beat dt {
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 0.5rem;
-}
-
-.insight__beat dd {
-  margin: 0;
-  font-size: var(--step-4);
-  line-height: 1.55;
-  max-width: 58ch;
-}
-
-@media (max-width: 620px) {
-  .insight__beat { grid-template-columns: 1fr; }
-  .insight__beat::before { padding: 0 0 0.4rem; }
-}
-
-/* Full-bleed media stack */
-.work-detail__media { margin-top: clamp(3rem, 8vw, 6rem); }
-
-.work-detail__media .media-frame {
-  aspect-ratio: 16 / 9;
-  margin-bottom: clamp(1rem, 3vw, 2.5rem);
-}
-
-.work-detail__media .media-frame:last-child { margin-bottom: 0; }
-
-/* Next-project pager */
-.pager {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  text-decoration: none;
-}
-
-.pager__title { font-family: var(--font); font-size: var(--step-6); }
-@media (hover: hover) and (pointer: fine) {
-  .pager:hover .pager__title { text-decoration: underline; text-underline-offset: 6px; }
-}
-
-/* ---------- Contact ---------- */
-
-.contact-grid { align-items: start; }
-
-.contact__block { grid-column: 1 / span 7; }
-
-@media (max-width: 860px) {
-  .contact__block { grid-column: 1 / -1; }
-}
-
-.contact__name {
-  font-size: var(--step-6);
-  font-weight: 400;
-  margin: 0 0 2.5rem;
-}
-
-.contact__list {
-  list-style: none;
-  margin: 0 0 2.5rem;
-  padding: 0;
-  font-size: var(--step-4);
-  border-top: 1px solid var(--line);
-}
-
-.contact__list li {
-  padding: 1.1rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.contact__list a { text-decoration-color: var(--line); text-underline-offset: 5px; }
-@media (hover: hover) and (pointer: fine) {
-  .contact__list a:hover { text-decoration-color: var(--ink); }
-}
-
-.contact__label {
-  display: block;
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 0.3rem;
-}
-
-.cv-slot {
-  /* No box — see .filter-btn. */
-  font-family: var(--font);
-  font-size: var(--step-1);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  display: inline-block;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  padding: 0.35rem 0;
-  color: var(--ink-soft);
-  text-decoration: none;
-  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
-}
-
-a.cv-slot:active { transform: scale(0.97); }
-
-@media (hover: hover) and (pointer: fine) {
-  a.cv-slot:hover { color: var(--ink); }
 }
 
 /* ---------- Footer (end card — the one inverted surface on the
@@ -1092,4 +791,353 @@ a.cv-slot:active { transform: scale(0.97); }
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
+}
+
+
+/* ============================================================
+   Canvas pages — about, contact, work detail (Sept 9 2026)
+
+   These were conventional documents: a column of text, ruled
+   sections, boxed media, an inverted footer slab. Against the node
+   tree they read as a different website. Rebuilt as scrolling
+   canvases on the same terms as the homepage:
+
+   - No rule ever separates two things. Space does it.
+   - No box is ever drawn around anything.
+   - Nothing sits in a column. An invisible 12-column grid places
+     blocks so they step down and inward.
+   - Media is a free object: draggable anywhere (js/drag.js) and
+     drifting gently on its own.
+
+   The grid is a placement tool, not a visible structure — if you
+   ever find yourself adding a border to make the layout legible,
+   the placement is wrong, not the border.
+   ============================================================ */
+
+.field,
+.work-field {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: clamp(1rem, 2vw, 1.75rem);
+  row-gap: clamp(2.5rem, 7vw, 6rem);
+  align-items: start;
+  padding: clamp(2rem, 7vw, 5rem) var(--gutter) clamp(4rem, 10vw, 8rem);
+}
+
+/* ---------- Reading blocks ---------- */
+
+.passage {
+  margin: 0;
+  font-size: var(--step-2);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.passage--a { grid-column: 1 / span 6; }
+.passage--b { grid-column: 3 / span 5; }
+.passage--c { grid-column: 5 / span 5; }
+
+.note {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 46ch;
+}
+
+/* Loose facts. A list, not a table — the old <dl> needed rules to
+   hold its columns apart, which is exactly what we're removing. */
+.notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.notes .label { display: block; color: var(--ink-soft); }
+
+.notes--about   { grid-column: 1 / span 5; }
+.notes--work    { grid-column: 9 / span 4; }
+.notes--credits { grid-column: 1 / span 3; }
+.notes--awards  { grid-column: 5 / span 4; }
+
+/* ---------- Free-floating media ---------- */
+
+.floater {
+  margin: 0;
+  position: relative;
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+.floater.is-dragging { cursor: grabbing; z-index: 6; }
+.floater figcaption { margin-top: 0.6rem; }
+
+/* The drift layer exists so three transforms never fight over one
+   element: .floater carries the drag offset, .drift carries the
+   ambient motion, and anything inside is free to do its own thing. */
+.drift {
+  display: block;
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* A frame with no frame. The tint is a placeholder standing in for
+   an image that hasn't landed yet — once a real src exists the
+   picture covers it and no rectangle is drawn at all. */
+.shot {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--paper-dim);
+}
+
+.shot img,
+.shot video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shot--wide     { aspect-ratio: 16 / 9; }
+.shot--tall     { aspect-ratio: 3 / 4; }
+.shot--square   { aspect-ratio: 1 / 1; }
+.shot--portrait { aspect-ratio: 4 / 5; }
+
+.shot__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  font-size: var(--step-0);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.floater--portrait { grid-column: 8 / span 4; grid-row: 1 / span 2; }
+.floater--lead     { grid-column: 2 / span 9; }
+.floater--b        { grid-column: 1 / span 5; }
+.floater--c        { grid-column: 7 / span 5; margin-top: clamp(1.5rem, 5vw, 4rem); }
+.floater--d        { grid-column: 3 / span 6; }
+
+/* ---------- Work detail ---------- */
+
+/* justify-self matters more than it looks: a grid item is blockified,
+   so .link-line would stretch to fill its column and its underline —
+   drawn with a background gradient at 100% width — would render as a
+   300px rule across the page. Exactly the thing this layout removes. */
+.link-line { justify-self: start; }
+.work-field__back { grid-column: 1 / span 3; justify-self: start; }
+.work-field__loading { grid-column: 1 / span 6; font-size: var(--step-2); margin: 0; }
+
+.work-title {
+  grid-column: 1 / span 8;
+  margin: 0;
+  font-size: var(--step-8);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+}
+
+.work-marks {
+  grid-column: 9 / span 4;
+  align-self: end;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+/* The writing, deliberately quieter than the work and stepped in and
+   out so it never reads as a stack of paragraphs. */
+.beats {
+  grid-column: 2 / span 8;
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3rem);
+}
+
+.beat { display: grid; gap: 0.4rem; }
+.beat:nth-child(even) { margin-left: clamp(1rem, 5vw, 5rem); }
+.beat .label { color: var(--ink-soft); }
+
+.beat p {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.6;
+  max-width: 54ch;
+}
+
+.next-node {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 0.3rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.next-node__title {
+  font-size: var(--step-6);
+  line-height: 1.1;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out);
+  justify-self: start;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .next-node:hover .next-node__title { border-bottom-color: var(--ink); }
+}
+
+/* ---------- Contact ---------- */
+
+.passage--name {
+  grid-column: 1 / span 8;
+  margin: 0;
+  font-size: var(--step-6);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.passage--name span { color: var(--ink-soft); }
+
+.reach { margin: 0; display: grid; gap: 0.3rem; justify-items: start; }
+.reach--a { grid-column: 1 / span 5; }
+.reach--b { grid-column: 7 / span 5; }
+.reach--c { grid-column: 2 / span 6; }
+.reach--d { grid-column: 8 / span 4; }
+.reach .label { color: var(--ink-soft); }
+
+.reach__link {
+  font-size: var(--step-4);
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out);
+}
+
+.reach__link--waiting { color: var(--ink-soft); }
+
+@media (hover: hover) and (pointer: fine) {
+  a.reach__link:hover { border-bottom-color: var(--ink); }
+}
+
+.note--contact { grid-column: 2 / span 5; }
+
+/* ---------- End marks (replaces the inverted footer slab) ---------- */
+
+.end-marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 var(--gutter) clamp(2rem, 5vw, 3.5rem);
+}
+
+.end-marks p { margin: 0; }
+.end-marks a { color: inherit; }
+
+.end-marks__mail {
+  font-size: var(--step-4);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .end-marks__mail:hover { border-bottom-color: var(--ink); }
+}
+
+.end-marks__inline { grid-column: 1 / -1; margin: clamp(2rem, 6vw, 4rem) 0 0; }
+
+/* ---------- Narrow screens ----------
+   The grid is what creates the loose placement, and there isn't room
+   for it on a phone. Blocks stack in reading order instead; the drift
+   and the dragging both still work. */
+
+@media (max-width: 860px) {
+  .field,
+  .work-field { display: block; padding-bottom: clamp(3rem, 12vw, 5rem); }
+
+  .field > *,
+  .work-field > * { margin-bottom: clamp(2rem, 9vw, 3.5rem); }
+
+  .floater--c { margin-top: 0; }
+  .beat:nth-child(even) { margin-left: 0; }
+  .work-title { font-size: var(--step-7); }
+}
+
+/* ============================================================
+   Ambient drift
+
+   Nodes and free media breathe slightly rather than sitting dead
+   still. Amplitude is 2-4px on purpose: these are click targets, and
+   anything larger starts to move the thing you are reaching for.
+   For the same reason the motion PAUSES the moment a pointer is over
+   a node or a drag begins — by the time you commit to a target it is
+   holding still.
+
+   CSS animation rather than JS: it is predetermined, it loops
+   forever, and it runs off the main thread, so it stays smooth while
+   the page is still loading images.
+
+   The easing is the built-in ease-in-out rather than this file's
+   --ease-in-out. The strong curve is right for a one-shot move, but
+   on an infinite loop it reads as a lurch at each turn.
+   ============================================================ */
+
+@keyframes drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(2px, -4px, 0); }
+}
+
+@keyframes drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(-3px, 3px, 0); }
+}
+
+@keyframes drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  33%      { transform: translate3d(3px, 2px, 0); }
+  66%      { transform: translate3d(-2px, -3px, 0); }
+}
+
+.node__drift {
+  display: inline-block;
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Hold still when the visitor is going for it. */
+.node.is-dragging .node__drift,
+.floater.is-dragging .drift,
+.is-dragging-something .node__drift,
+.is-dragging-something .drift { animation-play-state: paused; }
+
+.node:focus-within .node__drift,
+.floater:focus-within .drift { animation-play-state: paused; }
+
+@media (hover: hover) and (pointer: fine) {
+  .node:hover .node__drift,
+  .floater:hover .drift,
+  .reach__link:hover { animation-play-state: paused; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node__drift,
+  .drift { animation: none !important; }
 }

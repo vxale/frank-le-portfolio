@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-nav-current="about">
+<body data-nav-current="about" class="page-field">
 
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -17,59 +17,45 @@
   <a class="link-line" href="index.html">&larr; Node tree</a>
 </header>
 
-<main id="main">
-  <section class="section">
-    <div class="grid-12 about-grid">
-      <div class="about__headshot" data-reveal>
-        <div class="media-frame">
-          <!-- Replace with Frank's headshot: <img src="assets/headshot.jpg" alt="Portrait of Frank Le"> -->
-          <div class="media-placeholder">Headshot placeholder<br>— drop file in /assets and update src —</div>
-        </div>
-        <p class="about__caption">Lê Vũ Xuân Anh (Frank Le)</p>
-      </div>
+<!-- A scrolling canvas, not a document: no rules, no boxes, no
+     column. Passages step down and inward, the portrait floats free
+     and can be dragged anywhere. Placement lives in css/style.css
+     under "Canvas pages". -->
+<main id="main" class="field">
+  <h1 class="visually-hidden">About Frank Le</h1>
 
-      <div class="about__copy" data-reveal>
-        <h1 class="visually-hidden">About Frank Le</h1>
-        <p>I studied international relations in my first year, but my passion leads me to writing, photography, and filmmaking. My ambition is always to become a creative and film director, and one day I will have my films screened to audiences around the world.</p>
-        <p>I realized I need to learn more about the world's cultures and the constantly evolving industry of the arts, so I moved to Canada in pursuit of a bachelor's degree in Global Business and Digital Arts at the University of Waterloo.</p>
-        <p>Since then, I have been producing, writing, and directing my own short films, as well as working with clients in fashion at a low-budget level.</p>
-      </div>
+  <p class="passage passage--a">I studied international relations in my first year, but my passion leads me to writing, photography, and filmmaking. My ambition is always to become a creative and film director, and one day I will have my films screened to audiences around the world.</p>
 
-      <!-- Skimmable capsule: the facts a recruiter checks first, kept
-           out of the prose so the bio stays a bio. -->
-      <dl class="about__facts" data-reveal>
-        <div>
-          <dt>Disciplines</dt>
-          <dd>Directing, screenwriting, editing, UI/UX design</dd>
-        </div>
-        <div>
-          <dt>Studying</dt>
-          <dd>BGBDA Global Business &amp; Digital Arts, University of Waterloo — 4th year</dd>
-        </div>
-        <div>
-          <dt>Tools</dt>
-          <dd>Premiere Pro, DaVinci Resolve, Figma, Adobe CC</dd>
-        </div>
-        <div>
-          <dt>Based in</dt>
-          <dd>Waterloo, Ontario — originally Vietnam</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
+  <figure class="floater floater--portrait" data-drag>
+    <span class="drift">
+      <span class="shot shot--portrait">
+        <!-- Replace with Frank's headshot: <img src="assets/headshot.jpg" alt="Portrait of Frank Le"> -->
+        <span class="shot__empty">Headshot — drop file in /assets</span>
+      </span>
+    </span>
+    <figcaption class="label">Lê Vũ Xuân Anh (Frank Le)</figcaption>
+  </figure>
 
+  <p class="passage passage--b">I realized I need to learn more about the world's cultures and the constantly evolving industry of the arts, so I moved to Canada in pursuit of a bachelor's degree in Global Business and Digital Arts at the University of Waterloo.</p>
+
+  <p class="passage passage--c">Since then, I have been producing, writing, and directing my own short films, as well as working with clients in fashion at a low-budget level.</p>
+
+  <!-- The facts a recruiter checks first, kept out of the prose and
+       set loose rather than tabled. -->
+  <ul class="notes notes--about">
+    <li><span class="label">Disciplines</span> Directing, screenwriting, editing, UI/UX design</li>
+    <li><span class="label">Studying</span> BGBDA Global Business &amp; Digital Arts, University of Waterloo — 4th year</li>
+    <li><span class="label">Tools</span> Premiere Pro, DaVinci Resolve, Figma, Adobe CC</li>
+    <li><span class="label">Based in</span> Waterloo, Ontario — originally Vietnam</li>
+  </ul>
 </main>
 
-<footer class="site-footer">
-  <div class="site-footer__inner">
-    <a class="site-footer__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
-    <ul class="site-footer__links">
-      <li><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a></li>
-      <li>&copy; 2026 Lê Vũ Xuân Anh</li>
-    </ul>
-  </div>
+<footer class="end-marks">
+  <a class="end-marks__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
+  <p class="label"><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> · &copy; 2026 Lê Vũ Xuân Anh</p>
 </footer>
 
 <script src="js/site.js"></script>
+<script src="js/drag.js"></script>
 </body>
 </html>

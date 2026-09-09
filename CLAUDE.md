@@ -49,6 +49,15 @@ Node-tree implementation notes worth knowing before editing `js/node-tree.js`:
 - Edges are trimmed to each label's bounding box rather than drawn centre-to-centre, so a connector never runs through the word it points at.
 - With JS off the tree can't exist, so `index.html` carries a `<noscript>` list of the three page links. It is not a visible menu — it's the dead-end guard.
 
+## Canvas pages and drift (Sept 9 2026)
+`about.html`, `contact.html` and `work.html` were rebuilt as scrolling canvases so they stop reading as a different website from the node tree. Full reasoning in `docs/style-direction.md` under "Canvas pages" and "Ambient drift". The short version, all of which is easy to undo by accident:
+
+- **No rules, no boxes, no columns** anywhere on these pages — and the works grid lost its media borders too, because that is a site-wide art-direction rule now. Layout comes from an invisible 12-column placement grid.
+- **Work pages lead with media**, writing after and quieter. This reverses the original template order in `docs/sitemap.md` on Frank's instruction.
+- **`js/drag.js`** is the shared drag: a transform offset from the layout position, so nothing reflows. It repeats the node tree's two rules — window listeners, no `setPointerCapture`, 4px threshold, drag suppresses the click.
+- **Drift** is 2–4px over 9–15s, paused on hover/focus/drag, off under reduced motion, on its own transform layer. Do not raise the amplitude: these are click targets.
+- `js/node-tree.js` still has its **own** drag implementation, older than `js/drag.js`. They should converge next time the tree is touched; it was left alone here to avoid regressing recent work on it.
+
 ## Content model
 All project content lives in `data/works.json` — one entry per project (id, title, type, year, commercial, featured, role, tools, credits, awards, insight {what/problem/audience/process/result}, media[], optional thumb).
 

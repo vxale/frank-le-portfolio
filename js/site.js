@@ -96,6 +96,26 @@ function initReveals(root) {
   });
 }
 
+
+/** Spread ambient drift across a set of elements so they don't all
+    breathe in unison. Negative delays start each one mid-cycle, so
+    nothing waits for the loop to come round before it moves. Called
+    by js/drag.js on load and by js/node-tree.js whenever the tree
+    grows new nodes. */
+function driftAll(elements) {
+  if (REDUCED_MOTION) return;
+  const variants = ['drift-a', 'drift-b', 'drift-c'];
+  Array.from(elements).forEach((el, i) => {
+    if (el.dataset.drifting === 'on') return;
+    el.dataset.drifting = 'on';
+    const dur = 9 + ((i * 2.7) % 6);            // 9s - 15s, deterministic
+    el.style.animationName = variants[i % variants.length];
+    el.style.animationDuration = `${dur.toFixed(2)}s`;
+    el.style.animationDelay = `-${((i * 3.3) % dur).toFixed(2)}s`;
+  });
+}
+window.driftAll = driftAll;
+
 /** Marks the current page's nav link with aria-current="page" based
     on data-nav-current set on <body>. */
 document.addEventListener('DOMContentLoaded', () => {

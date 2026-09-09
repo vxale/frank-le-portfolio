@@ -8,7 +8,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-nav-current="works">
+<body data-nav-current="works" class="page-field">
 
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -17,45 +17,16 @@
   <a class="link-line" href="index.html">&larr; Node tree</a>
 </header>
 
-<!-- One flexible template for every project — content order follows
-     docs/sitemap.md: metadata → credits → awards → five-beat insight
-     → full-bleed media. All of it is driven by data/works.json. -->
-<main id="main" class="work-detail">
-  <section class="section">
-    <div class="grid-12">
-      <a class="work-detail__back" href="works.html">&larr; All works</a>
-
-      <div class="work-detail__head">
-        <h1 class="work-detail__title">Loading…</h1>
-        <dl class="work-detail__meta"></dl>
-      </div>
-
-      <div class="work-detail__credits"></div>
-
-      <div class="insight"></div>
-    </div>
-  </section>
-
-  <section class="work-detail__media" aria-label="Project media"></section>
-
-  <section class="section">
-    <div class="grid-12">
-      <div class="work-detail__pager"></div>
-    </div>
-  </section>
+<!-- One template for every project, rebuilt as a scrolling canvas:
+     the work leads, the writing follows quietly. Every frame is
+     draggable and drifts on its own. js/work-detail.js fills it from
+     data/works.json. -->
+<main id="main" class="work-field">
+  <p class="work-field__loading">Loading…</p>
 </main>
 
-<footer class="site-footer">
-  <div class="site-footer__inner">
-    <a class="site-footer__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
-    <ul class="site-footer__links">
-      <li><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a></li>
-      <li>&copy; 2026 Lê Vũ Xuân Anh</li>
-    </ul>
-  </div>
-</footer>
-
 <script src="js/site.js"></script>
+<script src="js/drag.js"></script>
 <script src="js/work-detail.js"></script>
 </body>
 </html>

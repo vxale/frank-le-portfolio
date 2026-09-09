@@ -459,8 +459,18 @@
       el.appendChild(caption);
     }
 
+    // Everything the node contains moves together on its own drift
+    // layer, which sits between the position transform on .node and
+    // the press transform on .node__hit — no two transforms ever land
+    // on the same element. See "Ambient drift" in css/style.css.
+    const drift = document.createElement('span');
+    drift.className = 'node__drift';
+    while (el.firstChild) drift.appendChild(el.firstChild);
+    el.appendChild(drift);
+
     node.el = el;
     node.hit = hit;
+    node.drift = drift;
 
     if (isBranch) {
       hit.addEventListener('click', (event) => {
@@ -581,6 +591,7 @@
     // Nodes already on screen may have been nudged by relax().
     allNodes.forEach((n) => { if (n.el && !node.children.includes(n)) applyPosition(n); });
 
+    if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
     requestSync(ENTER_MS + node.children.length * STAGGER_MS + 80);
   }
 
@@ -735,6 +746,7 @@
        alone on the paper with its "+" inviting the first click. The
        corner hint carries the instruction, so the page doesn't have
        to prove it is a menu by opening itself. */
+    if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
     requestSync(600);
   })();
 })();

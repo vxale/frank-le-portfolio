@@ -133,6 +133,35 @@ Frank's direction: the bio node goes, About comes back, and the root's caption c
 
 If the statement ever wants more presence than `--step-0` gives it, `--step-3` is one of the spare rungs — but that is a type-scale change and Frank ruled it out for this pass.
 
+
+## Canvas pages (Sept 9 2026) — about, contact, work detail
+Frank's read: against the node tree these three pages looked like a different website. They were conventional documents — a column of text, ruled sections, boxed media, an inverted footer slab. Rebuilt as scrolling canvases on the homepage's terms.
+
+**The rules now, site-wide:**
+- **No rule separates two things.** Space does it. There is no `<hr>`, no section border, no ruled `<dl>` anywhere in these layouts.
+- **No box is drawn around anything.** The works grid lost its media borders at the same time — this is an art-direction rule, not a per-page one.
+- **Nothing sits in a column.** An invisible 12-column grid places blocks so they step down and inward. The grid is a placement tool; if a border ever seems necessary to make the layout legible, the placement is wrong, not the border.
+- **Media is a free object** — draggable anywhere via `js/drag.js`, drifting gently on its own.
+
+**Work pages lead with the work.** The original template ran metadata → credits → awards → beats → media. That is reversed: title, a few marks, then the media at size, and the writing follows smaller and placed loosely. A recruiter should meet the film before the paragraph about the film.
+
+**Dragging is a transform offset, not absolute positioning.** An element keeps its place in the document and the transform moves it visually, so nothing reflows and the page stays responsive. `js/drag.js` carries the two hard-won rules from the node tree: window-level pointer listeners with **no `setPointerCapture`** (capturing retargets the press and silently breaks every click), and a 4px threshold where a real drag suppresses the click that would follow.
+
+**One placeholder caveat.** With no assets delivered, media shows as a light tint holding the aspect ratio. That tint is the one rectangle left on these pages, and it disappears the moment a real `src` exists in `data/works.json` — it is not a frame.
+
+## Ambient drift (the floating motion)
+Nodes and free media breathe rather than sitting dead still. Built against the `animate` skill's sequence, and the constraints are the design:
+
+- **Amplitude is 2–4px, period 9–15s.** These are click targets. Anything larger starts moving the thing the visitor is reaching for, which is the one rule that outranks the effect.
+- **It pauses on hover, on focus, and while anything is being dragged.** By the time you commit to a target it is holding still.
+- **CSS animation, not JS** — predetermined, infinite, and off the main thread, so it stays smooth while images are still loading.
+- **The easing is the built-in `ease-in-out`, deliberately not this file's `--ease-in-out`.** The strong curve is right for a one-shot move; on an infinite loop it reads as a lurch at each turn.
+- **Off entirely under `prefers-reduced-motion`.** This is pure decoration, so reducing it means removing it.
+
+Each drifting thing gets its own transform layer (`.node__drift`, `.drift`) so no two transforms ever land on one element: position on the outside, drift in the middle, press scale on the inside. Breaking that nesting is how you get a node that jumps when you press it.
+
+Known consequence worth remembering: a permanently drifting element is never "stable", so automated tests must force hover/click on nodes rather than waiting for them to settle.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

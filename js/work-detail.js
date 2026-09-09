@@ -1,9 +1,21 @@
-/* Work detail — one template for every project. Content order follows
-   docs/sitemap.md: metadata → credits → awards → five-beat insight →
-   full-bleed media. Blocks with no content collapse rather than
-   printing an empty heading, except Awards, which keeps its slot. */
+/* ============================================================
+   Work detail — one template for every project, built as a
+   scrolling canvas rather than a document.
+
+   The order is deliberate and reverses the original template: the
+   WORK LEADS. Title, a few marks, then the media at size — and the
+   writing (beats, credits, tools) comes after, set smaller and
+   placed loosely. Frank's call, Sept 9 2026: a recruiter should meet
+   the film before they meet the paragraph about the film.
+
+   Every frame is draggable (js/drag.js) and drifts gently on its own.
+   Nothing is boxed and nothing is separated by a rule — placement and
+   space do that work. Content still comes entirely from
+   data/works.json; adding a project is editing that file.
+   ============================================================ */
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const root = document.querySelector('.work-detail');
+  const root = document.querySelector('.work-field');
   if (!root) return;
 
   const id = new URLSearchParams(window.location.search).get('id');
@@ -12,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     works = await fetchWorks();
   } catch (err) {
-    root.innerHTML = `<section class="section"><div class="grid-12"><p class="works-empty">Couldn't load this project (${esc(err.message)}).</p></div></section>`;
+    root.innerHTML = `<p class="passage passage--a">Couldn't load this project (${esc(err.message)}).</p>`;
     return;
   }
 
@@ -20,85 +32,114 @@ document.addEventListener('DOMContentLoaded', async () => {
   const work = works[index];
 
   if (!work) {
-    document.querySelector('.work-detail__title').textContent = 'Project not found';
-    document.querySelector('.insight').innerHTML =
-      '<p class="works-empty">That project link doesn’t match anything in data/works.json. <a href="works.html">Browse all works</a>.</p>';
+    root.innerHTML = `
+      <h1 class="work-title">Project not found</h1>
+      <p class="passage passage--b">That link doesn't match anything in the work list.
+        <a class="link-line" href="works.html">Browse all works</a>.</p>`;
     return;
   }
 
   document.title = `${work.title} — Frank Le`;
-  document.querySelector('.work-detail__title').textContent = work.title;
 
-  // 1. Metadata
-  const meta = [
-    ['Role', work.role],
-    ['Year', work.year],
-    ['Type', typeLabel(work.type)],
-    ['Made for', work.commercial ? 'Commercial client' : 'Personal project'],
-    ['Tools', work.tools],
-  ].filter(([, value]) => value);
-
-  document.querySelector('.work-detail__meta').innerHTML = meta
-    .map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`)
-    .join('');
-
-  // 2 + 3. Credits and the awards slot (kept even when empty — the
-  // template reserves the space, per the brief).
-  const credits = work.credits || [];
-  const awards = work.awards || [];
-
-  document.querySelector('.work-detail__credits').innerHTML = `
-    ${credits.length ? `
-      <div class="credit-block">
-        <h2>Credits</h2>
-        <dl>
-          ${credits.map((c) => `<dt>${esc(c.role)}</dt><dd>${esc(c.name)}</dd>`).join('')}
-        </dl>
-      </div>` : ''}
-    <div class="credit-block${awards.length ? '' : ' credit-block--empty'}">
-      <h2>Awards &amp; screenings</h2>
-      ${awards.length
-        ? `<ul>${awards.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>`
-        : '<p>None listed yet.</p>'}
-    </div>
-  `;
-
-  // 4. Five-beat insight passage
-  const insight = work.insight || {};
-  const beats = [
-    ['What it is', insight.what],
-    ['The problem', insight.problem],
-    ['Who it’s for', insight.audience],
-    ['How I did it', insight.process],
-    ['The result', insight.result],
-  ].filter(([, value]) => value);
-
-  document.querySelector('.insight').innerHTML = beats.map(([label, value]) => `
-    <div class="insight__beat" data-reveal>
-      <dl>
-        <dt>${esc(label)}</dt>
-        <dd>${esc(value)}</dd>
-      </dl>
-    </div>
-  `).join('');
-
-  // 5. Full-bleed media
-  const media = (work.media || []);
-  document.querySelector('.work-detail__media').innerHTML = (media.length ? media : [null])
-    .map((m) => `<div class="media-frame" data-reveal>${mediaFrameInner(m, work.title)}</div>`)
-    .join('');
-
-  // Next project — keeps the visitor moving instead of dead-ending.
-  const next = works[(index + 1) % works.length];
-  if (next && next.id !== work.id) {
-    document.querySelector('.work-detail__pager').innerHTML = `
-      <a class="pager" href="work.html?id=${encodeURIComponent(next.id)}">
-        <span class="label">Next project</span>
-        <span class="pager__title">${esc(next.title)}</span>
-        <span class="label">${esc(workMetaLine(next))}</span>
-      </a>
-    `;
+  /** A frame with no frame: the media sits on the paper directly.
+      Until real assets land, an untitled tint holds the shape — it
+      has no border, and it disappears the moment a src exists. */
+  function shot(item, altFallback, shape) {
+    const inner = (() => {
+      if (item && item.src && item.type === 'video') {
+        return `<video src="${esc(item.src)}" muted loop playsinline autoplay
+                  aria-label="${esc(item.alt || altFallback)}"></video>`;
+      }
+      if (item && item.src) {
+        return `<img src="${esc(item.src)}" alt="${esc(item.alt || altFallback)}" loading="lazy">`;
+      }
+      return `<span class="shot__empty">Add media in data/works.json</span>`;
+    })();
+    return `<span class="shot shot--${shape}">${inner}</span>`;
   }
 
-  initReveals();
+  const media = (work.media && work.media.length) ? work.media : [null];
+  const shapes = ['wide', 'tall', 'square'];
+  const spots = ['lead', 'b', 'c', 'd'];
+
+  const frames = media.map((item, i) => `
+    <figure class="floater floater--${spots[i % spots.length]}" data-drag>
+      <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>
+    </figure>
+  `).join('');
+
+  const marks = [
+    typeLabel(work.type),
+    work.year,
+    work.commercial ? 'Commercial' : 'Personal',
+  ].filter(Boolean);
+
+  const facts = [
+    ['Role', work.role],
+    ['Tools', work.tools],
+  ].filter(([, v]) => v);
+
+  const beats = [
+    ['What it is', (work.insight || {}).what],
+    ['The problem', (work.insight || {}).problem],
+    ['Who it’s for', (work.insight || {}).audience],
+    ['How I did it', (work.insight || {}).process],
+    ['The result', (work.insight || {}).result],
+  ].filter(([, v]) => v);
+
+  const credits = work.credits || [];
+  const awards = work.awards || [];
+  const next = works[(index + 1) % works.length];
+
+  root.innerHTML = `
+    <a class="link-line work-field__back" href="works.html">&larr; All works</a>
+
+    <h1 class="work-title">${esc(work.title)}</h1>
+    <p class="work-marks">${marks.map((m) => `<span class="label">${esc(m)}</span>`).join('')}</p>
+
+    ${frames}
+
+    ${facts.length ? `
+      <ul class="notes notes--work">
+        ${facts.map(([k, v]) => `<li><span class="label">${esc(k)}</span> ${esc(v)}</li>`).join('')}
+      </ul>` : ''}
+
+    ${beats.length ? `
+      <div class="beats">
+        ${beats.map(([k, v]) => `
+          <div class="beat" data-reveal>
+            <span class="label">${esc(k)}</span>
+            <p>${esc(v)}</p>
+          </div>`).join('')}
+      </div>` : ''}
+
+    ${credits.length ? `
+      <ul class="notes notes--credits">
+        ${credits.map((c) => `<li><span class="label">${esc(c.role)}</span> ${esc(c.name)}</li>`).join('')}
+      </ul>` : ''}
+
+    <ul class="notes notes--awards">
+      <li><span class="label">Awards &amp; screenings</span> ${
+        awards.length ? awards.map(esc).join(' · ') : 'None listed yet'
+      }</li>
+    </ul>
+
+    ${next && next.id !== work.id ? `
+      <a class="next-node" href="work.html?id=${encodeURIComponent(next.id)}">
+        <span class="label">Next project</span>
+        <span class="next-node__title">${esc(next.title)}</span>
+        <span class="label">${esc(workMetaLine(next))}</span>
+      </a>` : ''}
+
+    <p class="end-marks__inline label">
+      <a href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a> ·
+      <a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> ·
+      &copy; 2026 Lê Vũ Xuân Anh
+    </p>
+  `;
+
+  // Built after render, since none of this markup existed at load.
+  root.querySelectorAll('[data-drag]').forEach((el) => window.makeDraggable(el));
+  window.driftAll(root.querySelectorAll('.drift'));
+  initReveals(root);
 });

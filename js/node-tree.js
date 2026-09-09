@@ -43,14 +43,11 @@
      play on hover rather than autoplaying. */
   const ROOT_MEDIA = { type: 'image', src: '', alt: '' };
 
-  /* The bio is a node, not a corner mark — it hangs off the root and
-     branches to the About page. The caption sits under the root's own
-     name. Both are copy, so they live here where they can be edited
-     without reading the layout code. */
-  const BIO =
-    'Lê Vũ Xuân Anh (Frank Le) is a young Vietnamese filmmaker and designer, ' +
-    'with working experience in art, fashion commercials, academia, and more.';
-  const ROOT_CAPTION = 'Creative Direction · Filmmaking · Screenwriting · Design';
+  /* The statement under the root's name. It is copy, so it lives here
+     where it can be edited without reading the layout code. */
+  const ROOT_CAPTION =
+    'Vietnamese indie filmmaker and designer visualizing stories of ' +
+    'cultures, brands, and most importantly, humans.';
 
   const ENTER_MS = 260;   // under 300ms — this is UI, not marketing
   const EXIT_MS = 170;    // exits are faster than entrances
@@ -66,14 +63,13 @@
   // ---------- Building the tree data ----------
 
   let nextId = 0;
-  function makeNode({ label, href, media, caption, passage, children, navKey }) {
+  function makeNode({ label, href, media, caption, children, navKey }) {
     const node = {
       uid: `n${nextId++}`,
       label,
       href: href || null,
       media: media && media.src ? media : null,
       caption: caption || null,
-      passage: Boolean(passage),
       navKey: navKey || null,
       childSpecs: children || [],
       children: [],
@@ -129,11 +125,7 @@
       media: ROOT_MEDIA,
       caption: ROOT_CAPTION,
       children: [
-        {
-          label: BIO,
-          passage: true,
-          children: [{ label: 'Get to know more', href: 'about.html', navKey: 'about' }],
-        },
+        { label: 'About', href: 'about.html', navKey: 'about' },
         ...typeSpecs,
         ...(works.length ? [{ label: 'All works', href: 'works.html', navKey: 'works' }] : []),
         { label: 'Contact', href: 'contact.html', navKey: 'contact' },
@@ -212,17 +204,9 @@
     if (!kids.length) return;
 
     const { w, h } = bounds();
-    const base = parent.passage && w >= 720
-      // The bio's child sits beside it, level with the text, rather
-      // than continuing the direction the bio itself came out at —
-      // which sent it diagonally off under the paragraph. Only where
-      // there's width for it: on a phone the paragraph and its child
-      // side by side are wider than the paper, so below 720px the
-      // child goes back to following the fan.
-      ? 0
-      : parent.parent
-        ? Math.atan2(parent.y - parent.parent.y, parent.x - parent.parent.x)
-        : 0.35; // root fans right and slightly down
+    const base = parent.parent
+      ? Math.atan2(parent.y - parent.parent.y, parent.x - parent.parent.x)
+      : 0.35; // root fans right and slightly down
 
     /* Longer branches and a wider fan than the tree started with. The
        labels are words, not dots — "PLACEHOLDER — Identity / Brand
@@ -245,8 +229,8 @@
       const angle = base - spread / 2 + spread * t;
       /* Long enough to clear both boxes, not just to satisfy the
          nominal reach. Measuring from centre to centre means a wide
-         parent — the bio passage is 500px across — would otherwise
-         start its branch inside itself. */
+         parent — the root, carrying its caption, is the widest box on
+         the canvas — would otherwise start its branch inside itself. */
       const clearance = extentAlong(parent.el, angle) + extentAlong(kid.el, angle) + 56;
       const radius = Math.max(reach, clearance);
       let x = parent.x + Math.cos(angle) * radius;
@@ -431,7 +415,6 @@
   function createElement(node) {
     const el = document.createElement('div');
     el.className = `node node--d${Math.min(node.depth, 3)}`;
-    if (node.passage) el.classList.add('node--passage');
     el.dataset.uid = node.uid;
 
     const isBranch = node.childSpecs.length > 0;

@@ -9,7 +9,7 @@ Lê Vũ Xuân Anh ("Frank Le") — 4th-year Global Business & Digital Arts stude
 A single unified portfolio (not split by discipline) covering both his design work and his filmmaking, aimed at landing design job/internship opportunities and film-industry contacts. Recruiters are expected to skim, not read deeply — content and layout should favor skimmability over density.
 
 ## Structure (see docs/sitemap.md for full detail)
-- `index.html` — Homepage: the node-tree canvas, which is also the site's only menu. Root "Frank Le" (portrait slot + a caption of disciplines) branches to: the bio passage (expands to "Get to know more" → about.html), Film / Design / Photography (each expanding straight to its projects — there is deliberately no "Works" level in between), All works → works.html, and Contact. Structure comes from `data/works.json`; see `js/node-tree.js`.
+- `index.html` — Homepage: the node-tree canvas, which is also the site's only menu. Root "Frank Le" (portrait slot + the statement line as its caption) branches to: About → about.html, Film / Design / Photography (each expanding straight to its projects — there is deliberately no "Works" level in between), All works → works.html, and Contact. Structure comes from `data/works.json`; see `js/node-tree.js`.
 - `about.html` — headshot + expanded bio + a skimmable facts capsule.
 - `works.html` — grid of all works, filterable by type / year / commercial, reads `data/works.json`.
 - `work.html?id=<id>` — one flexible detail template (not a separate file per project) driven by the same JSON. Content order: title/role/tools metadata → credits → awards slot → five-beat insight passage (what / problem / audience / process / result) → full-bleed media → next-project pager.
@@ -35,7 +35,7 @@ A second, deeper pass ("Art-direction revision, deepened" in `docs/style-directi
 Frank's direction, after living with the previous draft: the big hero line "wasn't working" and should come down; the list menu goes away **entirely** and the node tree becomes the site's navigation and its main feature, on a blank canvas, with nodes the visitor can drag; one typeface for everything; no boxes around buttons. Built against the `emil-design-eng` skill's decision framework.
 
 What that means concretely, and what NOT to undo:
-- **`index.html` IS the node tree.** No hero, no sections, no footer, no scroll — a full-viewport canvas (`js/node-tree.js`) with four quiet corner marks (name, role line, drag hint, email). The old hero and the `#work-grid` slot are both gone.
+- **`index.html` IS the node tree.** No hero, no sections, no footer, no scroll — a full-viewport canvas (`js/node-tree.js`) with two quiet corner marks (drag hint, email — the name and role marks were folded into the root node). The old hero and the `#work-grid` slot are both gone.
 - **There is no list menu anywhere on the site.** Inner pages get `.page-head`: nameplate plus one `← Node tree` link back. `js/nav.js`, the list/tree mode toggle and its `localStorage` key are deleted — don't reintroduce any of them.
 - **One typeface.** `--font` (Times) does headlines, labels, metadata and the tree alike; `--serif`/`--sans` no longer exist. Hierarchy is size, case and spacing only. A second family undoes the whole idea.
 - **The monumental scale is reversed.** `--step-3`/`--step-4` came back down to a normal editorial range. This supersedes the "don't quietly revert to smaller headline sizes" instruction from the earlier passes — Frank reversed it himself.

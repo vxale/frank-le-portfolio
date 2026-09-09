@@ -124,6 +124,15 @@ Result at 1440x900 with every branch open: 13 nodes, no overlaps, nothing off-ca
 
 Note that the child is level *as placed*; with several branches open the separation pass may nudge it by about a line to keep clear of a neighbouring project title. That is the pass doing its job — pinning the child's y would trade a tidy line-up for an overlap.
 
+## Canvas revision (Sept 9 2026, ninth) — the statement becomes the caption
+Frank's direction: the bio node goes, About comes back, and the root's caption carries a new statement line instead of the discipline list.
+
+- **`ROOT_CAPTION` is now the statement**: "Vietnamese indie filmmaker and designer visualizing stories of cultures, brands, and most importantly, humans." It replaces "Creative Direction · Filmmaking · Screenwriting · Design".
+- **The bio passage node and its "Get to know more" child are gone**, replaced by a plain `About` leaf pointing at about.html — which is where the tree started, three revisions ago. All the passage machinery went with it: the `passage` flag on nodes, the horizontal fan special case in `layoutChildren`, and the `.node--passage` CSS. The clearance rule that pass introduced stays, and still earns its keep: the root carrying this caption is now the widest box on the canvas.
+- **Caption styling: same rung, different voice.** Frank asked for no change to the type scale, so the caption is still `--step-0`. But it now carries a sentence rather than a list of labels, so the uppercase and the 0.14em label tracking came off — the house's small tracked caps are a label treatment, and this line has commas and a subordinate clause in it. Measure widened to `min(30rem, 60vw)`: two lines on desktop, three on a phone. 60vw rather than 70 because on a phone the root's box *is* the caption's width, and at 70vw it reached far enough across the canvas to collide with the branch beside it.
+
+If the statement ever wants more presence than `--step-0` gives it, `--step-3` is one of the spare rungs — but that is a type-scale change and Frank ruled it out for this pass.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

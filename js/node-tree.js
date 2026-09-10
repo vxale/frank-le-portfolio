@@ -63,10 +63,11 @@
   // ---------- Building the tree data ----------
 
   let nextId = 0;
-  function makeNode({ label, href, media, caption, children, navKey }) {
+  function makeNode({ label, alias, href, media, caption, children, navKey }) {
     const node = {
       uid: `n${nextId++}`,
       label,
+      alias: alias || null,
       href: href || null,
       media: media && media.src ? media : null,
       caption: caption || null,
@@ -121,7 +122,8 @@
        nodes, so it cost a click and said nothing. "All works" keeps
        works.html — the filterable grid — reachable from the canvas. */
     root = specToTree({
-      label: 'Frank Le',
+      label: 'Lê Vũ Xuân Anh',
+      alias: 'Frank Le',
       media: ROOT_MEDIA,
       caption: ROOT_CAPTION,
       children: [
@@ -439,6 +441,13 @@
     label.className = 'node__label';
     label.textContent = node.label;
     hit.appendChild(label);
+
+    if (node.alias) {
+      const alias = document.createElement('span');
+      alias.className = 'node__alias';
+      alias.textContent = node.alias;
+      hit.appendChild(alias);
+    }
 
     if (isBranch) {
       const glyph = document.createElement('span');

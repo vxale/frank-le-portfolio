@@ -42,10 +42,12 @@
      which is what a tight ratio buys you. Each step is 1.2x the one
      below, at BOTH ends of its clamp, so the ratio holds at every
      viewport rather than only at one width. Body is --step-2, and
-     the ladder is anchored there: 15px on a phone, 16.5px on a desk.
+     the ladder is anchored there: 16px on a phone, 17.5px on a desk.
 
-     That anchor came down from 16/18px on Frank's instruction (Sept 8
-     2026) — the site read too large. Because every rung is derived
+     The anchor has moved twice: down from 16/18px when the site read
+     too large, then back up to 16/17.5px on Sept 10 2026 when it read
+     too small to sit and read. 16px is the floor for body copy and
+     the reason it went back up — below that, prose is a squint. Because every rung is derived
      from the base, moving it moved all nine together and the
      proportions are untouched; this is the only place to change if
      the whole site should get bigger or smaller again. Do NOT nudge
@@ -58,15 +60,15 @@
      8 (page titles). Steps 3, 5 and 7 are the headroom the tighter
      ratio creates — real rungs, not yet needed. Reach for one of
      them before inventing a number. */
-  --step-0: clamp(0.651rem, 0.632rem + 0.084vw, 0.716rem); /* 10.4 - 11.5px */
-  --step-1: clamp(0.781rem, 0.758rem + 0.101vw, 0.859rem); /* 12.5 - 13.8px */
-  --step-2: clamp(0.938rem, 0.911rem + 0.120vw, 1.031rem); /* 15.0 - 16.5px */
-  --step-3: clamp(1.125rem, 1.092rem + 0.146vw, 1.238rem); /* 18.0 - 19.8px */
-  --step-4: clamp(1.35rem,  1.311rem + 0.174vw, 1.485rem); /* 21.6 - 23.8px */
-  --step-5: clamp(1.62rem,  1.573rem + 0.209vw, 1.782rem); /* 25.9 - 28.5px */
-  --step-6: clamp(1.944rem, 1.888rem + 0.250vw, 2.138rem); /* 31.1 - 34.2px */
-  --step-7: clamp(2.333rem, 2.265rem + 0.301vw, 2.566rem); /* 37.3 - 41.1px */
-  --step-8: clamp(2.799rem, 2.718rem + 0.361vw, 3.079rem); /* 44.8 - 49.3px */
+  --step-0: clamp(0.694rem, 0.675rem + 0.085vw, 0.760rem); /* 11.1 - 12.2px */
+  --step-1: clamp(0.833rem, 0.810rem + 0.101vw, 0.911rem); /* 13.3 - 14.6px */
+  --step-2: clamp(1rem,     0.973rem + 0.121vw, 1.094rem); /* 16.0 - 17.5px */
+  --step-3: clamp(1.2rem,   1.167rem + 0.146vw, 1.313rem); /* 19.2 - 21.0px */
+  --step-4: clamp(1.44rem,  1.401rem + 0.174vw, 1.575rem); /* 23.0 - 25.2px */
+  --step-5: clamp(1.728rem, 1.681rem + 0.209vw, 1.890rem); /* 27.6 - 30.2px */
+  --step-6: clamp(2.074rem, 2.018rem + 0.250vw, 2.268rem); /* 33.2 - 36.3px */
+  --step-7: clamp(2.488rem, 2.420rem + 0.302vw, 2.722rem); /* 39.8 - 43.5px */
+  --step-8: clamp(2.986rem, 2.905rem + 0.361vw, 3.266rem); /* 47.8 - 52.3px */
 
   --max-w: none;
   --gutter: clamp(1.25rem, 3vw, 3rem);
@@ -634,6 +636,15 @@ main { display: block; }
   transition: border-color 200ms var(--ease-out);
 }
 
+/* The name Frank works under, set beside the one on his passport and
+   two rungs down it — same line, clearly subordinate. Baseline
+   alignment comes from .node__hit being an inline-flex baseline row. */
+.node__alias {
+  font-size: 0.62em;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .node__hit:hover .node__label { border-color: currentColor; }
 }
@@ -690,13 +701,24 @@ main { display: block; }
 .node__caption {
   margin-top: 0.5rem;
   padding-left: 0.15rem;
-  max-width: min(30rem, 60vw); /* 60vw, not 70: on a phone the root's
-     box is the caption's width, and at 70vw it reached far enough
-     across the canvas to collide with the branch beside it */
-  font-size: var(--step-0);
-  letter-spacing: 0.01em;
-  line-height: 1.55;
-  color: var(--ink-soft);
+  /* display:block is load-bearing. As a bare <span> the caption is
+     inline, so it sat on the SAME line as the names and ran the whole
+     width of the canvas — and max-width, which does not apply to
+     inline boxes, was silently ignored. Block puts the statement on
+     its own line under the names and lets the measure below bite. */
+  display: block;
+  /* Sized to break across two lines at the statement's current
+     length. If the copy in ROOT_CAPTION changes materially, re-check
+     the wrap — this measure is tuned to it, not to a rule.
+     60vw, not 70: on a phone the root's box is the caption's width,
+     and at 70vw it reached far enough across the canvas to collide
+     with the branch beside it. */
+  max-width: min(34rem, 60vw);
+  /* --step-3, not --step-0. This is the hero line; it was sitting on
+     the label rung, three steps below body copy. */
+  font-size: var(--step-3);
+  line-height: 1.45;
+  color: var(--ink);
   user-select: none;
 }
 

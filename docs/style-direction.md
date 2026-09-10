@@ -88,17 +88,19 @@ One modular ladder, ratio **1.2**, nine rungs, anchored on body text at `--step-
 
 | token | size | used for |
 |---|---|---|
-| `--step-0` | 10.4 – 11.5px | tracked uppercase labels, metadata, captions |
-| `--step-1` | 12.5 – 13.8px | controls (filters, CV link, back links), small text, leaf node labels |
-| `--step-2` | 15.0 – 16.5px | body copy |
-| `--step-3` | 18.0 – 19.8px | *spare* |
-| `--step-4` | 21.6 – 23.8px | branch nodes, card titles, pager |
-| `--step-5` | 25.9 – 28.5px | *spare* |
-| `--step-6` | 31.1 – 34.2px | root node, section titles |
-| `--step-7` | 37.3 – 41.1px | *spare* |
-| `--step-8` | 44.8 – 49.3px | page titles, footer email |
+| `--step-0` | 11.1 – 12.2px | tracked uppercase labels, metadata |
+| `--step-1` | 13.3 – 14.6px | controls (filters, CV link, back links), small text, leaf node labels |
+| `--step-2` | 16.0 – 17.5px | body copy |
+| `--step-3` | 19.2 – 21.0px | the root's statement |
+| `--step-4` | 23.0 – 25.2px | branch nodes, card titles, pager, the "Frank Le" alias |
+| `--step-5` | 27.6 – 30.2px | *spare* |
+| `--step-6` | 33.2 – 36.3px | root node name, section titles |
+| `--step-7` | 39.8 – 43.6px | *spare* |
+| `--step-8` | 47.8 – 52.3px | page titles, footer email |
 
-**The anchor moved once already.** It shipped at 16–18px and came down to 15–16.5px the same day, on Frank's instruction that the site read too large. Because every rung derives from the base, that one edit moved all nine and left the proportions identical — which is the entire point of anchoring a ladder. If the site ever needs to get bigger or smaller as a whole, this is the only value to touch. `--step-0` is now 10.4px at the narrowest viewport, which is small for the uppercase tracked labels that use it; if any of them start to strain, move that element to `--step-1` rather than inflating the rung.
+**The anchor has moved twice.** It shipped at 16–18px, came down to 15–16.5px when the site read too large, and went back to 16–17.5px on Sept 10 2026 when it read too small to sit and read. 16px is the floor for body copy and the reason it went back up — below that, prose is a squint. Because every rung derives from the base, that one edit moved all nine and left the proportions identical — which is the entire point of anchoring a ladder. If the site ever needs to get bigger or smaller as a whole, this is the only value to touch. If a label ever strains, move that element up a rung rather than inflating the rung itself.
+
+**The lesson from the second move.** The complaint that triggered it was "the hero line is visibly small" — but the base was only part of it. The root's statement was set on `--step-0`, the *label* rung, three steps below body copy: the most important sentence on the site was the size of a metadata tag. Re-anchoring the whole ladder would have papered over that. When something reads too small, check which rung it is standing on before moving the ladder underneath it.
 
 **Why it was rebuilt.** The previous version had five tokens *and* thirty-three hand-picked `font-size` values, nine of them clustered between 0.7rem and 0.95rem — differences of half a pixel that nobody could see and no rule explained. The scale existed on paper while the CSS ignored it. All thirty-two of those (one `em` value stayed, correctly) now resolve to a rung.
 

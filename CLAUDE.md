@@ -58,6 +58,20 @@ Node-tree implementation notes worth knowing before editing `js/node-tree.js`:
 - **Drift** is 2–4px over 9–15s, paused on hover/focus/drag, off under reduced motion, on its own transform layer. Do not raise the amplitude: these are click targets.
 - `js/node-tree.js` still has its **own** drag implementation, older than `js/drag.js`. They should converge next time the tree is touched; it was left alone here to avoid regressing recent work on it.
 
+
+## The root node (Sept 10 2026)
+The canvas opens on Frank's name, and it carries three things in a fixed relationship:
+
+- **`Lê Vũ Xuân Anh`** at `--step-6` — the name on his passport, and the node's label.
+- **`Frank Le`** beside it at `--step-4` — the name he works under, on the same baseline and two rungs down, so it reads as an alias rather than a second heading. It comes from the root spec's `alias` field in `js/node-tree.js`.
+- **The statement** below both, at `--step-3`, breaking across two lines. Copy lives in `ROOT_CAPTION` at the top of `js/node-tree.js` so it can be edited without reading layout code.
+
+Two things here are easy to break:
+
+`.node__caption` must keep **`display: block`**. As a bare `<span>` it is inline, so it sat on the same line as the names, ran the full width of the canvas, and silently ignored its `max-width` — inline boxes don't take one. That is exactly the "occupying too much space" problem it was rebuilt to fix.
+
+Its measure is **tuned to the current copy** to break in two lines. If `ROOT_CAPTION` changes materially, re-check the wrap; the number is fitted to the sentence, not derived from a rule.
+
 ## Content model
 All project content lives in `data/works.json` — one entry per project (id, title, type, year, commercial, featured, role, tools, credits, awards, insight {what/problem/audience/process/result}, media[], optional thumb).
 

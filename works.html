@@ -7,6 +7,7 @@
 <meta name="description" content="Films, commercials, and design work by Lê Vũ Xuân Anh (Frank Le), filterable by type, year, and commercial work.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body data-nav-current="works">
 
@@ -14,7 +15,13 @@
 
 <header class="page-head">
   <a class="page-head__mark" href="index.html">Frank Le</a>
-  <a class="link-line" href="index.html">&larr; Node tree</a>
+  <div class="page-head__right">
+    <a class="link-line" href="index.html">&larr; Node tree</a>
+    <div class="theme" role="group" aria-label="Colour mode">
+      <button class="theme__btn" type="button" data-set-theme="light">Light</button>
+      <button class="theme__btn" type="button" data-set-theme="dark">Dark</button>
+    </div>
+  </div>
 </header>
 
 <main id="main">
@@ -48,6 +55,7 @@
 </footer>
 
 <script src="js/site.js"></script>
+<script src="js/theme.js"></script>
 <script src="js/works.js"></script>
 </body>
 </html>

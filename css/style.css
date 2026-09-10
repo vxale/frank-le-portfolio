@@ -20,6 +20,7 @@
   --ink: #16140f;
   --ink-soft: #5c5a55;
   --line: var(--ink); /* stark hairlines, not a soft gray — Sept 2026 revision */
+  color-scheme: light;
 
   /* Type — ONE typeface, every job (Frank's call, Sept 2026).
      The old split serif/grotesk system is gone: Times does the
@@ -1308,4 +1309,96 @@ main { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .node__drift,
   .drift { animation: none !important; }
+}
+
+/* ---------- Dark ----------
+   A print negative of the same sheet, not a second design: the ink
+   and the paper swap and nothing else moves. Neither end is pure —
+   #000 paper under #fff ink glares, and the site's whole idea is
+   printed rather than clinical.
+
+   Three states, handled in this order:
+     1. no choice made        -> follow prefers-color-scheme
+     2. explicit "dark"       -> dark regardless of the machine
+     3. explicit "light"      -> light regardless of the machine
+   The :not([data-theme="light"]) guard on the media query is what
+   makes 3 possible; without it a light choice loses to a dark OS.
+
+   Media is untouched. The work is the work in either mode. ---------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111110;
+    --paper-dim: #1c1b19;
+    --ink: #f2f0ea;
+    --ink-soft: #a5a29a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #111110;
+  --paper-dim: #1c1b19;
+  --ink: #f2f0ea;
+  --ink-soft: #a5a29a;
+  color-scheme: dark;
+}
+
+/* ---------- The light / dark control ----------
+   Same language as the works filters: no box, a rule under the word,
+   and the active one at full ink. Two words rather than one, because
+   a lone "Dark" in a corner reads ambiguously as either the state or
+   the action. ---------- */
+
+.theme {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.9rem;
+}
+
+.theme__btn {
+  font-family: var(--font);
+  font-size: var(--step-0);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out),
+              transform 0.14s var(--ease-out);
+}
+
+.theme__btn:active { transform: scale(0.94); }
+.theme__btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+.theme__btn[aria-pressed="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .theme__btn:hover { color: var(--ink); }
+}
+
+/* On the canvas it is a corner mark like the others. */
+.mark--theme {
+  top: var(--gutter);
+  right: var(--gutter);
+  pointer-events: auto;
+}
+
+/* On a page it sits with the way back, both to the right. */
+.page-head__right {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme__btn:active { transform: none; }
 }

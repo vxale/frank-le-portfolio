@@ -192,6 +192,17 @@ Every project node shows its year beside the title — `(2026)` — set a rung d
 
 The year uses `0.75em` where the root's alias uses `0.62em`. That is not an inconsistency: the alias sits beside 36px type, where 0.62em is still 22px, but a project node is 17px and the same ratio would have set its year at 10.7px — under `--step-0`, the smallest size anywhere on the site. A ratio that works at one end of a scale does not automatically work at the other.
 
+## Light and dark (Sept 10 2026)
+Three states, not two: light, dark, and *whatever the machine says*. The site starts in the third; an explicit choice only exists once the visitor makes one, and is remembered from then on. The CSS keys off `prefers-color-scheme` **and** a `data-theme` attribute, and the `:not([data-theme="light"])` guard on the media query is what lets an explicit light choice beat a dark OS.
+
+A one-line script sits in every `<head>` to set the attribute before first paint. Without it the page renders light for a frame and then flips, which is worse than either mode. It is the same pre-paint trick the old nav-mode toggle used — removed then because the *nav* shouldn't have had two modes, not because the technique was wrong.
+
+**Dark is a print negative, not a second design.** Paper `#111110`, ink `#f2f0ea`, and neither end is pure: `#000` under `#fff` glares, and this site is printed rather than clinical. Contrast holds both ways — 16.6:1 for ink on paper in dark against 18.4:1 in light, and ink-soft is actually better in dark (7.4:1 against 6.9:1).
+
+**Media is untouched in both modes.** The work is the work.
+
+The control is two words, `Light` / `Dark`, in the same language as the works filters: no box, a rule under the word, active at full ink. Two rather than one because a lone "Dark" in a corner reads ambiguously as either the state or the action.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

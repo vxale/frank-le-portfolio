@@ -654,6 +654,13 @@ main { display: block; }
   letter-spacing: 0.1em;
   color: var(--ink-soft);
   min-width: 0.6em;
+  /* Extra air before the +/− only. Widening .node__hit's flex gap
+     would have pushed "Frank Le" off the name it belongs to; the
+     glyph is a separate thing from the naming, so the space that
+     separates it should be too. In em, so it stays proportional at
+     every depth of the tree rather than looking cramped on the root
+     and gaping on a leaf. */
+  margin-left: 0.5em;
 }
 
 /* A still or clip beside the title. Sized in em, so it scales with

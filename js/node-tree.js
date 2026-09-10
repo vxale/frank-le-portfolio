@@ -68,6 +68,11 @@
   const MAX_K = 3;
   const VIEW_MS = 420;          // a camera move, not a UI transition
   const FIT_BACKOFF = 0.8;      // hold 20% back from a tight fit
+  /* And never magnify past this, however small the branch. The type
+     scale is tuned at 1x; a fit is for FRAMING a branch, not for
+     enlarging it, and without this cap a one-child branch zooms to
+     nearly 2x purely because its bounding box is small. */
+  const FIT_MAX_K = 1.15;
   const view = { x: 0, y: 0, k: 1 };
   let viewAnimating = false;
 
@@ -174,7 +179,15 @@
       `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.k})`;
 
     viewAnimating = move;
-    if (move) window.setTimeout(() => { viewAnimating = false; }, VIEW_MS + 20);
+    if (move) {
+      window.setTimeout(() => {
+        viewAnimating = false;
+        // One last look after the move has settled. The rAF loop reads
+        // positions mid-transition; this is the only frame guaranteed
+        // to see where everything actually came to rest.
+        updateCompass();
+      }, VIEW_MS + 40);
+    }
 
     const moved = Math.abs(view.x) > 1 || Math.abs(view.y) > 1
       || Math.abs(view.k - 1) > 0.01;
@@ -232,7 +245,7 @@
        number of pixels that means more to a small branch than a big
        one. */
     const tight = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh);
-    view.k = clamp(tight * FIT_BACKOFF, MIN_K, MAX_K);
+    view.k = clamp(tight * FIT_BACKOFF, MIN_K, Math.min(MAX_K, FIT_MAX_K));
     view.x = w / 2 - (minX + bw / 2) * view.k;
     view.y = h / 2 - (minY + bh / 2) * view.k;
     applyView(animate);
@@ -249,6 +262,24 @@
   }
 
   function resetView() {
+    /* The camera AND the tree. Every node drops its pin and re-flows
+       to where the layout would have put it, so a canvas that has been
+       rearranged comes back to its composed state.
+
+       What it does not do is close anything: expansion is what the
+       visitor came to see, and losing it would make this a "start
+       over" button rather than a "tidy up" one. Branches that are open
+       stay open and simply return to their default places. */
+    allNodes.forEach((n) => { n.pinned = false; });
+    placeRoot();
+    (function relayout(n) {
+      if (n.expanded) {
+        layoutChildren(n);
+        n.children.forEach(relayout);
+      }
+    })(root);
+    allNodes.forEach((n) => { if (n.el) applyPosition(n); });
+
     view.x = 0;
     view.y = 0;
     view.k = 1;
@@ -557,7 +588,19 @@
     const sx = root.x * view.k + view.x;      // root, in canvas pixels
     const sy = root.y * view.k + view.y;
 
-    if (sx >= 0 && sx <= w && sy >= 0 && sy <= h) {
+    /* Only once there is nothing left to see. Pointing home while part
+       of the tree is still in frame would be answering a question the
+       visitor has not asked — they can see where they are. Any node
+       even partly on screen counts. */
+    const c = canvas.getBoundingClientRect();
+    const somethingVisible = allNodes.some((n) => {
+      if (!n.el) return false;
+      const r = n.el.getBoundingClientRect();
+      return r.right > c.left && r.left < c.right
+          && r.bottom > c.top && r.top < c.bottom;
+    });
+
+    if (somethingVisible) {
       compass.hidden = true;
       return;
     }

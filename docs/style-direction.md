@@ -164,6 +164,20 @@ Each drifting thing gets its own transform layer (`.node__drift`, `.drift`) so n
 
 Known consequence worth remembering: a permanently drifting element is never "stable", so automated tests must force hover/click on nodes rather than waiting for them to settle.
 
+## The case study, as a chain (Sept 10 2026)
+The five beats on a work page were labelled blocks — **What it is**, **The problem** and so on in tracked caps between the paragraphs. Frank's read: the headings chopped the reading. They are gone from the page, and the passages now run as a numbered chain.
+
+- **The number is the whole handle.** `01`–`05` mark position in the sequence *and* fold their passage away. Without a heading there is nothing else short enough to be a node — a 130-character paragraph makes a sprawling hit target, and a bare "+" is a heading that says nothing.
+- **Everything is open on arrival; clicking folds.** Reveal-by-default, hide-on-demand. Frank's call, and the right one for the audience: recruiters skim, and gating four of five passages behind clicks means a visitor with twenty seconds reads one paragraph and leaves. The interaction is for pruning, not unlocking.
+- **A folded passage keeps its number**, so the sequence never renumbers itself under the reader.
+- **The headings survive as accessible names.** Each button reads "Hide: The problem" to a screen reader, and `data/works.json` still asks the five questions — so the writing scaffold Frank designed is intact even though the labels are off the page.
+- **No connecting lines.** Edges between short node labels read as a diagram; edges between paragraphs read as a flowchart of prose. Order is carried by the numbers and by each passage stepping further in than the last.
+- Passage text moved from `--step-1` to `--step-2`. This is the body copy of the page and it was set at control size.
+
+Why this is not the node-tree engine: a chain needs none of what makes `js/node-tree.js` 761 lines — no radial layout, no collision relaxation, no edge trimming. It is placement plus a collapse, so it lives in `js/work-detail.js` and cost no risk to the homepage.
+
+The collapse animates `grid-template-rows` from `1fr` to `0fr`. That touches layout, which `transform` and `opacity` avoid — accordions are the one case with no transform equivalent, so it is the sanctioned exception. Opening takes 240ms, folding 180ms.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

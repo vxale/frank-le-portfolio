@@ -988,23 +988,87 @@ main { display: block; }
   gap: 0.4rem 1.25rem;
 }
 
-/* The writing, deliberately quieter than the work and stepped in and
-   out so it never reads as a stack of paragraphs. */
+/* ---------- The case study, as a chain ----------
+   Five passages read in order. The number is the whole handle: it
+   marks position in the sequence AND folds its passage away. There
+   are no prose headings between the paragraphs — they chopped the
+   reading — and no connecting lines, because edges between short
+   labels read as a diagram but edges between paragraphs read as a
+   flowchart of prose, which is the opposite of what these pages are.
+   Order is carried by the numbers and by the step down the page. */
+
 .beats {
   grid-column: 2 / span 8;
   display: grid;
-  gap: clamp(1.75rem, 4vw, 3rem);
+  gap: clamp(1.5rem, 3.5vw, 2.5rem);
 }
 
-.beat { display: grid; gap: 0.4rem; }
-.beat:nth-child(even) { margin-left: clamp(1rem, 5vw, 5rem); }
-.beat .label { color: var(--ink-soft); }
+.beat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: clamp(1rem, 2.5vw, 2rem);
+  align-items: start;
+}
 
-.beat p {
-  margin: 0;
+/* Each passage sits a little further in than the last, so the chain
+   descends rather than stacking. Capped at the fourth step — past
+   that the indent eats the measure instead of shaping it. */
+.beat:nth-child(2) { margin-left: clamp(0.75rem, 2vw, 2rem); }
+.beat:nth-child(3) { margin-left: clamp(1.5rem, 4vw, 4rem); }
+.beat:nth-child(4),
+.beat:nth-child(n + 5) { margin-left: clamp(2.25rem, 6vw, 6rem); }
+
+.beat__num {
+  font-family: var(--font);
   font-size: var(--step-1);
+  line-height: 1.75;          /* sits on the first line of the passage */
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.beat__num:active { transform: scale(0.94); }
+.beat__num:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .beat__num:hover { color: var(--ink); }
+}
+
+/* A folded number keeps its place in the chain so the sequence never
+   renumbers itself under the reader. */
+.beat.is-closed .beat__num { color: var(--ink-soft); opacity: 0.55; }
+
+/* grid-template-rows 1fr -> 0fr is the one clean way to animate a
+   collapse to its own content height. It touches layout, which
+   transform and opacity avoid — accordions are the case where there
+   is no transform equivalent, so it is the sanctioned exception. */
+.beat__body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 240ms var(--ease-out),
+              opacity 240ms var(--ease-out);
+}
+
+.beat.is-closed .beat__body {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition-duration: 180ms;   /* folding away is faster than opening */
+}
+
+.beat__body > p {
+  overflow: hidden;             /* required for the 0fr row to clip */
+  margin: 0;
+  font-size: var(--step-2);     /* this is the body copy of the page */
   line-height: 1.6;
-  max-width: 54ch;
+  max-width: 56ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beat__body { transition: opacity 150ms var(--ease-out); }
 }
 
 .next-node {

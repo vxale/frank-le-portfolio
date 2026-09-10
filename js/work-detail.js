@@ -106,11 +106,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ${beats.length ? `
       <div class="beats">
-        ${beats.map(([k, v]) => `
-          <div class="beat" data-reveal>
-            <span class="label">${esc(k)}</span>
-            <p>${esc(v)}</p>
-          </div>`).join('')}
+        ${beats.map(([k, v], i) => {
+          const n = String(i + 1).padStart(2, '0');
+          return `
+          <div class="beat">
+            <button class="beat__num" type="button"
+                    aria-expanded="true" aria-controls="beat-${i}"
+                    data-beat="${esc(k)}" aria-label="Hide: ${esc(k)}">${n}</button>
+            <div class="beat__body" id="beat-${i}"><p>${esc(v)}</p></div>
+          </div>`;
+        }).join('')}
       </div>` : ''}
 
     ${credits.length ? `
@@ -137,6 +142,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       &copy; 2026 Lê Vũ Xuân Anh
     </p>
   `;
+
+  /* The beats read as one sequence: numbered, in order, every one of
+     them open on arrival. Clicking a number FOLDS a passage away
+     rather than revealing it — the interaction is for pruning, not
+     for unlocking, so a recruiter who never clicks still reads the
+     whole case study.
+
+     The old headings ("What it is", "The problem") are gone from the
+     page because they chopped the prose, but they survive as the
+     buttons' accessible names — a screen reader still hears what each
+     passage is, and data/works.json still asks Frank the five
+     questions when he writes. */
+  root.querySelectorAll('.beat__num').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const beat = btn.closest('.beat');
+      const closed = beat.classList.toggle('is-closed');
+      const body = beat.querySelector('.beat__body');
+      btn.setAttribute('aria-expanded', String(!closed));
+      btn.setAttribute('aria-label', `${closed ? 'Show' : 'Hide'}: ${btn.dataset.beat}`);
+      body.inert = closed;   // folded text leaves the tab order
+    });
+  });
 
   // Built after render, since none of this markup existed at load.
   root.querySelectorAll('[data-drag]').forEach((el) => window.makeDraggable(el));

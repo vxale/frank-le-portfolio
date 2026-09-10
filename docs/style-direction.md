@@ -203,6 +203,21 @@ A one-line script sits in every `<head>` to set the attribute before first paint
 
 The control is two words, `Light` / `Dark`, in the same language as the works filters: no box, a rule under the word, active at full ink. Two rather than one because a lone "Dark" in a corner reads ambiguously as either the state or the action.
 
+## The canvas is infinite (Sept 10 2026)
+Nodes live in **world coordinates** and the view is a window onto them. Screen = world × k + pan, so the inverse — used everywhere a pointer or a measured rect crosses between the two — is `(screen − pan) / k`. Everything that moves lives in `.canvas__world`; the corner marks stay outside it, so they hold still while the paper moves.
+
+`transform-origin` on the world is its **top-left**, not its centre. That is what keeps the conversion a plain subtract-and-divide; move the origin to the middle and every calculation in `js/node-tree.js` grows a term.
+
+**How it is driven.** Scroll pans, ctrl+scroll zooms — not arbitrary, since a trackpad pinch reaches the browser as a wheel event with `ctrlKey` set, so honouring that split is what makes pinch work on a laptop. Two fingers pinch on touch. Dragging empty paper pans. `+` / `−` / `0` on the keyboard, because none of the above is reachable without a pointer; the listener is on the window because the canvas is a `<main>` and cannot take focus.
+
+**Zoom is clamped to 0.3×–3×.** Past 3× the type is unusably large for a menu, and below 0.3× the labels stop being readable — panning past that is exploring a blur.
+
+**Opening a branch brings the camera to it.** Film, Design or Photography fits itself and its children in frame over 420ms. Not the root: its place — hard left, vertically centred — is a deliberate composition, and refitting on the first click would throw it away. Under reduced motion the move is instant rather than absent; the destination is the point, the travel is not.
+
+**Dragging a node divides by the zoom.** Pointer deltas are screen pixels and node coordinates are world units, so at 0.5× a node travels two screen pixels to move one of its own. Verified exact at 0.30×, 1.00× and 2.23×.
+
+**No clamp on a dragged node any more.** On an infinite canvas a node dragged off the edge is a node the visitor put there, not a mistake to correct. Auto-layout still aims inside the viewport, so the tree lays itself out sensibly and only hand-dragging escapes.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

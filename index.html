@@ -17,8 +17,14 @@
 <a class="skip-link" href="#main">Skip to content</a>
 
 <main id="main" class="canvas" data-node-canvas>
-  <svg class="canvas__edges" aria-hidden="true"></svg>
-  <div class="canvas__nodes"></div>
+  <!-- Everything that pans and zooms lives inside .canvas__world.
+       The canvas itself is the fixed viewport; the world is the sheet
+       of paper moving behind it. Corner marks stay outside, so they
+       hold still while the paper moves. -->
+  <div class="canvas__world">
+    <svg class="canvas__edges" aria-hidden="true"></svg>
+    <div class="canvas__nodes"></div>
+  </div>
 
   <!-- The tree is the whole menu, so with JS off there has to be a
        real set of links here or the site is a dead end. -->
@@ -37,6 +43,10 @@
        About, and the roles are the root's caption. See js/node-tree.js. -->
   <div class="marks__foot">
     <p class="mark mark--hint">Drag the nodes · click to open</p>
+  </div>
+
+  <div class="mark mark--view" hidden>
+    <button class="theme__btn" type="button" data-reset-view>Reset view</button>
   </div>
 
   <div class="mark mark--theme">

@@ -30,6 +30,7 @@
   const canvas = document.querySelector('[data-node-canvas]');
   if (!canvas) return;
 
+  const world = canvas.querySelector('.canvas__world');
   const svg = canvas.querySelector('.canvas__edges');
   const layer = canvas.querySelector('.canvas__nodes');
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -53,6 +54,21 @@
   const EXIT_MS = 170;    // exits are faster than entrances
   const STAGGER_MS = 45;
   const DRAG_THRESHOLD = 4; // px of movement before a press becomes a drag
+
+  /* ---------- The view ----------
+     The canvas is infinite: nodes live in world coordinates and the
+     view is a window onto them. Screen = world * k + pan, so the
+     inverse — used everywhere a pointer or a rect crosses over — is
+     (screen - pan) / k.
+
+     k is clamped rather than unbounded. Past 3x the type is unusably
+     large for a menu, and below 0.3x the labels stop being readable,
+     so panning past that point would be exploring a blur. */
+  const MIN_K = 0.3;
+  const MAX_K = 3;
+  const VIEW_MS = 420;          // a camera move, not a UI transition
+  const view = { x: 0, y: 0, k: 1 };
+  let viewAnimating = false;
 
   const allNodes = [];
   const edges = [];
@@ -139,6 +155,86 @@
         { label: 'Contact', href: 'contact.html', navKey: 'contact' },
       ],
     }, null);
+  }
+
+  // ---------- The view ----------
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  /** Paint the view. `animate` is only for programmatic moves — a
+      wheel or a drag has to track the input exactly, and a transition
+      there would lag a quarter second behind the hand. */
+  function applyView(animate) {
+    const move = animate && !reduceMotion();
+    world.style.transition = move
+      ? `transform ${VIEW_MS}ms var(--ease-in-out)`
+      : 'none';
+    world.style.transform =
+      `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.k})`;
+
+    viewAnimating = move;
+    if (move) window.setTimeout(() => { viewAnimating = false; }, VIEW_MS + 20);
+
+    const moved = Math.abs(view.x) > 1 || Math.abs(view.y) > 1
+      || Math.abs(view.k - 1) > 0.01;
+    if (resetMark) resetMark.hidden = !moved;
+
+    requestSync(move ? VIEW_MS + 60 : 0);
+  }
+
+  /** A point in the canvas's own pixels, from a pointer event. */
+  function localPoint(event) {
+    const c = canvas.getBoundingClientRect();
+    return { x: event.clientX - c.left, y: event.clientY - c.top };
+  }
+
+  /** Zoom about a fixed point: whatever sits under (sx, sy) stays
+      under it. Without this the view lurches toward the origin on
+      every wheel tick. */
+  function zoomAt(sx, sy, factor) {
+    const k2 = clamp(view.k * factor, MIN_K, MAX_K);
+    if (k2 === view.k) return;
+    const f = k2 / view.k;
+    view.x = sx - (sx - view.x) * f;
+    view.y = sy - (sy - view.y) * f;
+    view.k = k2;
+    applyView(false);
+  }
+
+  /** Move the view so a set of nodes sits comfortably in frame. Sizes
+      are read off the screen and divided by k, because a measured
+      rect is already scaled. */
+  function fitTo(nodes, animate) {
+    const live = nodes.filter((n) => n.el);
+    if (!live.length) return;
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    live.forEach((n) => {
+      const r = n.el.getBoundingClientRect();
+      const hw = (r.width / view.k) / 2;
+      const hh = (r.height / view.k) / 2;
+      minX = Math.min(minX, n.x - hw);
+      maxX = Math.max(maxX, n.x + hw);
+      minY = Math.min(minY, n.y - hh);
+      maxY = Math.max(maxY, n.y + hh);
+    });
+
+    const { w, h } = bounds();
+    const pad = Math.min(120, w * 0.1);
+    const bw = Math.max(1, maxX - minX);
+    const bh = Math.max(1, maxY - minY);
+
+    view.k = clamp(Math.min((w - pad * 2) / bw, (h - pad * 2) / bh), MIN_K, MAX_K);
+    view.x = w / 2 - (minX + bw / 2) * view.k;
+    view.y = h / 2 - (minY + bh / 2) * view.k;
+    applyView(animate);
+  }
+
+  function resetView() {
+    view.x = 0;
+    view.y = 0;
+    view.k = 1;
+    applyView(true);
   }
 
   // ---------- Geometry ----------
@@ -357,10 +453,14 @@
   /** Edge endpoints are read from where the nodes actually are on
       screen this frame, not from their target coordinates — that way
       the lines stay attached mid-animation and mid-drag. */
-  function centreOf(node) {
+  function centreOf(node, c) {
     const r = node.el.getBoundingClientRect();
-    const c = canvas.getBoundingClientRect();
-    return { x: r.left - c.left + r.width / 2, y: r.top - c.top + r.height / 2 };
+    // Screen -> world. The rect is already scaled by the view, so the
+    // size divides out as well as the position.
+    return {
+      x: (r.left - c.left - view.x) / view.k + (r.width / view.k) / 2,
+      y: (r.top - c.top - view.y) / view.k + (r.height / view.k) / 2,
+    };
   }
 
   /** Where a line leaving `centre` in direction (dx, dy) crosses the
@@ -378,12 +478,17 @@
   }
 
   function drawEdges() {
+    // One rect read for the whole pass; it is the same for every edge.
+    const c = canvas.getBoundingClientRect();
+    const k = view.k;
     edges.forEach((edge) => {
       if (!edge.parent.el || !edge.child.el) return;
-      const pb = edge.parent.el.getBoundingClientRect();
-      const cb = edge.child.el.getBoundingClientRect();
-      const a = centreOf(edge.parent);
-      const b = centreOf(edge.child);
+      const pr = edge.parent.el.getBoundingClientRect();
+      const cr = edge.child.el.getBoundingClientRect();
+      const pb = { width: pr.width / k, height: pr.height / k };
+      const cb = { width: cr.width / k, height: cr.height / k };
+      const a = centreOf(edge.parent, c);
+      const b = centreOf(edge.child, c);
       const dx = b.x - a.x;
       const dy = b.y - a.y;
 
@@ -654,6 +759,13 @@
     allNodes.forEach((n) => { if (n.el && !node.children.includes(n)) applyPosition(n); });
 
     if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
+
+    /* Opening Film, Design or Photography brings the camera to that
+       branch. Not the root: its place on the canvas — hard left,
+       vertically centred — is a deliberate composition, and refitting
+       on the first click would throw it away. */
+    if (node.depth > 0) fitTo([node].concat(node.children), true);
+
     requestSync(ENTER_MS + node.children.length * STAGGER_MS + 80);
   }
 
@@ -737,11 +849,15 @@
       requestSync(0);
     }
 
+    /* Pointer deltas are screen pixels and node coordinates are world
+       units, so the move divides by the zoom — at 0.5x a node has to
+       travel two screen pixels to move one of its own. And no clamp:
+       on an infinite canvas a node dragged off the edge is a node the
+       visitor put there, not a mistake to correct. */
     const node = dragging.node;
-    node.x = dragging.originX + dx;
-    node.y = dragging.originY + dy;
+    node.x = dragging.originX + dx / view.k;
+    node.y = dragging.originY + dy / view.k;
     node.pinned = true;
-    clampPosition(node);
     applyPosition(node);
   }
 
@@ -764,6 +880,108 @@
     requestSync(120);
   }
 
+  // ---------- Panning and zooming ----------
+
+  const resetBtn = document.querySelector('[data-reset-view]');
+  const resetMark = resetBtn ? (resetBtn.closest('.mark--view') || resetBtn) : null;
+  if (resetBtn) resetBtn.addEventListener('click', resetView);
+
+  let panning = null;
+  let pinchDist = 0;
+  const pinch = new Map();     // pointerId -> last position, for two fingers
+
+  /** A press that did not land on a node is a press on the paper. */
+  canvas.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.node')) return;
+    if (event.button !== undefined && event.button > 0) return;
+
+    pinch.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pinch.size === 1) {
+      panning = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: view.x,
+        originY: view.y,
+      };
+      canvas.classList.add('is-panning');
+      window.addEventListener('pointermove', onPanMove);
+      window.addEventListener('pointerup', onPanUp);
+      window.addEventListener('pointercancel', onPanUp);
+    }
+  });
+
+  function onPanMove(event) {
+    if (!pinch.has(event.pointerId)) return;
+    pinch.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    // Two fingers: the distance between them drives the zoom, their
+    // midpoint is the fixed point.
+    if (pinch.size >= 2) {
+      const [a, b] = [...pinch.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchDist) {
+        const c = canvas.getBoundingClientRect();
+        zoomAt((a.x + b.x) / 2 - c.left, (a.y + b.y) / 2 - c.top,
+               dist / pinchDist);
+      }
+      pinchDist = dist;
+      return;
+    }
+
+    if (!panning || event.pointerId !== panning.pointerId) return;
+    view.x = panning.originX + (event.clientX - panning.startX);
+    view.y = panning.originY + (event.clientY - panning.startY);
+    applyView(false);
+  }
+
+  function onPanUp(event) {
+    pinch.delete(event.pointerId);
+    if (pinch.size < 2) pinchDist = 0;
+    if (pinch.size) return;
+
+    window.removeEventListener('pointermove', onPanMove);
+    window.removeEventListener('pointerup', onPanUp);
+    window.removeEventListener('pointercancel', onPanUp);
+    canvas.classList.remove('is-panning');
+    panning = null;
+  }
+
+  /* Scroll pans, ctrl+scroll zooms. That split is not arbitrary: a
+     trackpad pinch reaches the browser as a wheel event with ctrlKey
+     set, so honouring it is what makes pinch work on a laptop. */
+  canvas.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    if (event.ctrlKey) {
+      const p = localPoint(event);
+      zoomAt(p.x, p.y, Math.exp(-event.deltaY * 0.01));
+    } else {
+      view.x -= event.deltaX;
+      view.y -= event.deltaY;
+      applyView(false);
+    }
+  }, { passive: false });
+
+  /* Keyboard, because none of the above is reachable without a
+     pointer. Zoom lands on the middle of the canvas. */
+  window.addEventListener('keydown', (event) => {
+    if (event.metaKey || event.altKey || event.ctrlKey) return;
+    // The canvas is a <main>, which cannot take focus, so this listens
+    // on the window instead — safe here because the page has no fields
+    // and none of these keys mean anything to a link or a button.
+    const t = event.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    const { w, h } = bounds();
+    if (event.key === '+' || event.key === '=') {
+      event.preventDefault(); zoomAt(w / 2, h / 2, 1.2);
+    } else if (event.key === '-' || event.key === '_') {
+      event.preventDefault(); zoomAt(w / 2, h / 2, 1 / 1.2);
+    } else if (event.key === '0') {
+      event.preventDefault(); resetView();
+    }
+  });
+
   function consumeDragClick(event) {
     if (!suppressClick) return false;
     event.preventDefault();
@@ -783,7 +1001,7 @@
       (function relayout(n) {
         if (n.expanded) { layoutChildren(n); n.children.forEach(relayout); }
       })(root);
-      allNodes.forEach((n) => { if (n.el) { clampPosition(n); applyPosition(n); } });
+      allNodes.forEach((n) => { if (n.el) applyPosition(n); });
       requestSync(120);
     }, 120);
   });
@@ -809,6 +1027,7 @@
        corner hint carries the instruction, so the page doesn't have
        to prove it is a menu by opening itself. */
     if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
+    applyView(false);
     requestSync(600);
   })();
 })();

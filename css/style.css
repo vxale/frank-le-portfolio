@@ -544,13 +544,30 @@ main { display: block; }
   touch-action: none;
 }
 
+/* The sheet of paper. transform-origin sits at its top-left corner
+   so screen and world coordinates convert with a plain
+   (screen - pan) / scale — put the origin in the middle and every
+   calculation in js/node-tree.js grows a term. */
+.canvas__world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
 .canvas__edges {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  overflow: visible;   /* an SVG clips to its own box by default, and
+                          the tree runs well outside it once panned */
 }
+
+/* Grabbing the paper itself, rather than a node on it. */
+.canvas.is-panning { cursor: grabbing; }
+.canvas.is-panning .node { pointer-events: none; }
 
 /* Recessive on purpose: the lines describe the structure, the words
    carry it. At full ink the diagram reads as a cage. */
@@ -1387,6 +1404,14 @@ main { display: block; }
 /* On the canvas it is a corner mark like the others. */
 .mark--theme {
   top: var(--gutter);
+  right: var(--gutter);
+  pointer-events: auto;
+}
+
+/* Only offered once the view has actually moved — a reset for a thing
+   that is already at rest is noise. */
+.mark--view {
+  top: calc(var(--gutter) + 1.9rem);
   right: var(--gutter);
   pointer-events: auto;
 }

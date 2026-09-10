@@ -601,10 +601,10 @@
     });
 
     if (somethingVisible) {
-      compass.hidden = true;
+      compass.classList.remove('is-shown');
       return;
     }
-    compass.hidden = false;
+    compass.classList.add('is-shown');
 
     /* Where the line from the middle of the screen out to the root
        crosses the edge — the same ray-to-box intersection the edges

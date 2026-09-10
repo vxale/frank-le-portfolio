@@ -1431,8 +1431,39 @@ main { display: block; }
      and something that appears to be found should not be faint. */
   color: var(--ink);
   cursor: pointer;
-  will-change: transform;
-  transition: opacity 0.2s var(--ease-out);
+  will-change: transform, opacity;
+
+  /* Hidden is the resting state, and it fades rather than cuts.
+     `hidden` was doing this job before and had to go: display:none
+     cannot transition, so the arrow snapped into existence at the
+     exact moment the visitor was already disoriented.
+
+     Only opacity moves. The button's transform is rewritten by
+     js/node-tree.js on every frame to place and aim it, so transform
+     is not a channel this can borrow — which is just as well, since
+     an arrow that slides while pointing would read as a second
+     direction.
+
+     visibility rides along with a delay so it flips only after the
+     fade finishes, keeping the button out of the tab order and out of
+     the way of clicks while it is invisible.
+
+     No prefers-reduced-motion override, deliberately: this is a pure
+     opacity fade with no movement in it, which is already the gentle
+     variant that override would ask for. */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 140ms var(--ease-out),
+              visibility 0s linear 140ms;
+}
+
+/* Exits faster than it enters: arriving is information, leaving is
+   just tidying up after the visitor already found their way back. */
+.compass.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms var(--ease-out),
+              visibility 0s linear 0s;
 }
 
 .compass__arrow {

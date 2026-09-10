@@ -17,7 +17,7 @@
     },
     "credits": [
       {
-        "role": "Artist",
+        "role": "Artists",
         "name": "An Chinh, Su Ha"
       },
       {
@@ -25,7 +25,7 @@
         "name": "Hoai Anh"
       },
       {
-        "role": "PA",
+        "role": "Production Assistants",
         "name": "Ong, Huyền Anh"
       },
       {
@@ -33,15 +33,19 @@
         "name": "Lê Vũ Xuân Anh"
       },
       {
-        "role": "DOP",
+        "role": "Director of Photography",
         "name": "Đức Anh Demen"
+      },
+      {
+        "role": "Production Designer",
+        "name": "Bùi Minh Huyền"
       },
       {
         "role": "Camera Operator",
         "name": "Hiếu Rin"
       },
       {
-        "role": "Focus",
+        "role": "Focus Puller",
         "name": "Vũ Tuấn"
       },
       {
@@ -53,10 +57,6 @@
         "name": "Hồng Minh"
       },
       {
-        "role": "PD",
-        "name": "Minh Huyền"
-      },
-      {
         "role": "Art",
         "name": "Huyền Anh, Hiếu Art"
       },
@@ -65,7 +65,7 @@
         "name": "Thu Ngân"
       },
       {
-        "role": "Make Up",
+        "role": "Make Up & Hair Stylists",
         "name": "Linh Chi, Ngân Giang, Tuệ Anh"
       },
       {
@@ -75,6 +75,10 @@
       {
         "role": "Laser Assistant",
         "name": "Hoàng Việt Hưng, Nguyễn Nhật Hùng"
+      },
+      {
+        "role": "Post-Production",
+        "name": "Đức Anh Demen"
       }
     ],
     "awards": [],

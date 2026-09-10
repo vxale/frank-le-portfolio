@@ -67,6 +67,7 @@
   const MIN_K = 0.3;
   const MAX_K = 3;
   const VIEW_MS = 420;          // a camera move, not a UI transition
+  const FIT_BACKOFF = 0.8;      // hold 20% back from a tight fit
   const view = { x: 0, y: 0, k: 1 };
   let viewAnimating = false;
 
@@ -224,9 +225,26 @@
     const bw = Math.max(1, maxX - minX);
     const bh = Math.max(1, maxY - minY);
 
-    view.k = clamp(Math.min((w - pad * 2) / bw, (h - pad * 2) / bh), MIN_K, MAX_K);
+    /* FIT_BACKOFF holds the camera 20% further away than a tight fit
+       (Frank's call, Sept 10 2026 — the tight one came in too close).
+       It multiplies the scale rather than growing `pad`, so the easing
+       off is the same at every branch size instead of eating a fixed
+       number of pixels that means more to a small branch than a big
+       one. */
+    const tight = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh);
+    view.k = clamp(tight * FIT_BACKOFF, MIN_K, MAX_K);
     view.x = w / 2 - (minX + bw / 2) * view.k;
     view.y = h / 2 - (minY + bh / 2) * view.k;
+    applyView(animate);
+  }
+
+  /** Bring a node back into frame without changing how far in we are.
+      The compass uses this: it is a way back, not a way out. */
+  function centreOn(node, animate) {
+    if (!node || !node.el) return;
+    const { w, h } = bounds();
+    view.x = w / 2 - node.x * view.k;
+    view.y = h / 2 - node.y * view.k;
     applyView(animate);
   }
 
@@ -516,10 +534,56 @@
   }
   function tick(now) {
     drawEdges();
+    updateCompass();
     if (dragging || now < syncUntil) {
       rafId = requestAnimationFrame(tick);
     } else {
       rafId = null;
+    }
+  }
+
+  // ---------- Compass ----------
+
+  const compass = document.querySelector('.compass');
+  const compassArrow = compass && compass.querySelector('.compass__arrow');
+  if (compass) compass.addEventListener('click', () => centreOn(root, true));
+
+  /** Shows an arrow riding the edge of the canvas whenever the root has
+      been panned off screen, pointing the way back to it. */
+  function updateCompass() {
+    if (!compass || !root || !root.el) return;
+
+    const { w, h } = bounds();
+    const sx = root.x * view.k + view.x;      // root, in canvas pixels
+    const sy = root.y * view.k + view.y;
+
+    if (sx >= 0 && sx <= w && sy >= 0 && sy <= h) {
+      compass.hidden = true;
+      return;
+    }
+    compass.hidden = false;
+
+    /* Where the line from the middle of the screen out to the root
+       crosses the edge — the same ray-to-box intersection the edges
+       use to stop short of a label. */
+    const cx = w / 2;
+    const cy = h / 2;
+    const dx = sx - cx;
+    const dy = sy - cy;
+    const hw = Math.max(12, cx - 34);
+    const hh = Math.max(12, cy - 34);
+    const t = Math.min(
+      hw / Math.max(Math.abs(dx), 0.001),
+      hh / Math.max(Math.abs(dy), 0.001)
+    );
+
+    compass.style.transform =
+      `translate3d(${cx + dx * t}px, ${cy + dy * t}px, 0) translate(-50%, -50%)`;
+    if (compassArrow) {
+      // Rotated on the inner span, so the button's own box — and its
+      // focus ring — stay square.
+      compassArrow.style.transform =
+        `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)`;
     }
   }
 
@@ -804,6 +868,18 @@
     const finish = () => doomed.forEach(removeNodeElement);
     if (reduceMotion()) finish();
     else window.setTimeout(finish, EXIT_MS);
+
+    /* Closing a branch pulls the camera back out the way opening it
+       pushed in — to the level being returned to, which is the parent
+       and its children. Without this the view stays pressed up against
+       a branch that is no longer there. The root is left alone for the
+       same reason it is on the way in: its framing is composed. */
+    if (node.depth > 0 && node.parent) {
+      const back = node.parent.depth > 0
+        ? [node.parent].concat(node.parent.children)
+        : [root].concat(root.children);
+      fitTo(back, true);
+    }
 
     requestSync(EXIT_MS + 60);
   }

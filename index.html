@@ -26,6 +26,15 @@
     <div class="canvas__nodes"></div>
   </div>
 
+  <!-- Points back to the root when the view has wandered off it. It
+       sits outside .canvas__world, in the canvas's own pixels, so it
+       stays pinned to the edge of the screen rather than to the
+       paper. js/node-tree.js places and rotates it. -->
+  <button class="compass" type="button" hidden
+          aria-label="Back to Lê Vũ Xuân Anh">
+    <span class="compass__arrow" aria-hidden="true">&rarr;</span>
+  </button>
+
   <!-- The tree is the whole menu, so with JS off there has to be a
        real set of links here or the site is a dead end. -->
   <noscript>
@@ -41,10 +50,6 @@
   <!-- The name, the bio and the role line all live on the canvas now:
        the root node says the name, the bio is a node that branches to
        About, and the roles are the root's caption. See js/node-tree.js. -->
-  <div class="marks__foot">
-    <p class="mark mark--hint">Drag the nodes · click to open</p>
-  </div>
-
   <div class="mark mark--view" hidden>
     <button class="theme__btn" type="button" data-reset-view>Reset view</button>
   </div>

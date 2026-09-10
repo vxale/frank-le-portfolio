@@ -797,17 +797,9 @@ main { display: block; }
   line-height: 1.8;
 }
 
-.marks__foot {
-  position: absolute;
-  left: var(--gutter);
-  bottom: var(--gutter);
-  display: grid;
-  gap: 0.75rem;
-}
-
-.mark--hint { position: static; }
-
-.mark--hint { color: var(--ink); }
+/* The drag hint is gone (Frank's call, Sept 10 2026) — the lower left
+   belongs to the reset now. Dragging and zooming are left to be found
+   rather than announced. */
 
 .mark--mail {
   right: var(--gutter);
@@ -1411,9 +1403,49 @@ main { display: block; }
 /* Only offered once the view has actually moved — a reset for a thing
    that is already at rest is noise. */
 .mark--view {
-  top: calc(var(--gutter) + 1.9rem);
-  right: var(--gutter);
+  left: var(--gutter);
+  bottom: var(--gutter);
   pointer-events: auto;
+}
+
+/* ---------- Compass ----------
+   When the root is off screen, an arrow rides the edge of the canvas
+   pointing at it. The button is placed and the arrow inside it is
+   rotated separately, so the rotation never reaches the accessible
+   name or the focus ring. ---------- */
+
+.compass {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  /* Full ink, not the soft grey the other marks use. Every other mark
+     is a quiet aside; this one only exists when the visitor is lost,
+     and something that appears to be found should not be faint. */
+  color: var(--ink);
+  cursor: pointer;
+  will-change: transform;
+  transition: opacity 0.2s var(--ease-out);
+}
+
+.compass__arrow {
+  display: block;
+  font-family: var(--font);
+  font-size: var(--step-4);
+  line-height: 1;
+}
+
+.compass:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .compass:hover { opacity: 0.6; }
 }
 
 /* On a page it sits with the way back, both to the right. */

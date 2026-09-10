@@ -178,6 +178,15 @@ Why this is not the node-tree engine: a chain needs none of what makes `js/node-
 
 The collapse animates `grid-template-rows` from `1fr` to `0fr`. That touches layout, which `transform` and `opacity` avoid — accordions are the one case with no transform equivalent, so it is the sanctioned exception. Opening takes 240ms, folding 180ms.
 
+## Node media and credit lists (Sept 10 2026)
+Two rules that apply to every node and every project from here on, not just to the first real one.
+
+**A node's media sits above its title, at 12em.** It was 4em beside the label; tripling it and stacking it reverses which one is the subject — at 4em the clip was a detail on a word, at 12em the title is a caption on the work. The root's portrait scales with it (7.2em, still portrait). Sizes stay in `em` so a node's frame tracks its depth without a rule per level. The naming row is wrapped in `.node__line` because the hit is a column now; without that wrapper the `+` glyph stacks under the label instead of sitting beside it.
+
+**Credit lists are two columns, never more, and fold past five rows.** A film credit list runs long — fifteen roles in one column turns a page into a ladder. Two columns means five rows is ten entries; past that the list keeps every entry but clips to five rows, fades the fifth out with a mask, and offers a `+` with the total. Folded is the default state. On a phone the grid drops to one column and five rows means five entries.
+
+The threshold is **rows, not entries**, because rows are what actually cost the page its height. `js/work-detail.js` decides, so it applies to every project automatically — nothing per-project to remember.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

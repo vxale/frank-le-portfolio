@@ -595,8 +595,10 @@ main { display: block; }
 
 .node__hit {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  flex-direction: column;   /* media above, naming below — the default
+                               for every node with a frame */
+  align-items: flex-start;
+  gap: 0.55em;
   font-family: var(--font);
   font-weight: 400;
   background: none;
@@ -665,19 +667,31 @@ main { display: block; }
 
 /* A still or clip beside the title. Sized in em, so it scales with
    the node's own depth without a rule per level. */
+/* The naming row: everything that used to sit directly in the hit. */
+.node__line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+/* Tripled (Sept 10 2026) and moved above the title. A node carrying
+   work should show the work, not a stamp beside a word — at 4em the
+   clip was a detail on the label; at 12em the label is a caption on
+   the clip. Still em-based, so it scales with the node's depth
+   without a rule per level. */
 .node__media {
   flex: none;
   display: block;
-  width: 4em;
+  width: 12em;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--paper-dim);
 }
 
-/* The root's is a portrait, and proportionally smaller — it sits
-   beside the biggest type on the canvas. */
+/* The root's is a portrait, and proportionally smaller — it sits with
+   the biggest type on the canvas. */
 .node--d0 .node__media {
-  width: 2.4em;
+  width: 7.2em;
   aspect-ratio: 3 / 4;
 }
 
@@ -695,9 +709,8 @@ main { display: block; }
   .node__hit:hover .node__media video { transform: scale(1.04); }
 }
 
-/* Text nodes align on the baseline; a node with a frame in it centres
-   instead, or the picture hangs off the bottom of the line. */
-.node__hit--media { align-items: center; }
+/* Media nodes need no special alignment now that the hit is a column
+   — the frame and its title both start at the left edge. */
 
 /* Describes the node it sits under; not a second thing to click.
    It carries a sentence rather than a list of labels, so it is set in
@@ -891,8 +904,61 @@ main { display: block; }
 
 .notes--about   { grid-column: 1 / span 5; }
 .notes--work    { grid-column: 9 / span 4; }
-.notes--credits { grid-column: 1 / span 3; }
-.notes--awards  { grid-column: 5 / span 4; }
+.notes--awards  { grid-column: 9 / span 4; }
+
+/* ---------- Credits ----------
+   Two columns, never more: a film credit list is long and a single
+   column of fifteen roles turns the page into a ladder. Anything past
+   five rows is folded away by default and the fifth row fades out, so
+   the block advertises that it continues without spending the height
+   to prove it. js/work-detail.js decides whether to fold — the rule
+   is rows, not entries, and it applies to every project. */
+
+.credits { grid-column: 1 / span 7; }
+
+.notes--credits {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* Ten items is five rows across two columns. Past that the list is
+   clipped rather than shortened — the entries still exist, they are
+   just not spending space until asked for. */
+.notes--credits.is-folded > li:nth-child(n + 11) { display: none; }
+
+.notes--credits.is-folded {
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+}
+
+.credits__more {
+  margin-top: 1rem;
+  font-family: var(--font);
+  font-size: var(--step-1);
+  line-height: 1;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  transition: color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.credits__more:active { transform: scale(0.94); }
+.credits__more:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .credits__more:hover { color: var(--ink); }
+}
+
+@media (max-width: 860px) {
+  .notes--credits { grid-template-columns: minmax(0, 1fr); }
+  /* One column on a phone, so five rows is five entries. */
+  .notes--credits.is-folded > li:nth-child(n + 6) { display: none; }
+}
 
 /* ---------- Free-floating media ---------- */
 

@@ -91,6 +91,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   ].filter(([, v]) => v);
 
   const credits = work.credits || [];
+  /* Two columns, so five rows is ten entries. Past that the list
+     folds by default and the button offers the rest. The threshold is
+     rows rather than entries because that is what actually costs the
+     page its height. */
+  const foldCredits = Math.ceil(credits.length / 2) > 5;
   const awards = work.awards || [];
   const next = works[(index + 1) % works.length];
 
@@ -122,9 +127,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>` : ''}
 
     ${credits.length ? `
-      <ul class="notes notes--credits">
-        ${credits.map((c) => `<li><span class="label">${esc(c.role)}</span> ${esc(c.name)}</li>`).join('')}
-      </ul>` : ''}
+      <div class="credits">
+        <ul class="notes notes--credits${foldCredits ? ' is-folded' : ''}" id="credit-list">
+          ${credits.map((c) => `<li><span class="label">${esc(c.role)}</span> ${esc(c.name)}</li>`).join('')}
+        </ul>
+        ${foldCredits ? `
+          <button class="credits__more" type="button" aria-expanded="false"
+                  aria-controls="credit-list"
+                  aria-label="Show all ${credits.length} credits">
+            <span class="credits__glyph" aria-hidden="true">+</span>
+            <span class="label">${credits.length} credits</span>
+          </button>` : ''}
+      </div>` : ''}
 
     <ul class="notes notes--awards">
       <li><span class="label">Awards &amp; screenings</span> ${
@@ -157,6 +171,20 @@ document.addEventListener('DOMContentLoaded', async () => {
      buttons' accessible names — a screen reader still hears what each
      passage is, and data/works.json still asks Frank the five
      questions when he writes. */
+  const more = root.querySelector('.credits__more');
+  if (more) {
+    more.addEventListener('click', () => {
+      const list = root.querySelector('.notes--credits');
+      const folded = list.classList.toggle('is-folded');
+      more.setAttribute('aria-expanded', String(!folded));
+      more.setAttribute('aria-label',
+        `${folded ? 'Show all' : 'Hide the last of the'} ${credits.length} credits`);
+      more.querySelector('.credits__glyph').textContent = folded ? '+' : '\u2212';
+      more.querySelector('.label').textContent =
+        folded ? `${credits.length} credits` : 'Fewer';
+    });
+  }
+
   root.querySelectorAll('.beat__num').forEach((btn) => {
     btn.addEventListener('click', () => {
       const beat = btn.closest('.beat');

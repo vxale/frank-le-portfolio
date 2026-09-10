@@ -437,16 +437,23 @@
       hit.appendChild(mediaFrame(node.media, hit));
     }
 
+    /* Name, alias and glyph share one row, and that row is a single
+       child of the hit. It has to be wrapped: the hit is a column now
+       (media above, naming below), so without this the glyph would
+       stack under the label instead of sitting beside it. */
+    const line = document.createElement('span');
+    line.className = 'node__line';
+
     const label = document.createElement('span');
     label.className = 'node__label';
     label.textContent = node.label;
-    hit.appendChild(label);
+    line.appendChild(label);
 
     if (node.alias) {
       const alias = document.createElement('span');
       alias.className = 'node__alias';
       alias.textContent = node.alias;
-      hit.appendChild(alias);
+      line.appendChild(alias);
     }
 
     if (isBranch) {
@@ -454,8 +461,10 @@
       glyph.className = 'node__glyph';
       glyph.setAttribute('aria-hidden', 'true');
       glyph.textContent = '+';
-      hit.appendChild(glyph);
+      line.appendChild(glyph);
     }
+
+    hit.appendChild(line);
 
     el.appendChild(hit);
 

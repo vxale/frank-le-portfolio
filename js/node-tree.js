@@ -507,19 +507,47 @@
 
     if (media.type === 'video') {
       const video = document.createElement('video');
-      video.src = media.src;
-      video.muted = true;
+      /* Two sources, not one. WebM/VP9 is smaller and is what most
+         browsers will take; the H.264 MP4 is the universal fallback
+         and is what Safari older than 14.1 needs. Order matters —
+         the browser takes the first it can decode. */
+      if (media.webm) {
+        const webm = document.createElement('source');
+        webm.src = media.webm;
+        webm.type = 'video/webm';
+        video.appendChild(webm);
+        const mp4 = document.createElement('source');
+        mp4.src = media.src;
+        mp4.type = 'video/mp4';
+        video.appendChild(mp4);
+      } else {
+        video.src = media.src;
+      }
+      video.muted = true;          // required, or no browser will autoplay
       video.loop = true;
-      video.playsInline = true;
-      video.preload = 'metadata';
+      video.playsInline = true;    // or iOS takes it fullscreen
+      if (media.poster) video.poster = media.poster;
       frame.appendChild(video);
 
       const play = () => { const p = video.play(); if (p) p.catch(() => {}); };
-      const stop = () => video.pause();
-      hit.addEventListener('pointerenter', play);
-      hit.addEventListener('pointerleave', stop);
-      hit.addEventListener('focus', play);
-      hit.addEventListener('blur', stop);
+
+      /* A clip on a node runs continuously — the canvas should show
+         the work moving, not wait to be asked. Under reduced motion it
+         holds on its poster instead and plays only on hover or focus,
+         so it stays reachable without putting looping motion on the
+         page for someone who asked for less of it. */
+      if (reduceMotion()) {
+        video.preload = 'metadata';
+        const stop = () => video.pause();
+        hit.addEventListener('pointerenter', play);
+        hit.addEventListener('pointerleave', stop);
+        hit.addEventListener('focus', play);
+        hit.addEventListener('blur', stop);
+      } else {
+        video.autoplay = true;
+        video.preload = 'auto';
+        play();
+      }
     } else {
       const img = document.createElement('img');
       img.src = media.src;

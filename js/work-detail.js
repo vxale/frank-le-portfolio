@@ -58,7 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return `<span class="shot shot--${shape}">${inner}</span>`;
   }
 
-  const media = (work.media && work.media.length) ? work.media : [null];
+  /* No media, no frames. The template used to draw one empty tint so
+     a placeholder project still had a shape; a real project with its
+     assets deliberately withheld should just be a page of writing. */
+  const media = (work.media && work.media.length) ? work.media : [];
   const shapes = ['wide', 'tall', 'square'];
   const spots = ['lead', 'b', 'c', 'd'];
 

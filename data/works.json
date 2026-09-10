@@ -1,5 +1,89 @@
 [
   {
+    "id": "gai-dep-khong-phai-buon",
+    "title": "Gái Đẹp Không Phải Buồn",
+    "type": "film",
+    "year": 2026,
+    "commercial": true,
+    "featured": true,
+    "role": "Director",
+    "tools": "",
+    "thumb": {
+      "type": "video",
+      "src": "assets/gai-dep-khong-phai-buon.mp4",
+      "webm": "assets/gai-dep-khong-phai-buon.webm",
+      "poster": "assets/gai-dep-khong-phai-buon-poster.jpg",
+      "alt": "Visualizer for Gái Đẹp Không Phải Buồn"
+    },
+    "credits": [
+      {
+        "role": "Artist",
+        "name": "An Chinh, Su Ha"
+      },
+      {
+        "role": "Producer",
+        "name": "Hoai Anh"
+      },
+      {
+        "role": "PA",
+        "name": "Ong, Huyền Anh"
+      },
+      {
+        "role": "Director",
+        "name": "Lê Vũ Xuân Anh"
+      },
+      {
+        "role": "DOP",
+        "name": "Đức Anh Demen"
+      },
+      {
+        "role": "Camera Operator",
+        "name": "Hiếu Rin"
+      },
+      {
+        "role": "Focus",
+        "name": "Vũ Tuấn"
+      },
+      {
+        "role": "Gaffer",
+        "name": "Quang Anh"
+      },
+      {
+        "role": "Lighting",
+        "name": "Hồng Minh"
+      },
+      {
+        "role": "PD",
+        "name": "Minh Huyền"
+      },
+      {
+        "role": "Art",
+        "name": "Huyền Anh, Hiếu Art"
+      },
+      {
+        "role": "Stylist",
+        "name": "Thu Ngân"
+      },
+      {
+        "role": "Make Up",
+        "name": "Linh Chi, Ngân Giang, Tuệ Anh"
+      },
+      {
+        "role": "Laser Operator",
+        "name": "Trần Hải Hà"
+      },
+      {
+        "role": "Laser Assistant",
+        "name": "Hoàng Việt Hưng, Nguyễn Nhật Hùng"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "A visualizer directed for the Afro-House single “Gái Đẹp Không Phải Buồn.”"
+    },
+    "media": []
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",
@@ -9,10 +93,22 @@
     "role": "Director, Writer, Editor",
     "tools": "Sony FX3, Premiere Pro, DaVinci Resolve",
     "credits": [
-      { "role": "Director", "name": "Frank Le" },
-      { "role": "Writer", "name": "Frank Le" },
-      { "role": "Cinematographer", "name": "TBD" },
-      { "role": "Editor", "name": "Frank Le" }
+      {
+        "role": "Director",
+        "name": "Frank Le"
+      },
+      {
+        "role": "Writer",
+        "name": "Frank Le"
+      },
+      {
+        "role": "Cinematographer",
+        "name": "TBD"
+      },
+      {
+        "role": "Editor",
+        "name": "Frank Le"
+      }
     ],
     "awards": [],
     "insight": {
@@ -23,8 +119,16 @@
       "result": "What happened — screened where, reaction, outcome, what you learned?"
     },
     "media": [
-      { "type": "image", "src": "", "alt": "" },
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      },
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   },
   {
@@ -37,8 +141,14 @@
     "role": "UI/UX Designer",
     "tools": "Figma, Adobe Illustrator",
     "credits": [
-      { "role": "Designer", "name": "Frank Le" },
-      { "role": "Client", "name": "TBD" }
+      {
+        "role": "Designer",
+        "name": "Frank Le"
+      },
+      {
+        "role": "Client",
+        "name": "TBD"
+      }
     ],
     "awards": [],
     "insight": {
@@ -49,9 +159,21 @@
       "result": "What was the outcome?"
     },
     "media": [
-      { "type": "image", "src": "", "alt": "" },
-      { "type": "image", "src": "", "alt": "" },
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      },
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      },
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   },
   {
@@ -64,9 +186,18 @@
     "role": "Director, Editor",
     "tools": "Premiere Pro, DaVinci Resolve",
     "credits": [
-      { "role": "Director", "name": "Frank Le" },
-      { "role": "Client", "name": "TBD" },
-      { "role": "Stylist", "name": "TBD" }
+      {
+        "role": "Director",
+        "name": "Frank Le"
+      },
+      {
+        "role": "Client",
+        "name": "TBD"
+      },
+      {
+        "role": "Stylist",
+        "name": "TBD"
+      }
     ],
     "awards": [],
     "insight": {
@@ -77,8 +208,16 @@
       "result": "What was the outcome for the client?"
     },
     "media": [
-      { "type": "video", "src": "", "alt": "" },
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "video",
+        "src": "",
+        "alt": ""
+      },
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   },
   {
@@ -91,7 +230,10 @@
     "role": "Designer",
     "tools": "Figma, Adobe Illustrator, InDesign",
     "credits": [
-      { "role": "Designer", "name": "Frank Le" }
+      {
+        "role": "Designer",
+        "name": "Frank Le"
+      }
     ],
     "awards": [],
     "insight": {
@@ -102,7 +244,11 @@
       "result": "What was the outcome?"
     },
     "media": [
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   },
   {
@@ -115,7 +261,10 @@
     "role": "Photographer",
     "tools": "35mm film, Lightroom",
     "credits": [
-      { "role": "Photographer", "name": "Frank Le" }
+      {
+        "role": "Photographer",
+        "name": "Frank Le"
+      }
     ],
     "awards": [],
     "insight": {
@@ -126,8 +275,16 @@
       "result": "Where did it end up?"
     },
     "media": [
-      { "type": "image", "src": "", "alt": "" },
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      },
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   },
   {
@@ -140,8 +297,14 @@
     "role": "UX Designer, Researcher",
     "tools": "Figma, Maze",
     "credits": [
-      { "role": "Designer", "name": "Frank Le" },
-      { "role": "Client", "name": "TBD" }
+      {
+        "role": "Designer",
+        "name": "Frank Le"
+      },
+      {
+        "role": "Client",
+        "name": "TBD"
+      }
     ],
     "awards": [],
     "insight": {
@@ -152,7 +315,11 @@
       "result": "What changed as a result?"
     },
     "media": [
-      { "type": "image", "src": "", "alt": "" }
+      {
+        "type": "image",
+        "src": "",
+        "alt": ""
+      }
     ]
   }
 ]

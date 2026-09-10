@@ -63,11 +63,12 @@
   // ---------- Building the tree data ----------
 
   let nextId = 0;
-  function makeNode({ label, alias, href, media, caption, children, navKey }) {
+  function makeNode({ label, alias, meta, href, media, caption, children, navKey }) {
     const node = {
       uid: `n${nextId++}`,
       label,
       alias: alias || null,
+      meta: meta || null,
       href: href || null,
       media: media && media.src ? media : null,
       caption: caption || null,
@@ -110,8 +111,13 @@
         // A project shows a still or clip beside its title as soon as
         // one exists: "thumb" if the entry names one, otherwise its
         // first media item. No media, no frame — the node is just type.
+        // Every project node carries its year (Frank's rule, Sept 10
+        // 2026). The parentheses live here rather than in works.json,
+        // which keeps "year" a number the rest of the site can filter
+        // and sort on.
         .map((w) => ({
           label: w.title,
+          meta: w.year ? `(${w.year})` : null,
           href: workHref(w),
           media: w.thumb || (w.media && w.media[0]),
         })),
@@ -454,6 +460,16 @@
       alias.className = 'node__alias';
       alias.textContent = node.alias;
       line.appendChild(alias);
+    }
+
+    /* The year, and anything like it: set beside the title but a rung
+       down, so it reads as a fact about the work rather than part of
+       its name. Same treatment as the root's alias. */
+    if (node.meta) {
+      const meta = document.createElement('span');
+      meta.className = 'node__meta';
+      meta.textContent = node.meta;
+      line.appendChild(meta);
     }
 
     if (isBranch) {

@@ -638,14 +638,23 @@ main { display: block; }
   transition: border-color 200ms var(--ease-out);
 }
 
-/* The name Frank works under, set beside the one on his passport and
-   two rungs down it — same line, clearly subordinate. Baseline
-   alignment comes from .node__hit being an inline-flex baseline row. */
-.node__alias {
-  font-size: 0.62em;
+/* Two things sit beside a node's name and below it in weight: the
+   name Frank works under, and a project's year. Same treatment —
+   subordinate on the same baseline, which .node__line provides. */
+.node__alias,
+.node__meta {
   color: var(--ink-soft);
   letter-spacing: 0.01em;
 }
+
+.node__alias { font-size: 0.62em; }
+
+/* 0.75em, not the alias's 0.62em. The alias sits beside the root's
+   36px name, where 0.62em is still 22px; a project node is 17px, and
+   the same ratio would set its year at 10.7px — under --step-0, the
+   smallest size anywhere on the site. A ratio that works at one end
+   of the scale does not automatically work at the other. */
+.node__meta { font-size: 0.75em; }
 
 @media (hover: hover) and (pointer: fine) {
   .node__hit:hover .node__label { border-color: currentColor; }

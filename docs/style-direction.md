@@ -187,6 +187,11 @@ Two rules that apply to every node and every project from here on, not just to t
 
 The threshold is **rows, not entries**, because rows are what actually cost the page its height. `js/work-detail.js` decides, so it applies to every project automatically — nothing per-project to remember.
 
+### Project nodes carry their year
+Every project node shows its year beside the title — `(2026)` — set a rung down so it reads as a fact about the work rather than part of its name. It comes from `year` in `data/works.json`, and the parentheses are added at render time so `year` stays a number the rest of the site can filter and sort on. Branch and page nodes (About, Film, Contact) carry no year.
+
+The year uses `0.75em` where the root's alias uses `0.62em`. That is not an inconsistency: the alias sits beside 36px type, where 0.62em is still 22px, but a project node is 17px and the same ratio would have set its year at 10.7px — under `--step-0`, the smallest size anywhere on the site. A ratio that works at one end of a scale does not automatically work at the other.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

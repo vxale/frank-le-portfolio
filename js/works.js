@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const toolRung = document.createElement('li');
-    toolRung.className = 'navcue__item';
+    toolRung.className = 'navcue__item navcue__item--tools';
     toolRung.appendChild(buildTools());
     list.appendChild(toolRung);
 

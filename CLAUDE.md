@@ -193,3 +193,17 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 - The button **holds its place while hidden**, so the end of the row does not jump the first time a card is picked up.
 
 **`.section` now opens like every other page.** Since the works heading and rules came out there was nothing at the top of the page to justify `--section-gap`, and the filter bar started 60px lower than the first line of every other page. `.section` uses `.field`'s figures now — `clamp(2rem, 7vw, 5rem)` top — and the gap below the header is 80px on works, contact and work pages alike. Change one, change both.
+
+
+## Four corrections (Sept 11 2026)
+
+**The tools hang off nothing.** The sort arrow and Tidy up sit above the filter branch with no edge joining them to it — `.navcue__item--tools::after { content: none }`. Sorting and tidying are things you do *to* the grid, not filters on the work in it, so the branch stops at the last filter group.
+
+**Contact joins the Navigate branch**, between Back to top and All works. Bottom to top it now reads `Navigate → Back to top → Contact → All works → Home`. `--rungs` on `.navcue` is 4 and `:nth-child(4)` carries `--i: 4`; both cues use the same figures, so the filter cue's own override is gone.
+
+**The media opens the project too.** `.media-frame` is an `<a>` on the works grid, so the card has two ways in. Two things hold it together:
+
+- **Both manipulations swallow their own click.** `js/drag.js` already suppressed the click after a real drag; `makeResizable` now does the same after a resize, with its own guard rather than the drag's shared one — dragging is only attached on fine pointers, and a resize works everywhere. Verified: a click synthesised straight after a drag does not navigate, nor after a resize, and a plain click does.
+- **The media link is `tabindex="-1"`.** It goes to the same place as the caption a line below it, and seven cards' worth of pressing Tab twice for one destination is a keyboard tax with nothing on the other side of it.
+
+**The awards slot waits until there is an award.** It used to print "Awards & screenings — None listed yet" on every project, which is a page telling you what it hasn't got. The block is now conditional and still reads `awards` from `data/works.json`, so the first one added brings it back with no code change.

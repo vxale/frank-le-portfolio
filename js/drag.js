@@ -136,6 +136,21 @@
     frame.dataset.resizable = 'on';
 
     let sizing = null;
+    let justResized = false;
+
+    /* The frame is a link now, and a resize ends with a pointerup on
+       top of it - which the browser reads as a click and follows.
+       Caught in the capture phase so it never reaches the anchor.
+
+       This is the resize's own guard rather than the drag's shared
+       one: dragging is only attached on fine pointers, and a resize
+       works everywhere. */
+    frame.addEventListener('click', (event) => {
+      if (!justResized) return;
+      justResized = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
 
     function onMove(event) {
       if (!sizing || event.pointerId !== sizing.id) return;
@@ -177,6 +192,8 @@
       frame.classList.remove('is-resizing');
       document.body.classList.remove('is-dragging-something');
       sizing = null;
+      justResized = true;
+      window.setTimeout(() => { justResized = false; }, 0);
       announceMoved();
     }
 

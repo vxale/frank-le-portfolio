@@ -222,6 +222,9 @@ main { display: block; }
 
 .media-frame {
   position: relative;
+  display: block;          /* it is an <a> on the works grid */
+  color: inherit;
+  text-decoration: none;
   aspect-ratio: 4 / 5;
   width: 100%;
   overflow: hidden;
@@ -1718,7 +1721,7 @@ main { display: block; }
 
 .navcue {
   --navcue-gap: 1.1rem;
-  --rungs: 3;              /* how many sit above the trigger */
+  --rungs: 4;              /* how many sit above the trigger */
   position: fixed;
   right: var(--gutter);
   bottom: var(--gutter);
@@ -1776,6 +1779,7 @@ main { display: block; }
 .navcue__item:nth-child(1) { --i: 1; }
 .navcue__item:nth-child(2) { --i: 2; }
 .navcue__item:nth-child(3) { --i: 3; }
+.navcue__item:nth-child(4) { --i: 4; }
 
 /* The edge down to whatever sits below - the same hairline the node
    tree draws between a parent and its children, stood on end. It grows
@@ -2113,6 +2117,7 @@ main { display: block; }
    the transition list and the card simply lands. */
 .work-card.is-homing { transition: transform 320ms var(--ease-in-out); }
 
-/* Four rungs in the filter branch now: three groups and the tools. */
-.navcue--filter { --rungs: 4; }
-.navcue--filter .navcue__item:nth-child(4) { --i: 4; }
+/* The tools hang off nothing. Sorting and tidying are things you do
+   to the grid, not filters on the work in it, so the branch stops at
+   the last filter group and they stand apart above it. */
+.navcue__item--tools::after { content: none; }

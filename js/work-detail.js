@@ -96,6 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
      rows rather than entries because that is what actually costs the
      page its height. */
   const foldCredits = Math.ceil(credits.length / 2) > 5;
+  /* Shown only when there is something to show. It used to print
+     "None listed yet" on every project, which is a page telling you
+     what it hasn't got. The slot is still here and still reads
+     data/works.json, so the first award to be added brings it back
+     without anyone touching this file. */
   const awards = work.awards || [];
   const next = works[(index + 1) % works.length];
 
@@ -138,11 +143,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           </button>` : ''}
       </div>` : ''}
 
-    <ul class="notes notes--awards">
-      <li><span class="label">Awards &amp; screenings</span> ${
-        awards.length ? awards.map(esc).join(' · ') : 'None listed yet'
-      }</li>
-    </ul>
+    ${awards.length ? `
+      <ul class="notes notes--awards">
+        <li><span class="label">Awards &amp; screenings</span> ${
+          awards.map(esc).join(' · ')
+        }</li>
+      </ul>` : ''}
 
     ${next && next.id !== work.id ? `
       <a class="next-node" href="work.html?id=${encodeURIComponent(next.id)}">

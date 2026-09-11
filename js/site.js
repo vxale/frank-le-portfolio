@@ -64,18 +64,24 @@ function workHref(work) {
       .media-frame__move  scroll parallax    CSS view() timeline
       img / video         hover scale        CSS
 
-    The card is no longer one big <a>. The media is something you pick
-    up and resize now, so it cannot also be a link waiting to fire on
-    mouseup; the caption carries the link instead, the way a node's
-    label does on the homepage. */
+    The media and the caption both open the project. The media also
+    drags and resizes, so both of those have to be able to swallow the
+    click they would otherwise end on: js/drag.js suppresses the click
+    after a real drag, and makeResizable does the same after a resize.
+    A press is a move, a re-crop, or an opening - never two of them.
+
+    The media link is tabindex="-1" on purpose. It goes to the same
+    place as the caption a line below it, and seven cards' worth of
+    pressing Tab twice for one destination is a keyboard tax with
+    nothing on the other side of it. */
 function cardMarkup(work, index, className) {
   return `
     <article class="${className}">
       <div class="work-card__body" data-reveal>
-        <div class="media-frame">
+        <a class="media-frame" href="${workHref(work)}" tabindex="-1">
           <div class="media-frame__move">${mediaFrameInner(work.media && work.media[0], work.title)}</div>
           <span class="media-frame__grip" data-resize-grip aria-hidden="true"></span>
-        </div>
+        </a>
         <a class="caption" href="${workHref(work)}">
           <span class="caption__index">${workNumber(index)}</span>
           <span class="caption__title">${esc(work.title)}</span>

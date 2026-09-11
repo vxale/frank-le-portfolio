@@ -176,3 +176,20 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 **The project counter is gone.** The grid is short enough to see, and a running total is a database's idea of a portfolio.
 
 **Every page closes the same way.** Four different footers had grown up: About and Works had the large address plus a quiet second line, Contact had only a copyright, and work pages had all three marks squeezed into one small line rendered by `js/work-detail.js` inside the field grid. All four now use the same static `<footer class="end-marks">`; `.end-marks__inline` and the JS that produced it are gone. Contact repeats its own address at the foot as a result — a small redundancy accepted so that every page ends identically.
+
+
+## The works bar: options on hover, sort, tidy (Sept 11 2026)
+
+**The filter bar rests as three pairs.** `TYPE ALL`, `YEAR ALL`, `MADE FOR ALL` — each group shows its name and its current answer, and the alternatives arrive when the pointer does. The hidden options **keep their space**, so a group never changes width and the row never shifts under the hand: measured, the Type group is 341px both at rest and hovered. Two scopes matter and are easy to get wrong:
+
+- **`.filters` only.** Inside the corner cue the whole branch is already hover-revealed; a second hover inside the first would be a door behind a door, so the cue shows every option as soon as it opens.
+- **Fine pointers only.** On touch there is nothing to reveal them with, so they stay out.
+
+**Sort is a glyph and nothing else** (Frank's call — no text indication). An arrow that turns over: down is newest first, which is where it starts, up is oldest first. The half-turn is the whole control, so it is the one thing in that row that has to read as movement rather than a swap — 200ms, `--ease-out`. The accessible name carries what the arrow cannot say out loud and updates with the state. Sorting runs on a **copy**; `works` keeps the order `data/works.json` gives it, which is the order Frank maintains by hand.
+
+**Tidy up appears only once something has been moved.** `js/drag.js` fires a `cards:moved` event when a drag or a resize finishes, and `window.sendHome(card)` puts one card back. Two details:
+
+- **The journey home is animated; the crop is not.** Transitioning a frame's width would animate the height of the grid row it sits in, and through that the position of everything below — a page-wide reflow at 60fps to make a corner snap look smooth. The eye follows the card travelling and does not miss the rest. 320ms `--ease-in-out`, because this is a thing crossing the screen rather than arriving or leaving.
+- The button **holds its place while hidden**, so the end of the row does not jump the first time a card is picked up.
+
+**`.section` now opens like every other page.** Since the works heading and rules came out there was nothing at the top of the page to justify `--section-gap`, and the filter bar started 60px lower than the first line of every other page. `.section` uses `.field`'s figures now — `clamp(2rem, 7vw, 5rem)` top — and the gap below the header is 80px on works, contact and work pages alike. Change one, change both.

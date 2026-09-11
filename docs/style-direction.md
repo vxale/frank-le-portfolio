@@ -303,3 +303,7 @@ The heading and the two rules above the grid are gone. The page says what it is 
 Scroll past the filter bar on the works page and it reappears as a cue in the lower left, growing upward — the same object as the Navigate cue in the lower right, mirrored across the page. The two lower corners hold the things you reach for rather than read, and they behave identically. It stands down again when the bar returns, or when the closing marks arrive in the corner it is standing in.
 
 Resizing a card's media keeps its shape. The frames are cut 16:9, 3:4, 4:3 and 1:1 by position in the grid; that is a composition, and a drag is allowed to change how big it is, not what it is.
+
+
+## The filter bar at rest (Sept 11 2026)
+Three pairs: the name of a filter and its current answer. The alternatives arrive under the pointer and take their space back when it leaves — the row itself never moves. Sorting is an arrow that turns over, with no word attached; tidying up is offered only once something has been moved out of place.

@@ -10,6 +10,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const requestedType = new URLSearchParams(window.location.search).get('type');
   const active = { type: requestedType || 'all', year: 'all', commercial: 'all' };
 
+  /* Newest first to begin with - that is what a portfolio is for. The
+     button flips it, and says which way round it is with an arrow
+     rather than a word: the glyph is the whole control, so the
+     direction has to be readable at a glance and in one character. */
+  let order = 'desc';
+
+  const SORT_GLYPH =
+    '<svg viewBox="0 0 12 15" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.1" stroke-linecap="square" focusable="false">' +
+    '<path d="M6 1.5V13"/><path d="M2 9.5 6 13.5 10 9.5"/></svg>';
+
+  function orderLabel() {
+    return order === 'desc'
+      ? 'Sort by year: newest first'
+      : 'Sort by year: oldest first';
+  }
+
   function render() {
     const filtered = works.filter((w) => {
       if (active.type !== 'all' && w.type !== active.type) return false;
@@ -26,7 +43,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    grid.innerHTML = filtered.map((w, i) => cardMarkup(w, i, 'work-card')).join('');
+    /* Sorted on a copy. `works` keeps the order the file gives it,
+       which is the order Frank maintains by hand, and a sort button
+       should not quietly rewrite that. */
+    const ordered = filtered.slice().sort((a, b) => (
+      order === 'asc' ? a.year - b.year : b.year - a.year
+    ));
+
+    grid.innerHTML = ordered.map((w, i) => cardMarkup(w, i, 'work-card')).join('');
+
+    // A fresh grid is a tidy grid: nothing has been moved yet.
+    document.querySelectorAll('[data-tidy]').forEach((b) => b.classList.remove('is-shown'));
 
     /* Picking a card up is a fine-pointer affordance only. A drag on
        touch needs touch-action: none on the card, and the cards cover
@@ -48,6 +75,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     group.appendChild(makeButton('All', key, 'all'));
     options.forEach((opt) => group.appendChild(makeButton(opt.label, key, opt.value)));
     return group;
+  }
+
+  /* Sort and tidy: two things you do TO the grid rather than to the
+     set of work in it, so they sit apart from the filters at the end
+     of the row - and, in the corner cue, on a rung of their own. */
+  function buildTools() {
+    const tools = document.createElement('div');
+    tools.className = 'filter-group filter-tools';
+
+    const sort = document.createElement('button');
+    sort.type = 'button';
+    sort.className = 'tool-btn';
+    sort.dataset.sort = '';
+    sort.dataset.order = order;
+    sort.innerHTML = `<span class="tool-btn__glyph" aria-hidden="true">${SORT_GLYPH}</span>`;
+    sort.setAttribute('aria-label', orderLabel());
+    sort.addEventListener('click', () => {
+      order = order === 'desc' ? 'asc' : 'desc';
+      // Every sort button on the page, the same way the filters do it.
+      document.querySelectorAll('[data-sort]').forEach((b) => {
+        b.dataset.order = order;
+        b.setAttribute('aria-label', orderLabel());
+      });
+      render();
+    });
+
+    const tidy = document.createElement('button');
+    tidy.type = 'button';
+    tidy.className = 'filter-btn tool-tidy';
+    tidy.dataset.tidy = '';
+    tidy.textContent = 'Tidy up';
+    tidy.addEventListener('click', tidyUp);
+
+    tools.appendChild(sort);
+    tools.appendChild(tidy);
+    return tools;
+  }
+
+  /* Offered only once there is something to tidy. A button that puts
+     things back when nothing has been moved is a button that does
+     nothing, and the corner has no room for one. */
+  window.addEventListener('cards:moved', () => {
+    document.querySelectorAll('[data-tidy]').forEach((b) => b.classList.add('is-shown'));
+  });
+
+  function tidyUp() {
+    grid.querySelectorAll('.work-card').forEach((card) => window.sendHome(card));
+    document.querySelectorAll('[data-tidy]').forEach((b) => b.classList.remove('is-shown'));
   }
 
   function makeButton(label, key, value) {
@@ -97,6 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.appendChild(buildFilterGroup(...g));
       list.appendChild(item);
     });
+
+    const toolRung = document.createElement('li');
+    toolRung.className = 'navcue__item';
+    toolRung.appendChild(buildTools());
+    list.appendChild(toolRung);
 
     document.body.appendChild(cue);
     if (window.setupCue) window.setupCue(cue);
@@ -153,6 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ];
 
     groups.forEach((g) => filterBar.appendChild(buildFilterGroup(...g)));
+    filterBar.appendChild(buildTools());
     buildFilterCue(groups);
 
     render();

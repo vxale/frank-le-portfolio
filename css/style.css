@@ -159,8 +159,14 @@ a { color: inherit; }
 
 main { display: block; }
 
+/* The same opening as every canvas page. works.html is the only page
+   left using .section, and since its heading and rules came out there
+   was nothing at the top of it to justify --section-gap - the filter
+   bar simply started 60px lower than the first line of every other
+   page. These figures are .field's, deliberately: change one, change
+   both. */
 .section {
-  padding: var(--section-gap) var(--gutter);
+  padding: clamp(2rem, 7vw, 5rem) var(--gutter) clamp(4rem, 10vw, 8rem);
 }
 
 .section--tight { padding-block: clamp(2rem, 5vw, 4rem); }
@@ -2010,3 +2016,103 @@ main { display: block; }
 
 /* A rung here is a whole filter group, not a word. */
 .navcue--filter .filter-group { margin: 0; }
+
+
+/* ---------- Filter options, and the two grid tools ----------
+
+   OPTIONS ON HOVER. In the bar a group shows its name and its answer;
+   the alternatives arrive when the pointer does. The space they take
+   is held open whether they are showing or not, so a group never
+   changes width and the row never shifts under the hand - the same
+   rule as the outward-link mark on Contact and the resize grip on a
+   card.
+
+   Only in the bar. Inside the corner cue the whole branch is already
+   hover-revealed, and a second hover inside the first would be a door
+   behind a door.
+
+   And only where there is a pointer: on touch there is nothing to
+   reveal them with, so they stay out.
+
+   SORT is a glyph and nothing else, per Frank - an arrow that turns
+   over. Down is newest first, up is oldest first, and the accessible
+   name carries what the arrow cannot say out loud.
+
+   TIDY appears only once something has been moved. ---------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .filters .filter-btn[aria-pressed="false"] {
+    opacity: 0;
+    transition: opacity 160ms var(--ease-out),
+                color 0.2s var(--ease-out),
+                border-color 0.2s var(--ease-out);
+  }
+
+  .filters .filter-group:hover .filter-btn,
+  .filters .filter-group:focus-within .filter-btn { opacity: 1; }
+}
+
+.filter-tools { gap: 0.9rem; }
+
+.tool-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out),
+              transform 0.14s var(--ease-out);
+}
+
+.tool-btn:active { transform: scale(0.94); }
+.tool-btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+.tool-btn__glyph {
+  display: block;
+  width: 0.72rem;
+  transition: transform 200ms var(--ease-out);
+}
+
+.tool-btn__glyph svg { display: block; width: 100%; height: auto; }
+
+/* The whole control is this half-turn, so it is the one thing here
+   that must read as movement rather than as a swap. */
+.tool-btn[data-order="asc"] .tool-btn__glyph { transform: rotate(180deg); }
+
+@media (hover: hover) and (pointer: fine) {
+  .tool-btn:hover { color: var(--ink); }
+}
+
+/* Holds its place while hidden, so the end of the row does not jump
+   the first time a card is moved. */
+.tool-tidy {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms var(--ease-out),
+              visibility 0s linear 160ms,
+              color 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out);
+}
+
+.tool-tidy.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms var(--ease-out),
+              visibility 0s linear 0s,
+              color 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out);
+}
+
+/* The way home. --ease-in-out because this is a thing moving across
+   the screen from one place to another, not something arriving or
+   leaving. Under reduced motion the global rule drops transform from
+   the transition list and the card simply lands. */
+.work-card.is-homing { transition: transform 320ms var(--ease-in-out); }
+
+/* Four rungs in the filter branch now: three groups and the tools. */
+.navcue--filter { --rungs: 4; }
+.navcue--filter .navcue__item:nth-child(4) { --i: 4; }

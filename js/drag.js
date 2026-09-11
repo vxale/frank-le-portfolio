@@ -90,6 +90,13 @@
 
     suppressClick = moved;
     if (moved) window.setTimeout(() => { suppressClick = false; }, 0);
+    if (moved) announceMoved();
+  }
+
+  /* Anything that offers to put things back needs to know something
+     was taken out of place. One event, no knowledge of who listens. */
+  function announceMoved() {
+    window.dispatchEvent(new CustomEvent('cards:moved'));
   }
 
   window.makeDraggable = function makeDraggable(el) {
@@ -170,6 +177,7 @@
       frame.classList.remove('is-resizing');
       document.body.classList.remove('is-dragging-something');
       sizing = null;
+      announceMoved();
     }
 
     grip.addEventListener('pointerdown', (event) => {
@@ -191,6 +199,32 @@
       window.addEventListener('pointerup', onUp);
       window.addEventListener('pointercancel', onUp);
     });
+  };
+
+  /* Put one thing back where the layout wanted it.
+
+     The journey home is animated; the crop is not. Transitioning a
+     frame's width would animate the height of the grid row it sits in,
+     and through that the position of everything below it - a page-wide
+     reflow, sixty times a second, to make a corner snap look smooth.
+     The eye follows the card travelling and does not miss the rest. */
+  const HOME_MS = 320;
+
+  window.sendHome = function sendHome(el) {
+    if (!el) return;
+    const frame = el.querySelector ? el.querySelector('.media-frame') : null;
+    if (frame) {
+      frame.style.width = '';
+      frame.style.height = '';
+      frame.style.aspectRatio = '';
+      frame.style.removeProperty('width');
+    }
+    if (el.dataset.draggable !== 'on') return;
+    const at = currentOffset(el);
+    if (!at.x && !at.y) return;
+    el.classList.add('is-homing');
+    paint(el, 0, 0);
+    window.setTimeout(() => el.classList.remove('is-homing'), HOME_MS + 40);
   };
 
   // driftAll() lives in site.js, because the node tree needs it too

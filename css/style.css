@@ -358,15 +358,9 @@ main { display: block; }
   border-bottom-color: var(--ink);
 }
 
-.works-count {
-  grid-column: 1 / -1;
-  margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
+/* The project counter was removed Sept 11 2026. The grid is short
+   enough to see, and a running total is a database's idea of a
+   portfolio. */
 
 .works-grid {
   grid-column: 1 / -1;
@@ -1250,7 +1244,9 @@ main { display: block; }
   .end-marks__mail:hover { border-bottom-color: var(--ink); }
 }
 
-.end-marks__inline { grid-column: 1 / -1; margin: clamp(2rem, 6vw, 4rem) 0 0; }
+/* .end-marks__inline is gone: work pages closed on a single small
+   line while every other page closed on the large address and a quiet
+   second line. They all use the same <footer class="end-marks"> now. */
 
 /* ---------- Narrow screens ----------
    The grid is what creates the loose placement, and there isn't room
@@ -1828,14 +1824,25 @@ main { display: block; }
 
 .navcue__link:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
 
-/* A halo of paper behind the words. It is invisible on an empty
-   corner and does its work only on a narrow screen, where a fixed
-   control has nowhere to open except over the text it is sitting on.
-   Cheaper and quieter than a scrim, and it keeps the rule that
-   nothing on this site gets a box. */
+/* A halo of paper behind the words. A fixed control has nowhere to
+   open except over whatever is under it - a paragraph on a narrow
+   screen, a project title on the works grid - and three stacked
+   blurs of the page's own colour knock that back far enough to read
+   against without drawing an edge. Invisible on an empty corner, and
+   it keeps the rule that nothing on this site gets a box. */
 .navcue__trigger,
-.navcue__link {
-  text-shadow: 0 0 0.6em var(--paper), 0 0 0.3em var(--paper);
+.navcue__link,
+.navcue .filter-btn,
+.navcue .filter-group__label {
+  /* Five stops, not one. The halo is the page's own colour painted on
+     the page's own colour, so on an empty corner every extra stop is
+     free - it only shows where something is underneath, and a works
+     grid can put a 40px title under a 12px label. */
+  text-shadow: 0 0 0.3em var(--paper),
+               0 0 0.6em var(--paper),
+               0 0 0.9em var(--paper),
+               0 0 1.3em var(--paper),
+               0 0 1.8em var(--paper);
 }
 
 /* The page you are already standing on is named, not offered. */
@@ -1955,3 +1962,61 @@ main { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .media-frame__move { animation: none; inset: 0; }
 }
+
+
+/* ---------- The filter cue ----------
+   The same object as the Navigate cue in every way that matters -
+   same classes, same open and close behaviour, same figures - turned
+   to face the other way.
+
+   It lives in the TOP LEFT, because that is the corner the filter bar
+   itself occupies, and a control that retreats to where it came from
+   is one the visitor can find again without looking. Which is also
+   why it opens downward: away from the trigger, in the direction the
+   page runs.
+
+   js/works.js shows it only while the real bar is off screen.
+   ---------- */
+
+.navcue--filter {
+  top: var(--gutter);
+  left: var(--gutter);
+  right: auto;
+  bottom: auto;
+  flex-direction: column;          /* trigger on top, branch below */
+  align-items: flex-start;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms var(--ease-out),
+              visibility 0s linear 200ms;
+}
+
+.navcue--filter.is-available {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms var(--ease-out),
+              visibility 0s linear 0s;
+}
+
+.navcue--filter .navcue__list {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Folded UP into the trigger, since the branch grows down from it. */
+.navcue--filter .navcue__item {
+  transform: translate3d(0, calc(var(--i) * -0.8rem), 0);
+}
+
+/* And the edge belongs above each rung, growing down out of whatever
+   it hangs from, rather than below it reaching for nothing. */
+.navcue--filter .navcue__item::after {
+  top: auto;
+  bottom: 100%;
+  right: auto;
+  left: 0.5em;
+  transform-origin: 50% 0;
+}
+
+/* A rung here is a whole filter group, not a word. */
+.navcue--filter .filter-group { margin: 0; }

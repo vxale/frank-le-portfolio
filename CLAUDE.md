@@ -158,3 +158,19 @@ Four things to know before touching it:
 - **Longhands, not the `animation` shorthand.** `animation: name linear both` sets `animation-duration: 0s`, and a progress-based timeline needs it left at `auto`.
 - **Dragging is attached only where `(hover: hover) and (pointer: fine)` matches.** A drag needs `touch-action: none` on the card, and the cards cover most of this page — on a phone that would be a grid you cannot scroll past. Resizing is safe everywhere: only the small grip takes the press.
 - **The resize grip calls `stopPropagation`**, which is what keeps one press from being a resize and a card drag at once. It clears `aspect-ratio` on first move (or the ratio rule fights the height) and clamps between 120px and 92% of the viewport width, so a frame can never push a horizontal scrollbar across the page.
+
+
+## Resize, the filter cue, and one footer (Sept 11 2026)
+
+**Resizing a work card's media holds its shape.** The frame's ratio is a composition decision made in CSS — 16:9, 3:4, 4:3, 1:1 by position in the grid — and letting a corner drag squash it would let anyone distort the work by accident. `makeResizable` in `js/drag.js` now projects the pointer onto the frame's own diagonal instead of reading dx and dy as two independent numbers: `along = (dx·r + dy) / (r² + 1)`, then `width = w₀ + along·r` and `aspect-ratio` does the height. Moving along the diagonal scales at full speed, moving across it barely counts, and a purely vertical pull still resizes rather than feeling dead. Verified across four drag directions: the ratio holds to four decimal places.
+
+**The filter bar has a corner cue.** Scroll past it on `works.html` and `Filter` appears in the **top left**, opening downward into the three filter groups; scroll back and it stands down and closes. Two things about it:
+
+- It is **the same component as Navigate**, not a lookalike. `js/navcue.js` exports `setupCue` and wires anything carrying `data-cue`; the filter cue reuses `.navcue`'s classes and adds `.navcue--filter`, which only reverses the direction — top left instead of bottom right, branch growing down instead of up, edges above each rung instead of below. Anything fixed in one is fixed in both.
+- It holds **a second set of buttons, not a mirror of the state**. `makeButton`'s handler writes to `active` and then re-presses every `.filter-btn` on the page carrying that key, so both sets stay in step without a line of code that knows the other exists. Verified: clicking Film in the corner presses Film in the bar and filters the grid.
+
+Top left is deliberate — it is the corner the filter bar itself occupies, so the control retreats to where it came from, which is also why it opens *downward*, in the direction the page runs.
+
+**The project counter is gone.** The grid is short enough to see, and a running total is a database's idea of a portfolio.
+
+**Every page closes the same way.** Four different footers had grown up: About and Works had the large address plus a quiet second line, Contact had only a copyright, and work pages had all three marks squeezed into one small line rendered by `js/work-detail.js` inside the field grid. All four now use the same static `<footer class="end-marks">`; `.end-marks__inline` and the JS that produced it are gone. Contact repeats its own address at the foot as a result — a small redundancy accepted so that every page ends identically.

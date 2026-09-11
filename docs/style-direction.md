@@ -297,3 +297,9 @@ The page you are standing on is named in the branch but not offered as a link.
 The grid is no longer a page of links to look at. Each card drifts its media a few per cent against the page as it crosses the viewport, grows it 3% under the pointer, can be picked up and moved, and its media can be re-cropped from the corner. None of it announces itself: the parallax is under the threshold of noticing as an effect, and the resize grip waits to be hovered before it draws.
 
 The heading and the two rules above the grid are gone. The page says what it is by what is on it.
+
+
+## The filter cue (Sept 11 2026)
+Scroll past the filter bar on the works page and it reappears as a cue in the top left — the same object as the Navigate cue in the bottom right, turned to face the other way. It retreats to the corner it came from and opens downward, in the direction the page runs.
+
+Resizing a card's media keeps its shape. The frames are cut 16:9, 3:4, 4:3 and 1:1 by position in the grid; that is a composition, and a drag is allowed to change how big it is, not what it is.

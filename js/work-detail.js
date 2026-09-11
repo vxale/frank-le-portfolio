@@ -151,11 +151,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         <span class="label">${esc(workMetaLine(next))}</span>
       </a>` : ''}
 
-    <p class="end-marks__inline label">
-      <a href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a> ·
-      <a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> ·
-      &copy; 2026 Lê Vũ Xuân Anh
-    </p>
   `;
 
   /* The beats read as one sequence: numbered, in order, every one of

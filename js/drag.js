@@ -133,16 +133,33 @@
     function onMove(event) {
       if (!sizing || event.pointerId !== sizing.id) return;
 
-      // The ratio comes off the moment a size is chosen by hand, or
-      // the aspect-ratio rule fights the height being set.
-      frame.style.aspectRatio = 'auto';
+      /* The crop is fixed: only the size changes. The frame's shape is
+         a composition decision made in the CSS (16:9, 3:4, 4:3, 1:1
+         by position in the grid) and letting a drag squash it would
+         let anyone distort the work by accident.
+
+         So the pointer is projected onto the frame's own diagonal
+         rather than read as two independent numbers. Moving along the
+         diagonal scales at full speed; moving across it barely counts,
+         which is exactly how a constrained corner-drag should feel.
+         Both axes still contribute, so the frame never feels dead to
+         a vertical pull. */
+      const dx = event.clientX - sizing.x;
+      const dy = event.clientY - sizing.y;
+      const r = sizing.ratio;
+      const along = (dx * r + dy) / (r * r + 1);
 
       const maxW = document.documentElement.clientWidth * 0.92;
       const maxH = document.documentElement.clientHeight * 1.2;
-      const w = sizing.w + (event.clientX - sizing.x);
-      const h = sizing.h + (event.clientY - sizing.y);
-      frame.style.width = Math.min(maxW, Math.max(MIN_SIZE, w)) + 'px';
-      frame.style.height = Math.min(maxH, Math.max(MIN_SIZE, h)) + 'px';
+
+      let w = sizing.w + along * r;
+      w = Math.max(MIN_SIZE, Math.min(maxW, maxH * r, w));
+
+      // aspect-ratio does the height. Setting it explicitly here would
+      // be a second source of truth for the same number.
+      frame.style.aspectRatio = String(r);
+      frame.style.height = 'auto';
+      frame.style.width = w + 'px';
     }
 
     function onUp(event) {
@@ -165,6 +182,7 @@
         id: event.pointerId,
         x: event.clientX, y: event.clientY,
         w: box.width, h: box.height,
+        ratio: box.height > 0 ? box.width / box.height : 1,
       };
       frame.classList.add('is-resizing');
       document.body.classList.add('is-dragging-something');

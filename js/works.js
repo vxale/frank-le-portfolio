@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const grid = document.querySelector('.works-grid');
   const filterBar = document.querySelector('.filters');
-  const count = document.querySelector('.works-count');
   if (!grid) return;
 
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -21,12 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return true;
     });
-
-    if (count) {
-      count.textContent = filtered.length === works.length
-        ? `${works.length} project${works.length === 1 ? '' : 's'}`
-        : `${filtered.length} of ${works.length} projects`;
-    }
 
     if (!filtered.length) {
       grid.innerHTML = '<p class="works-empty">No work matches these filters yet.</p>';
@@ -75,18 +68,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     return btn;
   }
 
+  /* The filter bar again, in the corner it came from, for when the
+     real one has scrolled out of sight.
+
+     It holds a second set of buttons rather than a mirror of the
+     state, which is the cheaper thing by far: makeButton's handler
+     writes to `active` and then re-presses every .filter-btn on the
+     page carrying that key, so both sets stay in step without a line
+     of code that knows the other one exists.
+
+     It is the same component as the Navigate cue - same classes, same
+     open and close behaviour out of js/navcue.js - laid out from the
+     top left instead of the bottom right, because that is the corner
+     the filter bar itself occupies and the direction it retreats in. */
+  function buildFilterCue(groups) {
+    const cue = document.createElement('nav');
+    cue.className = 'navcue navcue--filter';
+    cue.setAttribute('data-cue', '');
+    cue.setAttribute('aria-label', 'Filter works');
+    cue.innerHTML = '<button class="navcue__trigger" type="button" ' +
+                    'aria-expanded="false">Filter</button>' +
+                    '<ul class="navcue__list"></ul>';
+
+    const list = cue.querySelector('.navcue__list');
+    groups.forEach((g) => {
+      const item = document.createElement('li');
+      item.className = 'navcue__item';
+      item.appendChild(buildFilterGroup(...g));
+      list.appendChild(item);
+    });
+
+    document.body.appendChild(cue);
+    if (window.setupCue) window.setupCue(cue);
+
+    /* Available only while the real bar is off screen. The moment it
+       comes back the corner stands down - and closes, because a branch
+       left hanging over a bar that already says the same thing is two
+       answers to one question. */
+    if (!('IntersectionObserver' in window)) return;
+    const watcher = new IntersectionObserver(([entry]) => {
+      const away = !entry.isIntersecting;
+      cue.classList.toggle('is-available', away);
+      if (!away) {
+        cue.classList.remove('is-open');
+        cue.querySelector('.navcue__trigger').setAttribute('aria-expanded', 'false');
+      }
+    }, { threshold: 0 });
+    watcher.observe(filterBar);
+  }
+
   try {
     works = await fetchWorks();
 
     const types = [...new Set(works.map((w) => w.type))].map((t) => ({ label: typeLabel(t), value: t }));
     const years = [...new Set(works.map((w) => String(w.year)))].sort((a, b) => b - a).map((y) => ({ label: y, value: y }));
 
-    filterBar.appendChild(buildFilterGroup('Type', 'type', types));
-    filterBar.appendChild(buildFilterGroup('Year', 'year', years));
-    filterBar.appendChild(buildFilterGroup('Made for', 'commercial', [
-      { label: 'Commercial', value: 'commercial' },
-      { label: 'Personal', value: 'personal' },
-    ]));
+    const groups = [
+      ['Type', 'type', types],
+      ['Year', 'year', years],
+      ['Made for', 'commercial', [
+        { label: 'Commercial', value: 'commercial' },
+        { label: 'Personal', value: 'personal' },
+      ]],
+    ];
+
+    groups.forEach((g) => filterBar.appendChild(buildFilterGroup(...g)));
+    buildFilterCue(groups);
 
     render();
   } catch (err) {

@@ -38,8 +38,6 @@
         <!-- filter buttons injected by js/works.js based on data/works.json -->
       </div>
 
-      <p class="works-count" aria-live="polite"></p>
-
       <div class="works-grid">
         <!-- work cards injected by js/works.js -->
       </div>
@@ -62,7 +60,7 @@
      the homepage. The trigger is first in the markup and the column is
      reversed in CSS, so the tab order runs bottom to top the way the
      branch reads. js/navcue.js owns the open state. -->
-<nav class="navcue" aria-label="Site">
+<nav class="navcue" data-cue aria-label="Site">
   <button class="navcue__trigger" type="button" aria-expanded="false">Navigate</button>
   <ul class="navcue__list">
     <li class="navcue__item"><button class="navcue__link" type="button" data-scroll-top>Back to top</button></li>

@@ -71,7 +71,8 @@
 </main>
 
 <footer class="end-marks">
-  <p class="label">&copy; 2026 Lê Vũ Xuân Anh</p>
+  <a class="end-marks__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
+  <p class="label"><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> &middot; &copy; 2026 Lê Vũ Xuân Anh</p>
 </footer>
 
 <!-- Navigation, lower right: the node tree's logic folded into one
@@ -80,7 +81,7 @@
      the homepage. The trigger is first in the markup and the column is
      reversed in CSS, so the tab order runs bottom to top the way the
      branch reads. js/navcue.js owns the open state. -->
-<nav class="navcue" aria-label="Site">
+<nav class="navcue" data-cue aria-label="Site">
   <button class="navcue__trigger" type="button" aria-expanded="false">Navigate</button>
   <ul class="navcue__list">
     <li class="navcue__item"><button class="navcue__link" type="button" data-scroll-top>Back to top</button></li>

@@ -188,32 +188,10 @@ main { display: block; }
 
 /* ---------- Section headings ---------- */
 
-.section-head {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-bottom: 0.85rem;
-  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-  border-bottom: 1px solid var(--line);
-}
-
-.section-head__link {
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 2px;
-  transition: border-color 0.3s var(--ease);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .section-head__link:hover { border-bottom-color: var(--ink); }
-}
+/* The section head and its rule were removed Sept 11 2026 along with
+   the one on the filter row: works.html was the last page carrying
+   them, and ruled-off headers are the document look this site left
+   behind. git has the rules. */
 
 /* Text link with a rule that draws itself on hover */
 .link-line {
@@ -237,10 +215,19 @@ main { display: block; }
 /* ---------- Media ---------- */
 
 .media-frame {
+  position: relative;
   aspect-ratio: 4 / 5;
   width: 100%;
   overflow: hidden;
   background: var(--paper-dim);
+  /* The frame declares the scroll timeline that the layer inside it
+     reads. It has to be declared HERE and not on that layer: overflow
+     makes this frame a scroll container, so a view() timeline created
+     inside it would measure the layer against the frame - which never
+     scrolls - and sit frozen at 50% forever. Measured from the frame,
+     it measures against the page, which is the thing moving. */
+  view-timeline-name: --card-view;
+  view-timeline-axis: block;
 }
 
 .media-frame img,
@@ -273,12 +260,17 @@ main { display: block; }
 
 /* ---------- Card caption (works grid) ---------- */
 
+/* The caption carries the link now that the media is something you
+   pick up rather than click through. */
 .caption {
   margin-top: 0.85rem;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0 0.9rem;
   align-items: baseline;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .caption__index {
@@ -292,6 +284,12 @@ main { display: block; }
   font-family: var(--font);
   font-size: var(--step-4);
   line-height: 1.25;
+  /* justify-self, or the underline stretches the whole grid column
+     and reads as a rule rather than a link. */
+  justify-self: start;
+  max-width: 100%;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms var(--ease-out);
 }
 
 .caption__meta {
@@ -311,9 +309,7 @@ main { display: block; }
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 2rem;
-  padding-bottom: 1.25rem;
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
-  border-bottom: 1px solid var(--line);
   font-family: var(--font);
 }
 
@@ -381,10 +377,23 @@ main { display: block; }
 
 .work-card {
   grid-column: span 6;
-  text-decoration: none;
-  color: inherit;
+  position: relative;     /* so a card being dragged can ride above */
   display: block;
+  color: inherit;
 }
+
+/* The layer that reveals on scroll. It is not .work-card itself
+   because the drag writes a transform there, and one element cannot
+   hold two. */
+.work-card__body { display: block; }
+
+.work-card[data-draggable="on"] {
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+}
+
+.work-card.is-dragging { cursor: grabbing; z-index: 3; }
 
 /* Broken rhythm: a repeating four-item pattern of uneven spans,
    offsets and aspect ratios. This is where the "unconventional"
@@ -786,7 +795,12 @@ main { display: block; }
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 1.5rem var(--gutter) 0;
+  /* var(--gutter), not 1.5rem. The homepage holds its colour-mode
+     control at top: var(--gutter), and a header that used a different
+     figure made the Light/Dark pair jump 14px up the moment you left
+     the canvas. The two are now the same distance from the same
+     corner - measured at 1280px: 38.39px on every page. */
+  padding: var(--gutter) var(--gutter) 0;
 }
 
 
@@ -1702,6 +1716,7 @@ main { display: block; }
 
 .navcue {
   --navcue-gap: 1.1rem;
+  --rungs: 3;              /* how many sit above the trigger */
   position: fixed;
   right: var(--gutter);
   bottom: var(--gutter);
@@ -1751,13 +1766,14 @@ main { display: block; }
   opacity: 0;
   visibility: hidden;
   transform: translate3d(0, calc(var(--i) * 0.8rem), 0);
-  transition: opacity 170ms var(--ease-out) calc((2 - var(--i)) * 35ms),
-              transform 170ms var(--ease-out) calc((2 - var(--i)) * 35ms),
+  transition: opacity 170ms var(--ease-out) calc((var(--rungs) - var(--i)) * 35ms),
+              transform 170ms var(--ease-out) calc((var(--rungs) - var(--i)) * 35ms),
               visibility 0s linear 240ms;
 }
 
 .navcue__item:nth-child(1) { --i: 1; }
 .navcue__item:nth-child(2) { --i: 2; }
+.navcue__item:nth-child(3) { --i: 3; }
 
 /* The edge down to whatever sits below - the same hairline the node
    tree draws between a parent and its children, stood on end. It grows
@@ -1773,7 +1789,7 @@ main { display: block; }
   background: var(--ink);
   transform: scaleY(0);
   transform-origin: 50% 100%;
-  transition: transform 170ms var(--ease-out) calc((2 - var(--i)) * 35ms);
+  transition: transform 170ms var(--ease-out) calc((var(--rungs) - var(--i)) * 35ms);
 }
 
 /* Open. 260ms out and 170ms back, staggered 45ms - the same figures
@@ -1794,12 +1810,19 @@ main { display: block; }
   transition: transform 260ms var(--ease-out) calc((var(--i) - 1) * 45ms);
 }
 
+/* One rung is a button (Back to top) and two are links. They are the
+   same object to look at, so the button is stripped back to type. */
 .navcue__link {
+  font-family: var(--font);
   font-size: var(--step-2);
   line-height: 1.2;
   color: var(--ink);
+  background: none;
+  padding: 0;
   text-decoration: none;
+  border: 0;
   border-bottom: 1px solid transparent;
+  cursor: pointer;
   transition: border-color 200ms var(--ease-out);
 }
 
@@ -1836,4 +1859,99 @@ main { display: block; }
   .navcue__item::after,
   .navcue.is-open .navcue__item::after { transform: scaleY(1); }
   .navcue__trigger:active { transform: none; }
+}
+
+
+/* ---------- Works grid: parallax, hover, resize ----------
+   Three behaviours on one card, each on its own element.
+
+   SCROLL. The media drifts a few per cent against the page as the
+   card crosses the viewport - enough to separate the image from the
+   paper it sits on, not enough to notice as an effect. It is a
+   view() scroll timeline rather than a scroll handler, so it runs off
+   the main thread and cannot stutter while images decode; where the
+   browser has no such timeline nothing moves, which is a fine place
+   to land.
+
+   HOVER. 1.03 over 400ms, the same figure the site already uses on
+   media elsewhere. A grid is browsed dozens of times in a sitting, so
+   this stays at the near-imperceptible end.
+
+   RESIZE. A corner grip, two hairlines, that waits for the pointer
+   the way the outward-link mark on Contact does. ---------- */
+
+.media-frame__move {
+  position: absolute;
+  inset: -4% 0;           /* taller than the frame, so no edge shows */
+  /* Longhands, not the shorthand: `animation: name linear both` sets
+     animation-duration to 0s, and a progress-based timeline needs it
+     left at auto to stretch across the range. */
+  animation-name: card-parallax;
+  animation-duration: auto;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  animation-timeline: --card-view;
+  animation-range: cover 0% cover 100%;
+  will-change: transform;
+}
+
+@keyframes card-parallax {
+  from { transform: translate3d(0, -3%, 0); }
+  to   { transform: translate3d(0, 3%, 0); }
+}
+
+.media-frame__grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1.15rem;
+  height: 1.15rem;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.media-frame__grip::before,
+.media-frame__grip::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: var(--ink);
+  transition: opacity 160ms var(--ease-out);
+}
+
+.media-frame__grip::before { width: 1.15rem; height: 1px; }
+.media-frame__grip::after  { width: 1px; height: 1.15rem; }
+
+/* While a frame is being re-cropped it should track the hand exactly,
+   so the image inside holds still and nothing eases. */
+.media-frame.is-resizing .media-frame__move { animation-play-state: paused; }
+
+@media (hover: hover) and (pointer: fine) {
+  .work-card:hover .media-frame img,
+  .work-card:hover .media-frame video { transform: scale(1.03); }
+
+  .work-card:hover .caption__title { border-bottom-color: var(--ink); }
+
+  /* A card in the hand is being moved, not admired. */
+  .work-card.is-dragging .media-frame img,
+  .work-card.is-dragging .media-frame video { transform: none; }
+
+  /* The grip waits to be asked. On touch there is no hover to ask
+     with, so it simply stays out. */
+  .media-frame__grip::before,
+  .media-frame__grip::after { opacity: 0; }
+
+  .work-card:hover .media-frame__grip::before,
+  .work-card:hover .media-frame__grip::after,
+  .media-frame.is-resizing .media-frame__grip::before,
+  .media-frame.is-resizing .media-frame__grip::after { opacity: 1; }
+}
+
+/* Nothing drifts and nothing scales. The frame keeps its media, the
+   grip keeps working - resizing is a thing the visitor asked for, not
+   motion the page decided on. */
+@media (prefers-reduced-motion: reduce) {
+  .media-frame__move { animation: none; inset: 0; }
 }

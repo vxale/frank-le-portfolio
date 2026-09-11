@@ -129,3 +129,32 @@ Two knock-on changes came with it:
 
 - **`works.html` lost the inverted footer slab** and closes on `.end-marks` like every other page. It was the last piece of the pre-canvas design still standing, and it is also a full-width dark field the cue would have vanished into. Its CSS is deleted; git has it.
 - **`.end-marks` now holds both marks to the left** instead of at opposite ends. The lower right belongs to the cue, and a branch opening on top of the copyright is worse than an asymmetry nobody will notice.
+
+
+## Header geometry, and the works grid you can handle (Sept 11 2026)
+
+**The colour-mode control now sits in the same place on every page.** `.page-head` was padded `1.5rem` at the top while the homepage holds its mark at `top: var(--gutter)`, so Light/Dark jumped 14px the moment you left the canvas. `.page-head` uses `var(--gutter)` on all sides now — measured at 1280px, the control's top edge is 38.39px and its right edge 53.39px on all five pages. If either figure is ever changed, change it in both places.
+
+**`works.html` lost its section head and both rules** — the one under the heading and the one under the filter row. The `<h1>` survives as `.visually-hidden` text, because a page with no heading at all is a hole for anything reading structure rather than looking at it. `.section-head` and `.section-head__link` are deleted; works.html was their last user.
+
+**The Navigate branch has three rungs**: `Back to top`, `All works`, `Home`, bottom to top. Rung count lives in `--rungs` on `.navcue` and the stagger maths reads it, so a fourth rung is a `:nth-child` line and a number, not a rewrite. `Back to top` is a `<button>` styled identically to the two links; it scrolls smoothly (instantly under reduced motion) and closes the branch behind itself.
+
+### The works card
+
+The card is no longer one big `<a>`. The media is something the visitor picks up and resizes now, so it cannot also be a link waiting to fire on mouseup; **the caption carries the link**, the way a node's label does on the homepage.
+
+It is four nested elements, and the nesting is load-bearing — four things want a transform, and two on one element means the second silently wins:
+
+| element | transform | owner |
+| --- | --- | --- |
+| `.work-card` | drag offset | `js/drag.js` |
+| `.work-card__body` | scroll reveal | `js/site.js` |
+| `.media-frame__move` | scroll parallax | CSS view timeline |
+| `img` / `video` | hover scale | CSS |
+
+Four things to know before touching it:
+
+- **The view timeline is declared on `.media-frame`, not on the layer that uses it.** `.media-frame` has `overflow: hidden`, which makes it a scroll container — a `view()` timeline created *inside* it measures the layer against the frame, which never scrolls, and sits frozen at 50% progress forever. That was the first version, and it looked exactly like working code. Declared on the frame as `view-timeline-name: --card-view`, it measures against the page. Verified: progress runs 0.29 → 1.00 as a card crosses the viewport, moving the media about 33px.
+- **Longhands, not the `animation` shorthand.** `animation: name linear both` sets `animation-duration: 0s`, and a progress-based timeline needs it left at `auto`.
+- **Dragging is attached only where `(hover: hover) and (pointer: fine)` matches.** A drag needs `touch-action: none` on the card, and the cards cover most of this page — on a phone that would be a grid you cannot scroll past. Resizing is safe everywhere: only the small grip takes the press.
+- **The resize grip calls `stopPropagation`**, which is what keeps one press from being a resize and a card drag at once. It clears `aspect-ratio` on first move (or the ratio rule fights the height) and clamps between 120px and 92% of the viewport width, so a frame can never push a horizontal scrollbar across the page.

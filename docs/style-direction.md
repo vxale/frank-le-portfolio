@@ -291,3 +291,9 @@ Inner pages carry no nameplate and no back link. The name is the root of the nod
 In its place, one cue in the lower right: the word `Navigate`, held at low ink until it is wanted, growing a short branch upward when asked — Navigate, All works, Home. It is the node tree's logic folded into a corner, drawn in the same hairline-and-label language, and it moves on the same figures the tree expands on.
 
 The page you are standing on is named in the branch but not offered as a link.
+
+
+## The works grid, handled (Sept 11 2026)
+The grid is no longer a page of links to look at. Each card drifts its media a few per cent against the page as it crosses the viewport, grows it 3% under the pointer, can be picked up and moved, and its media can be re-cropped from the corner. None of it announces itself: the parallax is under the threshold of noticing as an effect, and the resize grip waits to be hovered before it draws.
+
+The heading and the two rules above the grid are gone. The page says what it is by what is on it.

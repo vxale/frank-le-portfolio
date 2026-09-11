@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const count = document.querySelector('.works-count');
   if (!grid) return;
 
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
   let works = [];
   // ?type=film etc. lets the node-tree branches land on a filtered grid.
   const requestedType = new URLSearchParams(window.location.search).get('type');
@@ -32,7 +34,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     grid.innerHTML = filtered.map((w, i) => cardMarkup(w, i, 'work-card')).join('');
-    grid.querySelectorAll('.work-card').forEach((card) => card.setAttribute('data-reveal', ''));
+
+    /* Picking a card up is a fine-pointer affordance only. A drag on
+       touch needs touch-action: none on the card, and the cards cover
+       most of this page - the result would be a grid you cannot
+       scroll past. Resizing is safe everywhere: the grip is the only
+       thing that takes the press, and it is small. */
+    grid.querySelectorAll('.work-card').forEach((card) => {
+      if (finePointer.matches) window.makeDraggable(card);
+      window.makeResizable(card.querySelector('.media-frame'));
+    });
+
     initReveals(grid);
   }
 

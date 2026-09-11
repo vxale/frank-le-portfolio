@@ -107,6 +107,74 @@
     }, true);
   };
 
+  /* ----------------------------------------------------------
+     Resize, for media that the visitor is allowed to re-crop.
+
+     Same two house rules as the drag above: window listeners, and
+     nothing calls setPointerCapture. The grip stops the event from
+     reaching the card, so one press is either a resize or a move,
+     never both.
+
+     Sizes are clamped at both ends. A frame small enough to vanish
+     or wide enough to push a scrollbar across the page is not a
+     composition, it is a broken layout.
+     ---------------------------------------------------------- */
+
+  const MIN_SIZE = 120;
+
+  window.makeResizable = function makeResizable(frame) {
+    if (!frame || frame.dataset.resizable === 'on') return;
+    const grip = frame.querySelector('[data-resize-grip]');
+    if (!grip) return;
+    frame.dataset.resizable = 'on';
+
+    let sizing = null;
+
+    function onMove(event) {
+      if (!sizing || event.pointerId !== sizing.id) return;
+
+      // The ratio comes off the moment a size is chosen by hand, or
+      // the aspect-ratio rule fights the height being set.
+      frame.style.aspectRatio = 'auto';
+
+      const maxW = document.documentElement.clientWidth * 0.92;
+      const maxH = document.documentElement.clientHeight * 1.2;
+      const w = sizing.w + (event.clientX - sizing.x);
+      const h = sizing.h + (event.clientY - sizing.y);
+      frame.style.width = Math.min(maxW, Math.max(MIN_SIZE, w)) + 'px';
+      frame.style.height = Math.min(maxH, Math.max(MIN_SIZE, h)) + 'px';
+    }
+
+    function onUp(event) {
+      if (!sizing || event.pointerId !== sizing.id) return;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      frame.classList.remove('is-resizing');
+      document.body.classList.remove('is-dragging-something');
+      sizing = null;
+    }
+
+    grip.addEventListener('pointerdown', (event) => {
+      if (event.button !== undefined && event.button > 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+
+      const box = frame.getBoundingClientRect();
+      sizing = {
+        id: event.pointerId,
+        x: event.clientX, y: event.clientY,
+        w: box.width, h: box.height,
+      };
+      frame.classList.add('is-resizing');
+      document.body.classList.add('is-dragging-something');
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    });
+  };
+
   // driftAll() lives in site.js, because the node tree needs it too
   // and this file isn't loaded on the homepage.
   document.addEventListener('DOMContentLoaded', () => {

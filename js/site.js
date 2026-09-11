@@ -53,17 +53,36 @@ function workHref(work) {
   return `work.html?id=${encodeURIComponent(work.id)}`;
 }
 
-/** Shared card used by the homepage carousel and the works grid. */
+/** The works-grid card.
+
+    Four nested elements, because four separate things want a transform
+    and no two of them may share one - the last one written wins and
+    the others silently stop:
+
+      .work-card          drag offset        js/drag.js
+      .work-card__body    scroll reveal      js/site.js
+      .media-frame__move  scroll parallax    CSS view() timeline
+      img / video         hover scale        CSS
+
+    The card is no longer one big <a>. The media is something you pick
+    up and resize now, so it cannot also be a link waiting to fire on
+    mouseup; the caption carries the link instead, the way a node's
+    label does on the homepage. */
 function cardMarkup(work, index, className) {
   return `
-    <a class="${className}" href="${workHref(work)}">
-      <div class="media-frame">${mediaFrameInner(work.media && work.media[0], work.title)}</div>
-      <div class="caption">
-        <span class="caption__index">${workNumber(index)}</span>
-        <span class="caption__title">${esc(work.title)}</span>
-        <span class="caption__meta">${esc(workMetaLine(work))}</span>
+    <article class="${className}">
+      <div class="work-card__body" data-reveal>
+        <div class="media-frame">
+          <div class="media-frame__move">${mediaFrameInner(work.media && work.media[0], work.title)}</div>
+          <span class="media-frame__grip" data-resize-grip aria-hidden="true"></span>
+        </div>
+        <a class="caption" href="${workHref(work)}">
+          <span class="caption__index">${workNumber(index)}</span>
+          <span class="caption__title">${esc(work.title)}</span>
+          <span class="caption__meta">${esc(workMetaLine(work))}</span>
+        </a>
       </div>
-    </a>
+    </article>
   `;
 }
 

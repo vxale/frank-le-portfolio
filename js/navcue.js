@@ -64,6 +64,20 @@
     if (!cue.contains(event.target)) open(false);
   });
 
+  /* Back to top is a rung like the others, and the nearest one to the
+     trigger: it is the cheapest thing the branch offers and the one
+     most often wanted on a long page. It closes the branch behind
+     itself - the visitor asked to go somewhere, not to keep looking
+     at a menu. */
+  const toTop = cue.querySelector('[data-scroll-top]');
+  if (toTop) {
+    toTop.addEventListener('click', () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      open(false);
+    });
+  }
+
   // A link to the page you are already standing on is not a link.
   const here = window.location.pathname.split('/').pop() || 'index.html';
   cue.querySelectorAll('.navcue__link').forEach((link) => {

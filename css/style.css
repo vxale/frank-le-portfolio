@@ -1189,10 +1189,20 @@ main { display: block; }
 .passage--name span { color: var(--ink-soft); }
 
 .reach { margin: 0; display: grid; gap: 0.3rem; justify-items: start; }
-.reach--a { grid-column: 1 / span 5; }
-.reach--b { grid-column: 7 / span 5; }
-.reach--c { grid-column: 2 / span 6; }
-.reach--d { grid-column: 8 / span 4; }
+
+/* Rows are named here rather than left to auto-placement. With seven
+   objects on the field, the order they happen to be written in stops
+   being a composition - the two addresses together, the four outward
+   links scattered across two rows, the CV last and the note beside
+   it. Below 860px the field becomes a single column and every one of
+   these is ignored, which is the intent. */
+.reach--a { grid-column: 1 / span 5; grid-row: 2; }
+.reach--b { grid-column: 7 / span 5; grid-row: 2; }
+.reach--c { grid-column: 2 / span 3; grid-row: 3; }
+.reach--e { grid-column: 7 / span 3; grid-row: 3; }
+.reach--f { grid-column: 1 / span 3; grid-row: 4; }
+.reach--g { grid-column: 6 / span 3; grid-row: 4; }
+.reach--d { grid-column: 9 / span 4; grid-row: 5; }
 .reach .label { color: var(--ink-soft); }
 
 .reach__link {
@@ -1206,11 +1216,61 @@ main { display: block; }
 
 .reach__link--waiting { color: var(--ink-soft); }
 
-@media (hover: hover) and (pointer: fine) {
-  a.reach__link:hover { border-bottom-color: var(--ink); }
+/* ---------- Links that leave the site ----------
+   The place name is the whole label. A mark appears beside it to say
+   the link opens elsewhere - drawn as a hairline rather than set as
+   the arrow character, because the page has exactly one typeface and
+   it cannot be relied on to carry that glyph. ---------- */
+
+.reach__link--out {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
 }
 
-.note--contact { grid-column: 2 / span 5; }
+/* The mark holds its space at all times, shown or not: revealing it
+   must not shove the word it belongs to sideways. */
+.reach__out {
+  display: inline-block;
+  flex: none;
+  width: 0.5em;
+  color: var(--ink-soft);
+}
+
+.reach__out svg { display: block; width: 100%; height: auto; }
+
+@media (hover: hover) and (pointer: fine) {
+  a.reach__link:hover { border-bottom-color: var(--ink); }
+
+  /* Where there is a pointer, the mark waits to be asked - this is a
+     hover, seen dozens of times a session, so it is 140ms and two
+     pixels and no more. On touch there is nothing to ask with, so the
+     mark simply stays out, which is why this lives in here. */
+  .reach__out {
+    opacity: 0;
+    transform: translate3d(-2px, 2px, 0);
+    transition: opacity 140ms var(--ease-out),
+                transform 140ms var(--ease-out);
+  }
+
+  .reach__link--out:hover .reach__out,
+  .reach__link--out:focus-visible .reach__out {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Keyboard reaches it the same way a pointer does. */
+.reach__link--out:focus-visible .reach__out { opacity: 1; }
+
+/* The mark still arrives, it just arrives without travelling. */
+@media (prefers-reduced-motion: reduce) {
+  .reach__out,
+  .reach__link--out:hover .reach__out,
+  .reach__link--out:focus-visible .reach__out { transform: none; }
+}
+
+.note--contact { grid-column: 2 / span 5; grid-row: 5; }
 
 /* ---------- End marks (replaces the inverted footer slab) ---------- */
 

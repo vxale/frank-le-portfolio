@@ -1966,24 +1966,25 @@ main { display: block; }
 
 /* ---------- The filter cue ----------
    The same object as the Navigate cue in every way that matters -
-   same classes, same open and close behaviour, same figures - turned
-   to face the other way.
+   same classes, same open and close behaviour, same figures, same
+   direction - standing in the opposite corner.
 
-   It lives in the TOP LEFT, because that is the corner the filter bar
-   itself occupies, and a control that retreats to where it came from
-   is one the visitor can find again without looking. Which is also
-   why it opens downward: away from the trigger, in the direction the
-   page runs.
+   Lower left, growing upward, mirroring Navigate across the page. The
+   two corners at the foot of the screen are where this site keeps the
+   things you reach for rather than read, and a pair that behave
+   identically is easier to learn than two that each have their own
+   idea about which way a branch goes.
 
-   js/works.js shows it only while the real bar is off screen.
+   Everything below is a reflection: the geometry, the folding and the
+   edges all come from .navcue unchanged. js/works.js shows it only
+   while the real bar is off screen and the foot of the page is not.
    ---------- */
 
 .navcue--filter {
-  top: var(--gutter);
-  left: var(--gutter);
+  top: auto;
   right: auto;
-  bottom: auto;
-  flex-direction: column;          /* trigger on top, branch below */
+  bottom: var(--gutter);
+  left: var(--gutter);
   align-items: flex-start;
   opacity: 0;
   visibility: hidden;
@@ -1998,24 +1999,13 @@ main { display: block; }
               visibility 0s linear 0s;
 }
 
-.navcue--filter .navcue__list {
-  flex-direction: column;
-  align-items: flex-start;
-}
+.navcue--filter .navcue__list { align-items: flex-start; }
 
-/* Folded UP into the trigger, since the branch grows down from it. */
-.navcue--filter .navcue__item {
-  transform: translate3d(0, calc(var(--i) * -0.8rem), 0);
-}
-
-/* And the edge belongs above each rung, growing down out of whatever
-   it hangs from, rather than below it reaching for nothing. */
+/* The one thing a mirror actually changes: the edge hangs off the
+   left of a rung rather than the right. */
 .navcue--filter .navcue__item::after {
-  top: auto;
-  bottom: 100%;
   right: auto;
   left: 0.5em;
-  transform-origin: 50% 0;
 }
 
 /* A rung here is a whole filter group, not a word. */

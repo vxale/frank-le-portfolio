@@ -101,20 +101,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.appendChild(cue);
     if (window.setupCue) window.setupCue(cue);
 
-    /* Available only while the real bar is off screen. The moment it
-       comes back the corner stands down - and closes, because a branch
-       left hanging over a bar that already says the same thing is two
-       answers to one question. */
+    /* Available while the grid is what you are looking at: the real
+       bar gone from the top of the screen, and the end of the page not
+       yet arrived at the bottom of it.
+
+       The first condition is the point of the thing. The second is
+       because the cue stands in the lower left, which is also where
+       every page signs off - and the closing marks are not something
+       to hover a filter menu over. Reaching the foot of the works is
+       finishing with them. */
     if (!('IntersectionObserver' in window)) return;
-    const watcher = new IntersectionObserver(([entry]) => {
-      const away = !entry.isIntersecting;
-      cue.classList.toggle('is-available', away);
-      if (!away) {
+
+    const foot = document.querySelector('.end-marks');
+    let barAway = false;
+    let footHere = false;
+
+    function settle() {
+      const show = barAway && !footHere;
+      cue.classList.toggle('is-available', show);
+      if (!show) {
         cue.classList.remove('is-open');
         cue.querySelector('.navcue__trigger').setAttribute('aria-expanded', 'false');
       }
+    }
+
+    const watcher = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === filterBar) barAway = !entry.isIntersecting;
+        else footHere = entry.isIntersecting;
+      });
+      settle();
     }, { threshold: 0 });
+
     watcher.observe(filterBar);
+    if (foot) watcher.observe(foot);
   }
 
   try {

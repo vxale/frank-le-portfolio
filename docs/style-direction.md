@@ -300,6 +300,6 @@ The heading and the two rules above the grid are gone. The page says what it is 
 
 
 ## The filter cue (Sept 11 2026)
-Scroll past the filter bar on the works page and it reappears as a cue in the top left — the same object as the Navigate cue in the bottom right, turned to face the other way. It retreats to the corner it came from and opens downward, in the direction the page runs.
+Scroll past the filter bar on the works page and it reappears as a cue in the lower left, growing upward — the same object as the Navigate cue in the lower right, mirrored across the page. The two lower corners hold the things you reach for rather than read, and they behave identically. It stands down again when the bar returns, or when the closing marks arrive in the corner it is standing in.
 
 Resizing a card's media keeps its shape. The frames are cut 16:9, 3:4, 4:3 and 1:1 by position in the grid; that is a composition, and a drag is allowed to change how big it is, not what it is.

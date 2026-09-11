@@ -207,3 +207,21 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 - **The media link is `tabindex="-1"`.** It goes to the same place as the caption a line below it, and seven cards' worth of pressing Tab twice for one destination is a keyboard tax with nothing on the other side of it.
 
 **The awards slot waits until there is an award.** It used to print "Awards & screenings — None listed yet" on every project, which is a page telling you what it hasn't got. The block is now conditional and still reads `awards` from `data/works.json`, so the first one added brings it back with no code change.
+
+
+## Five more (Sept 11 2026)
+
+**works.html signs off short** — copyright only, no address and no LinkedIn. This is a deliberate exception to "every page closes the same way" from earlier the same day, made on Frank's instruction: the page is an index of the work, the ways to reach him are one rung up the Navigate branch in the corner, and repeating them under a grid of projects was a second ending to a page that already had one. **Do not "fix" it back.**
+
+**Back to top is not a rung while you are at the top.** `js/navcue.js` toggles `.is-off` on it from a passive scroll listener, guarded so it only writes to the DOM when the boolean actually flips. `display: none` rather than a fade, so the branch closes up behind it and the hairline above it reaches the trigger instead of a gap. The threshold is 40px, not zero — a page can sit a hair off the top after a reload or a rubber-band, and a rung that flickers in and out of a menu is worse than one that waits a moment. The remaining rungs keep their `--i` from `:nth-child`, so the stagger starts 45ms in rather than at 0 when the rung is away; that is below noticing and not worth the machinery to fix.
+
+**Choosing a filter settles its group.** The alternatives used to stay open after a click until the pointer moved off and back. `js/works.js` adds `.is-settled` on a real press (`event.detail > 0`, so a keyboard activation does not) and clears it on `pointerleave`. The CSS took two passes to get right, and both mistakes are worth knowing:
+
+- The guard is **`:not(:has(:focus-visible))`, not `:not(:focus-within)`.** Clicking a button focuses it, so `:focus-within` is true after every mouse click — which held the group open and was precisely the bug the rule existed to fix.
+- The **reveal** rule had the same problem in reverse and now reads `:has(:focus-visible)` too. With `:focus-within` there, moving the pointer away after a click left the options open, because the button you clicked still had focus.
+
+`:focus-visible` is the one that means a keyboard is standing there, and a keyboard user must never have the thing under their focus hidden. Verified through the whole cycle: rest → hover → click → move away → hover again → Tab in.
+
+**The CV moved from Contact to About**, beside the facts list rather than under it — same row, other side of the page (`.reach--cv`, column 7). It belongs where a recruiter is already reading, not on the page they go to afterwards.
+
+**The email addresses carry the outward mark.** A `mailto:` leaves this site as surely as a link to LinkedIn does — it hands you to another application — and a reader who has learned what the mark means on one line should not have to relearn it on the next. No `target` (that would be wrong on a mailto); the hidden text says "opens your email app" rather than "opens in a new tab".

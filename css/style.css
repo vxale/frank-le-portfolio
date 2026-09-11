@@ -2052,8 +2052,28 @@ main { display: block; }
                 border-color 0.2s var(--ease-out);
   }
 
+  /* Revealed by a pointer over the group, or by a keyboard standing
+     in it. :has(:focus-visible) rather than :focus-within on purpose:
+     a mouse click focuses the button it hits, and :focus-within would
+     therefore hold the whole group open after every choice - long
+     after the pointer had gone somewhere else. */
   .filters .filter-group:hover .filter-btn,
-  .filters .filter-group:focus-within .filter-btn { opacity: 1; }
+  .filters .filter-group:has(:focus-visible) .filter-btn { opacity: 1; }
+
+  /* Settled: a choice has just been made with the pointer, so the
+     alternatives stand down again without waiting for it to move.
+     js/works.js clears this when the pointer leaves the group, which
+     is what lets a second look bring them back.
+
+     The guard is :not(:has(:focus-visible)), NOT :not(:focus-within).
+     Clicking a button focuses it, so :focus-within is true after
+     every mouse click - which held the alternatives open and was
+     exactly the bug this rule exists to fix. :focus-visible is the
+     one that means a keyboard is standing here, and a keyboard user
+     must never have the thing under their focus hidden. */
+  .filters .filter-group.is-settled:not(:has(:focus-visible)) .filter-btn[aria-pressed="false"] {
+    opacity: 0;
+  }
 }
 
 .filter-tools { gap: 0.9rem; }
@@ -2121,3 +2141,12 @@ main { display: block; }
    to the grid, not filters on the work in it, so the branch stops at
    the last filter group and they stand apart above it. */
 .navcue__item--tools::after { content: none; }
+
+/* A rung that has nothing to offer is not a rung. display:none rather
+   than a fade, so the branch closes up behind it and the edge above
+   reaches the trigger instead of a gap. */
+.navcue__item.is-off { display: none; }
+
+/* The CV, now on About. It sits beside the facts list rather than
+   under it - same row, other side of the page. */
+.reach--cv { grid-column: 7 / span 4; }

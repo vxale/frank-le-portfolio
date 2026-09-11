@@ -85,6 +85,27 @@
         window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
         open(false);
       });
+
+      /* And it is not a rung at all while you are already at the top.
+         The rung is removed from the layout rather than faded, so the
+         branch closes up behind it and the hairline above it reaches
+         down to the trigger instead of to a gap.
+
+         40px rather than zero: a page can sit a hair off the top after
+         a reload or a rubber-band, and a rung that flickers in and out
+         of a menu is worse than one that waits a moment. */
+      const rung = toTop.closest('.navcue__item');
+      let wasScrolled = null;
+
+      function syncToTop() {
+        const scrolled = window.scrollY > 40;
+        if (scrolled === wasScrolled) return;   // nothing to write
+        wasScrolled = scrolled;
+        if (rung) rung.classList.toggle('is-off', !scrolled);
+      }
+
+      window.addEventListener('scroll', syncToTop, { passive: true });
+      syncToTop();
     }
 
     // A link to the page you are already standing on is not a link.

@@ -74,6 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     group.innerHTML = `<span class="filter-group__label">${esc(label)}</span>`;
     group.appendChild(makeButton('All', key, 'all'));
     options.forEach((opt) => group.appendChild(makeButton(opt.label, key, opt.value)));
+
+    /* Choosing settles the group: the alternatives go away without
+       waiting to be dismissed. They only come back when the pointer
+       leaves and returns, which is the gesture that asked for them in
+       the first place. */
+    group.addEventListener('pointerleave', () => group.classList.remove('is-settled'));
     return group;
   }
 
@@ -133,7 +139,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.dataset.key = key;
     btn.dataset.value = value;
     btn.setAttribute('aria-pressed', String(active[key] === value));
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (event) => {
+      /* detail is 0 when the button was fired from the keyboard. A
+         keyboard user is still inside the group and still needs to see
+         it, so only a real press settles it - and the CSS lets
+         :focus-within override this anyway. */
+      if (event.detail > 0) {
+        const group = btn.closest('.filter-group');
+        if (group) group.classList.add('is-settled');
+      }
+
       active[key] = value;
       document.querySelectorAll(`.filter-btn[data-key="${key}"]`).forEach((b) => {
         b.setAttribute('aria-pressed', String(b.dataset.value === value));

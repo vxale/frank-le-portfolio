@@ -88,3 +88,24 @@ All project content lives in `data/works.json` — one entry per project (id, ti
 
 ## Working style
 Frank reviews and gives direction; explain non-obvious technical decisions in plain terms rather than assuming familiarity with the codebase. No build tools/framework (plain HTML/CSS/JS). Frank authorized React/Next on Sept 8 2026 and it was declined for two concrete reasons, both still true: **Node isn't installed on his machine** (`node`/`npm`/`npx` all absent, no nvm), so anything with a build step couldn't be run or previewed there without setting that up first; and the only stateful piece in a five-page static site is the nav menu, which is ~200 lines of vanilla JS. Revisit only if the site grows something a framework actually earns — and install Node first.
+
+
+## The view corner and the colour-mode crossfade (Sept 11 2026)
+
+**The zoom bar** lives in the lower left of the canvas, above `Reset view`, and it both reports the scale and sets it. Four things about it are decisions rather than defaults:
+
+- It is a real `<input type="range">`. A styled `<div>` with pointer handlers would have looked identical and cost arrow keys, Home/End, page-up/down, press-anywhere-on-the-track, and the screen-reader announcement. The price is a page of vendor pseudo-elements in `css/style.css`; it is worth paying. `aria-valuetext` is set on every change, or a screen reader reads the track position (`52`) instead of the scale it stands for (`100 per cent`).
+- **The track is logarithmic.** 0.33x-1x and 1x-3x feel like the same amount of zooming but are very different spans of `k`; a linear track would spend most of its length on magnification nobody uses.
+- **`MIN_K` is `1 / 3`, not `0.3`.** That makes the limits symmetric in log terms, which is what puts 1x exactly at the midpoint of the bar — slider 50 is scale 1.000, not 0.993. The tick under the track marks that midpoint and is positioned from `--zoom-home`, written by `js/node-tree.js` from the same two constants the slider maps, so it cannot drift if the limits ever change.
+- **Dragging the bar zooms about the centre of the screen**, not the pointer: the pointer is on the control, not on the paper, so there is no point under the cursor worth holding still.
+
+Everything reports through `syncZoom()`, called from `applyView`, so wheel, pinch, keyboard, a branch opening and reset all reach the bar by one path.
+
+**`Reset view` now fades instead of vanishing**, and keeps its row in the grid whether shown or not. `[hidden]` cannot be transitioned (`display: none`), and a button that appeared by shoving the zoom bar upward made the corner twitch every time the paper moved. `js/node-tree.js` toggles `.is-shown` on the button itself — `resetMark` is the button now, not the corner it sits in, because the corner has a permanent occupant.
+
+**Light/dark crossfades** rather than cutting. Two paths, in `js/theme.js`:
+
+1. **A view transition** where the browser has one. It snapshots the page, applies the change, and dissolves old into new on the compositor — free for the main thread, which on this page is already drawing edges and drifting nodes every frame.
+2. **Registered custom properties** where it does not. `@property` with `syntax: "<color>"` is what makes `transition: --ink` mean anything at all; unregistered, a custom property is just a string and will not interpolate. This path recalculates style for the whole document every frame, so the class that carries it is added for the length of the fade and taken off again.
+
+Both run at **260ms linear**. Linear is not laziness: a crossfade composites two layers, and easing either one makes their opacities sum to something other than 1 through the middle, which shows as a bright or dark pulse halfway across. There is deliberately **no `prefers-reduced-motion` override** — nothing moves, it is a blend of two colour states, which is already the gentle variant that override would ask for.

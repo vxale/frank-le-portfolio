@@ -62,9 +62,15 @@
      (screen - pan) / k.
 
      k is clamped rather than unbounded. Past 3x the type is unusably
-     large for a menu, and below 0.3x the labels stop being readable,
-     so panning past that point would be exploring a blur. */
-  const MIN_K = 0.3;
+     large for a menu, and below a third the labels stop being
+     readable, so panning past that point would be exploring a blur. */
+  /* 1/3 rather than a round 0.3, so the limits are symmetric in log
+     terms: a third out and three times in are the same distance from
+     1x. That is what puts 1x exactly at the middle of the zoom bar
+     instead of a hair past it, and makes the bar's midpoint mean
+     something. The floor moves by three hundredths of a scale step,
+     which is nothing to look at. */
+  const MIN_K = 1 / 3;
   const MAX_K = 3;
   const VIEW_MS = 420;          // a camera move, not a UI transition
   const FIT_BACKOFF = 0.8;      // hold 20% back from a tight fit
@@ -75,6 +81,21 @@
   const FIT_MAX_K = 1.15;
   const view = { x: 0, y: 0, k: 1 };
   let viewAnimating = false;
+
+  /* The zoom bar in the lower left. The track is mapped
+     logarithmically, not linearly: 0.3x to 1x and 1x to 3x are the
+     same amount of zooming to the eye but wildly different spans of
+     k, and a linear track would spend four fifths of its length on
+     magnification nobody uses. Log also puts 1x a little past the
+     middle, where it belongs.
+
+     These are read inside applyView, which can run before the corner
+     marks are looked up further down, so they are resolved here at
+     the top rather than beside their listener. */
+  const LOG_MIN = Math.log(MIN_K);
+  const LOG_MAX = Math.log(MAX_K);
+  const zoomRange = document.querySelector('[data-zoom-range]');
+  const zoomValue = document.querySelector('[data-zoom-value]');
 
   const allNodes = [];
   const edges = [];
@@ -191,9 +212,27 @@
 
     const moved = Math.abs(view.x) > 1 || Math.abs(view.y) > 1
       || Math.abs(view.k - 1) > 0.01;
-    if (resetMark) resetMark.hidden = !moved;
+    // A class, not [hidden]: display:none cannot be transitioned, and
+    // the button's row is held open whether it shows or not.
+    if (resetMark) resetMark.classList.toggle('is-shown', moved);
+    syncZoom();
 
     requestSync(move ? VIEW_MS + 60 : 0);
+  }
+
+  /** Put the bar where the view actually is. Called from applyView,
+      so every route to a new scale - wheel, pinch, keyboard, a branch
+      opening, reset - reports through the same one place. */
+  function syncZoom() {
+    const percent = Math.round(view.k * 100);
+    if (zoomRange) {
+      const pos = (Math.log(view.k) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+      zoomRange.value = String(Math.round(pos * 100));
+      // Screen readers would otherwise read the track position ("52")
+      // rather than the thing it stands for.
+      zoomRange.setAttribute('aria-valuetext', `${percent} per cent`);
+    }
+    if (zoomValue) zoomValue.textContent = `${percent}%`;
   }
 
   /** A point in the canvas's own pixels, from a pointer event. */
@@ -1002,8 +1041,33 @@
   // ---------- Panning and zooming ----------
 
   const resetBtn = document.querySelector('[data-reset-view]');
-  const resetMark = resetBtn ? (resetBtn.closest('.mark--view') || resetBtn) : null;
+  /* The button itself, not the corner it sits in: the zoom bar shares
+     that corner now and stays put. */
+  const resetMark = resetBtn;
   if (resetBtn) resetBtn.addEventListener('click', resetView);
+
+  if (zoomRange) {
+    // Hand the 1x position to the CSS so the tick under the track is
+    // computed from the same limits the slider maps.
+    const home = (0 - LOG_MIN) / (LOG_MAX - LOG_MIN);
+    const track = zoomRange.closest('.zoom__track') || zoomRange;
+    track.style.setProperty('--zoom-home', `${(home * 100).toFixed(2)}%`);
+
+    /* Dragging the bar zooms about the middle of the screen. The
+       pointer is on the bar, not on the paper, so there is no point
+       under the cursor to hold still - the centre of the frame is
+       what the visitor is looking at and what should stay put.
+
+       No transition on the way through: this tracks a hand. */
+    zoomRange.addEventListener('input', () => {
+      const t = Number(zoomRange.value) / 100;
+      const target = Math.exp(LOG_MIN + (LOG_MAX - LOG_MIN) * t);
+      const { w, h } = bounds();
+      zoomAt(w / 2, h / 2, target / view.k);
+      syncZoom();
+    });
+  }
+  syncZoom();
 
   let panning = null;
   let pinchDist = 0;

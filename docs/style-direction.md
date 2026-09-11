@@ -272,3 +272,14 @@ Headshot and project images/video are ready on Frank's end but not yet placed in
 
 ## Success criterion for look & feel
 The test for any specific choice: does it make the finished homepage feel like "a filmmaker made this" (Frank's stated target reaction), not like a generic design-student portfolio.
+
+
+## The view corner (Sept 11 2026)
+The lower left of the canvas reports and controls the view: a hairline zoom bar with a tick on it and the scale beside it, and `Reset view` fading in underneath once the paper has actually moved. It is drawn in the same drafting-mark language as the other corners — no box, no plus/minus buttons, the rule and the tick doing the work.
+
+It carries a second job. When the drag hint came out on Sept 10 2026 the canvas was left with no standing sign that it zooms at all; the bar is that sign, and it earns its place by being useful rather than by explaining itself.
+
+## Light and dark (Sept 11 2026)
+Dark is a print negative of the same sheet — ink and paper swap and nothing else moves. Neither end is pure: `#000` under `#fff` glares, and the whole idea here is printed rather than clinical. Media is untouched in both; the work is the work.
+
+The switch dissolves over 260ms rather than cutting, because repainting every surface at once reads as a flash. Nothing travels during it — it is a blend of two colour states and no more.

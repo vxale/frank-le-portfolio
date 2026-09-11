@@ -50,8 +50,20 @@
   <!-- The name, the bio and the role line all live on the canvas now:
        the root node says the name, the bio is a node that branches to
        About, and the roles are the root's caption. See js/node-tree.js. -->
-  <div class="mark mark--view" hidden>
-    <button class="theme__btn" type="button" data-reset-view>Reset view</button>
+  <!-- The view corner. The zoom read-out stands here permanently: it
+       reports the scale, sets it, and - since the drag hint came out -
+       is the only standing sign that this canvas zooms at all. Reset
+       fades in underneath once the view has actually moved, in a row
+       that is held open either way so the bar above never jumps. -->
+  <div class="mark mark--view">
+    <div class="zoom">
+      <span class="zoom__track">
+        <input class="zoom__range" type="range" min="0" max="100" step="1"
+               value="52" aria-label="Zoom" data-zoom-range>
+      </span>
+      <output class="zoom__value" data-zoom-value>100%</output>
+    </div>
+    <button class="theme__btn view-reset" type="button" data-reset-view>Reset view</button>
   </div>
 
   <div class="mark mark--theme">

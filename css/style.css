@@ -1402,10 +1402,145 @@ main { display: block; }
 
 /* Only offered once the view has actually moved — a reset for a thing
    that is already at rest is noise. */
+/* The lower left is the view corner: the zoom read-out on top, the
+   reset under it, one grid so the reset can come and go without
+   shifting anything above it. */
 .mark--view {
   left: var(--gutter);
   bottom: var(--gutter);
   pointer-events: auto;
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+}
+
+/* Only offered once the view has actually moved - a reset for a thing
+   that is already at rest is noise. It fades instead of vanishing,
+   and keeps its row either way: a button that appeared by shoving the
+   zoom bar upward would make the corner twitch every time a visitor
+   touched the paper. */
+.view-reset {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms var(--ease-out),
+              visibility 0s linear 160ms,
+              color 0.2s var(--ease-out),
+              transform 0.14s var(--ease-out);
+}
+
+.view-reset.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms var(--ease-out),
+              visibility 0s linear 0s,
+              color 0.2s var(--ease-out),
+              transform 0.14s var(--ease-out);
+}
+
+/* ---------- Zoom ----------
+   A hairline, a tick riding it, and the number beside it. No box and
+   no plus/minus buttons: the same drafting-mark language as the rest
+   of the corners.
+
+   It is a real <input type="range">, which is why there is a page of
+   vendor pseudo-elements below. The alternative - a div with pointer
+   handlers - would have cost arrow keys, Home/End, page-up, the
+   drag-anywhere-on-the-track behaviour and the screen-reader
+   announcement, all of which come free here. ---------- */
+
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.zoom__track {
+  position: relative;
+  display: block;
+  width: 8.5rem;
+}
+
+/* Where 1x sits on the track. --zoom-home is written by
+   js/node-tree.js from the same limits the slider maps, so the mark
+   cannot drift away from the truth if those limits change. */
+.zoom__track::after {
+  content: "";
+  position: absolute;
+  left: var(--zoom-home, 52%);
+  top: calc(50% + 0.2rem);
+  width: 1px;
+  height: 0.28rem;
+  background: var(--ink-soft);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.zoom__range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: ew-resize;
+}
+
+.zoom__range::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.zoom__range::-moz-range-track {
+  height: 1px;
+  background: var(--ink-soft);
+  opacity: 0.55;
+}
+
+/* A tick, not a knob. Thin enough to read as a drafting mark; the
+   whole track takes the press, so it never has to be aimed at. */
+.zoom__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2px;
+  height: 0.85rem;
+  margin-top: -0.42rem;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  transition: transform 120ms var(--ease-out);
+}
+
+.zoom__range::-moz-range-thumb {
+  width: 2px;
+  height: 0.85rem;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  transition: transform 120ms var(--ease-out);
+}
+
+/* The only motion here: the tick stands up under the finger. */
+.zoom__range:active::-webkit-slider-thumb { transform: scaleY(1.25); }
+.zoom__range:active::-moz-range-thumb { transform: scaleY(1.25); }
+
+.zoom__range:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+.zoom__value {
+  font-family: var(--font);
+  font-size: var(--step-0);
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.4em;   /* 100% -> 95% must not shuffle the corner */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zoom__range:active::-webkit-slider-thumb { transform: none; }
+  .zoom__range:active::-moz-range-thumb { transform: none; }
 }
 
 /* ---------- Compass ----------
@@ -1489,4 +1624,70 @@ main { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .theme__btn:active { transform: none; }
+}
+
+
+/* ---------- Light / dark crossfade ----------
+   Switching mode repaints every surface on the page at once. Cut
+   straight from one to the other and the eye reads it as a flash;
+   dissolved over a quarter second it reads as the lights changing.
+
+   Nothing moves - this is a blend of two colour states and no more -
+   which is also why there is no prefers-reduced-motion override here.
+   A motionless crossfade is already the gentle variant that override
+   would ask for, and cutting it would put the flash back.
+
+   The duration sits at the short end (260ms) because the switch is a
+   control, not a scene: long enough to read as a dissolve, short
+   enough that a visitor toggling twice is not waiting on it.
+   ---------- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  /* Linear, deliberately. The two snapshots are composited together;
+     easing either one makes their opacities sum to something other
+     than 1 through the middle of the fade, which shows up as a bright
+     or dark pulse halfway across. */
+  animation-timing-function: linear;
+}
+
+/* Registration for the fallback path in js/theme.js. An unregistered
+   custom property is just a string to the engine, so `transition:
+   --ink` does nothing at all; with a syntax and an initial value it
+   becomes a colour that can be interpolated. The initial values are
+   the light tokens - they are never actually used, since :root sets
+   all four, but a registered property must declare one. */
+@property --paper {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --paper-dim {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f1f1f1;
+}
+
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #16140f;
+}
+
+@property --ink-soft {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #5c5a55;
+}
+
+/* Only while a switch is in flight. Left on permanently it would put
+   a style recalculation of the entire document behind every colour
+   change on the page. */
+:root.is-theme-fading {
+  transition: --paper 260ms linear,
+              --paper-dim 260ms linear,
+              --ink 260ms linear,
+              --ink-soft 260ms linear;
 }

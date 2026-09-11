@@ -43,11 +43,44 @@
     });
   }
 
+  let fadeTimer = 0;
+
+  /* Crossfade rather than cut. Two ways, in order of preference:
+
+     1. A view transition. The browser snapshots the page as it is,
+        applies the change, and dissolves the old picture into the new
+        one on the compositor. One texture fading over another - the
+        canvas, the type, the video frames and all - at no cost to the
+        main thread, which on this page is already drawing edges and
+        drifting nodes every frame.
+
+     2. Failing that, the four colour tokens are transitioned
+        directly. Custom properties only interpolate once they are
+        registered with @property, which css/style.css does. This
+        recalculates style for the whole document on every frame, so
+        it is the fallback and not the plan, and the class comes off
+        again as soon as the fade is done.
+
+     Both are linear on purpose: a crossfade is a constant-rate blend,
+     and an eased one lets the two layers overlap unevenly in the
+     middle - a visible dip or flash halfway through the change. */
+  function swap(apply) {
+    if (typeof document.startViewTransition === 'function') {
+      document.startViewTransition(apply);
+      return;
+    }
+    root.classList.add('is-theme-fading');
+    apply();
+    window.clearTimeout(fadeTimer);
+    fadeTimer = window.setTimeout(
+      () => root.classList.remove('is-theme-fading'), 340);
+  }
+
   function set(value) {
     try {
       localStorage.setItem(KEY, value);
     } catch (err) { /* nothing to do — the page still switches */ }
-    paint();
+    swap(paint);
   }
 
   document.addEventListener('DOMContentLoaded', () => {

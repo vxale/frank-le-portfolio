@@ -417,69 +417,10 @@ main { display: block; }
   padding: 3rem 0;
 }
 
-/* ---------- Footer (end card — the one inverted surface on the
-   site, so every page closes like a title card) ---------- */
-
-.site-footer {
-  background: var(--ink);
-  color: var(--paper);
-  padding: clamp(3rem, 8vw, 6rem) var(--gutter) clamp(2rem, 4vw, 3rem);
-}
-
-.site-footer__inner {
-  max-width: var(--max-w);
-  margin-inline: auto;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: clamp(1rem, 2vw, 1.75rem);
-}
-
-.site-footer__mail {
-  /* full width, not span 8 — at the Sept 2026 --step-3 bump this no
-     longer fit its old column and was breaking mid-word */
-  grid-column: 1 / -1;
-  font-family: var(--font);
-  font-size: var(--step-8);
-  line-height: 1.1;
-  text-decoration: none;
-  word-break: break-word;
-  background-image: linear-gradient(var(--paper), var(--paper));
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 0 1px;
-  transition: background-size 0.3s var(--ease);
-}
-
-.site-footer__links {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1.75rem;
-  list-style: none;
-  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(245, 242, 234, 0.25);
-  font-family: var(--font);
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.site-footer__links a { text-decoration: none; opacity: 0.75; transition: opacity 0.3s var(--ease); }
-.site-footer__links a:hover { opacity: 1; }
-
-.site-footer__links li:last-child { margin-left: auto; opacity: 0.5; }
-
-@media (hover: hover) and (pointer: fine) {
-  .site-footer__mail:hover { background-size: 100% 1px; }
-}
-
-.site-footer :focus-visible { outline-color: var(--paper); }
-
-@media (max-width: 860px) {
-  .site-footer__mail { grid-column: 1 / -1; }
-  .site-footer__links li:last-child { margin-left: 0; }
-}
+/* The inverted footer slab was removed Sept 11 2026. It was the last
+   piece of the pre-canvas design still standing, on works.html alone,
+   and every other page had already moved to .end-marks. Its rules
+   lived here; git has them if the title-card idea ever comes back. */
 
 /* ---------- Motion: scroll reveals ----------
    Smooth and slow, per the brief — content lifts into place rather
@@ -836,22 +777,16 @@ main { display: block; }
    There is no list menu anywhere on the site. Every page that isn't
    the canvas gets its nameplate and one way back to the tree. ---------- */
 
+/* One thing lives here: the colour mode, held to the right. The
+   nameplate and the back link were removed Sept 11 2026 - see the
+   comment in any page's markup, and the Navigate cue below. */
 .page-head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1.5rem var(--gutter) 0;
-}
-
-.page-head__mark {
-  font-family: var(--font);
-  font-size: var(--step-1);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink);
-  text-decoration: none;
 }
 
 
@@ -1052,7 +987,6 @@ main { display: block; }
    drawn with a background gradient at 100% width — would render as a
    300px rule across the page. Exactly the thing this layout removes. */
 .link-line { justify-self: start; }
-.work-field__back { grid-column: 1 / span 3; justify-self: start; }
 .work-field__loading { grid-column: 1 / span 6; font-size: var(--step-2); margin: 0; }
 
 .work-title {
@@ -1274,12 +1208,16 @@ main { display: block; }
 
 /* ---------- End marks (replaces the inverted footer slab) ---------- */
 
+/* Both marks sit to the left. They used to hold opposite ends of the
+   line, but the lower right belongs to the Navigate cue now, and a
+   branch opening on top of the copyright is worse than an asymmetry
+   nobody will notice. */
 .end-marks {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: clamp(1rem, 4vw, 3rem);
   padding: 0 var(--gutter) clamp(2rem, 5vw, 3.5rem);
 }
 
@@ -1675,13 +1613,6 @@ main { display: block; }
 }
 
 /* On a page it sits with the way back, both to the right. */
-.page-head__right {
-  display: flex;
-  align-items: baseline;
-  gap: clamp(1rem, 3vw, 2.5rem);
-  flex-wrap: wrap;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .theme__btn:active { transform: none; }
 }
@@ -1750,4 +1681,159 @@ main { display: block; }
               --paper-dim 260ms linear,
               --ink 260ms linear,
               --ink-soft 260ms linear;
+}
+
+
+/* ---------- The Navigate cue ----------
+   The only navigation on an inner page, and the node tree's logic
+   folded into one corner: a quiet word in the lower right that grows a
+   short branch upward when asked - Navigate, then All works, then
+   Home.
+
+   It holds low ink until it is wanted. The corner is the emptiest part
+   of these pages and the place a hand already rests, and a navigation
+   that announces itself on a page whose whole subject is one piece of
+   work would be competing with the work.
+
+   The open state is a class, not :hover. A touch browser fires a
+   synthetic hover on tap that never leaves, which strands a CSS-only
+   hover menu open on a phone; js/navcue.js opens on pointer only where
+   there is a real pointer, and on focus for the keyboard. ---------- */
+
+.navcue {
+  --navcue-gap: 1.1rem;
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 6;
+  display: flex;
+  flex-direction: column-reverse;   /* the trigger sits at the bottom */
+  align-items: flex-end;
+  gap: var(--navcue-gap);
+  margin: 0;
+}
+
+.navcue__trigger {
+  font-family: var(--font);
+  font-size: var(--step-0);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 200ms var(--ease-out),
+              transform 140ms var(--ease-out);
+}
+
+.navcue__trigger:active { transform: scale(0.94); }
+.navcue__trigger:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.navcue.is-open .navcue__trigger { opacity: 1; }
+
+.navcue__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--navcue-gap);
+}
+
+/* Closed. Each rung waits a little further down than the one below it,
+   so the branch is folded into the trigger rather than stacked above
+   it out of sight - opening unfolds, it does not slide a finished list
+   into view. --i is the rung's distance from the trigger. */
+.navcue__item {
+  position: relative;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, calc(var(--i) * 0.8rem), 0);
+  transition: opacity 170ms var(--ease-out) calc((2 - var(--i)) * 35ms),
+              transform 170ms var(--ease-out) calc((2 - var(--i)) * 35ms),
+              visibility 0s linear 240ms;
+}
+
+.navcue__item:nth-child(1) { --i: 1; }
+.navcue__item:nth-child(2) { --i: 2; }
+
+/* The edge down to whatever sits below - the same hairline the node
+   tree draws between a parent and its children, stood on end. It grows
+   from its bottom, so the branch reads as travelling up out of the
+   trigger rather than dropping in from above. */
+.navcue__item::after {
+  content: "";
+  position: absolute;
+  right: 0.5em;
+  top: 100%;
+  width: 1px;
+  height: var(--navcue-gap);
+  background: var(--ink);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 170ms var(--ease-out) calc((2 - var(--i)) * 35ms);
+}
+
+/* Open. 260ms out and 170ms back, staggered 45ms - the same figures
+   the node tree expands and collapses on, because this is the same
+   gesture. Opening staggers upward from the trigger; closing runs the
+   other way, so the branch retracts into the word it came from. */
+.navcue.is-open .navcue__item {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 260ms var(--ease-out) calc((var(--i) - 1) * 45ms),
+              transform 260ms var(--ease-out) calc((var(--i) - 1) * 45ms),
+              visibility 0s linear 0s;
+}
+
+.navcue.is-open .navcue__item::after {
+  transform: scaleY(1);
+  transition: transform 260ms var(--ease-out) calc((var(--i) - 1) * 45ms);
+}
+
+.navcue__link {
+  font-size: var(--step-2);
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms var(--ease-out);
+}
+
+.navcue__link:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+
+/* A halo of paper behind the words. It is invisible on an empty
+   corner and does its work only on a narrow screen, where a fixed
+   control has nowhere to open except over the text it is sitting on.
+   Cheaper and quieter than a scrim, and it keeps the rule that
+   nothing on this site gets a box. */
+.navcue__trigger,
+.navcue__link {
+  text-shadow: 0 0 0.6em var(--paper), 0 0 0.3em var(--paper);
+}
+
+/* The page you are already standing on is named, not offered. */
+.navcue__link[aria-current="page"] { color: var(--ink-soft); }
+
+@media (hover: hover) and (pointer: fine) {
+  .navcue__link:hover { border-bottom-color: var(--ink); }
+  .navcue__link[aria-current="page"]:hover { border-bottom-color: transparent; }
+}
+
+/* Room at the foot of every page so the cue never sits on the closing
+   marks. */
+.end-marks { padding-bottom: clamp(4rem, 8vw, 5.5rem); }
+
+/* The branch still arrives and leaves, it just does not travel to do
+   it - and the edges are structure rather than motion, so they are
+   simply there. */
+@media (prefers-reduced-motion: reduce) {
+  .navcue__item,
+  .navcue.is-open .navcue__item { transform: none; }
+  .navcue__item::after,
+  .navcue.is-open .navcue__item::after { transform: scaleY(1); }
+  .navcue__trigger:active { transform: none; }
 }

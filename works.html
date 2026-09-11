@@ -13,14 +13,15 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- Only the colour mode lives up here now. The nameplate and the way
+     back both came out on Sept 11 2026: the name is the root of the
+     node tree one click away, and a masthead repeated on every page is
+     the thing this site is built to avoid. Navigation is the cue in
+     the lower right. -->
 <header class="page-head">
-  <a class="page-head__mark" href="index.html">Frank Le</a>
-  <div class="page-head__right">
-    <a class="link-line" href="index.html">&larr; Node tree</a>
-    <div class="theme" role="group" aria-label="Colour mode">
-      <button class="theme__btn" type="button" data-set-theme="light">Light</button>
-      <button class="theme__btn" type="button" data-set-theme="dark">Dark</button>
-    </div>
+  <div class="theme" role="group" aria-label="Colour mode">
+    <button class="theme__btn" type="button" data-set-theme="light">Light</button>
+    <button class="theme__btn" type="button" data-set-theme="dark">Dark</button>
   </div>
 </header>
 
@@ -44,18 +45,32 @@
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="site-footer__inner">
-    <a class="site-footer__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
-    <ul class="site-footer__links">
-      <li><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a></li>
-      <li>&copy; 2026 Lê Vũ Xuân Anh</li>
-    </ul>
-  </div>
+<!-- The same end marks every other page closes on. The inverted slab
+     that used to sit here was the last survivor of the pre-canvas
+     design, and it is also a full-width dark field that the Navigate
+     cue would have disappeared into. -->
+<footer class="end-marks">
+  <a class="end-marks__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
+  <p class="label"><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> &middot; &copy; 2026 Lê Vũ Xuân Anh</p>
 </footer>
+
+<!-- Navigation, lower right: the node tree's logic folded into one
+     corner. Quiet until asked, then a short branch grows upward -
+     Navigate, All works, Home - the way a node grows its children on
+     the homepage. The trigger is first in the markup and the column is
+     reversed in CSS, so the tab order runs bottom to top the way the
+     branch reads. js/navcue.js owns the open state. -->
+<nav class="navcue" aria-label="Site">
+  <button class="navcue__trigger" type="button" aria-expanded="false">Navigate</button>
+  <ul class="navcue__list">
+    <li class="navcue__item"><a class="navcue__link" href="works.html">All works</a></li>
+    <li class="navcue__item"><a class="navcue__link" href="index.html">Home</a></li>
+  </ul>
+</nav>
 
 <script src="js/site.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/navcue.js"></script>
 <script src="js/works.js"></script>
 </body>
 </html>

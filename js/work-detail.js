@@ -100,8 +100,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const next = works[(index + 1) % works.length];
 
   root.innerHTML = `
-    <a class="link-line work-field__back" href="works.html">&larr; All works</a>
-
     <h1 class="work-title">${esc(work.title)}</h1>
     <p class="work-marks">${marks.map((m) => `<span class="label">${esc(m)}</span>`).join('')}</p>
 

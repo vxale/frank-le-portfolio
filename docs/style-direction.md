@@ -283,3 +283,11 @@ It carries a second job. When the drag hint came out on Sept 10 2026 the canvas 
 Dark is a print negative of the same sheet — ink and paper swap and nothing else moves. Neither end is pure: `#000` under `#fff` glares, and the whole idea here is printed rather than clinical. Media is untouched in both; the work is the work.
 
 The switch dissolves over 260ms rather than cutting, because repainting every surface at once reads as a flash. Nothing travels during it — it is a blend of two colour states and no more.
+
+
+## Inner-page navigation (Sept 11 2026)
+Inner pages carry no nameplate and no back link. The name is the root of the node tree, one click away; repeating it as a masthead on every page is the convention this site exists to avoid. The header holds the colour mode and nothing else.
+
+In its place, one cue in the lower right: the word `Navigate`, held at low ink until it is wanted, growing a short branch upward when asked — Navigate, All works, Home. It is the node tree's logic folded into a corner, drawn in the same hairline-and-label language, and it moves on the same figures the tree expands on.
+
+The page you are standing on is named in the branch but not offered as a link.

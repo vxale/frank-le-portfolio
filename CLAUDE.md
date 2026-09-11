@@ -109,3 +109,23 @@ Everything reports through `syncZoom()`, called from `applyView`, so wheel, pinc
 2. **Registered custom properties** where it does not. `@property` with `syntax: "<color>"` is what makes `transition: --ink` mean anything at all; unregistered, a custom property is just a string and will not interpolate. This path recalculates style for the whole document every frame, so the class that carries it is added for the length of the fade and taken off again.
 
 Both run at **260ms linear**. Linear is not laziness: a crossfade composites two layers, and easing either one makes their opacities sum to something other than 1 through the middle, which shows as a bright or dark pulse halfway across. There is deliberately **no `prefers-reduced-motion` override** — nothing moves, it is a blend of two colour states, which is already the gentle variant that override would ask for.
+
+
+## Inner-page chrome: the Navigate cue (Sept 11 2026)
+
+Every inner page carried a `Frank Le` nameplate top-left and a `← Node tree` link top-right, and `work.html` added a `← All works` link of its own. All three are gone. The header now holds one thing, the colour mode, held to the right.
+
+Navigation is a single cue fixed to the **lower right**: the word `Navigate` at 0.4 opacity, which grows a short branch upward when asked — `Navigate` → `All works` → `Home`. It is the node tree's own logic folded into a corner, and it is built in `js/navcue.js` + the "Navigate cue" block in `css/style.css`.
+
+Five things here are decisions, not defaults:
+
+- **The open state is a class, not `:hover`.** A touch browser fires a synthetic hover on tap that never leaves, which strands a CSS-only hover menu open on a phone. `js/navcue.js` opens on pointer only where `(hover: hover) and (pointer: fine)` matches and `pointerType !== 'touch'`, on `focusin` for the keyboard, and on click everywhere. Escape closes and returns focus to the trigger; a pointerdown outside closes.
+- **The trigger is first in the markup and the column is `flex-direction: column-reverse`.** That is what makes the tab order run `Navigate → All works → Home`, bottom to top, the same direction the branch reads. Put the list first and the keyboard walks it backwards.
+- **The rungs are folded into the trigger when closed** — each sits `--i × 0.8rem` lower than its open position, so opening *unfolds* rather than sliding a finished list into view. The hairline between rungs is a real edge, scaled from `transform-origin: 50% 100%`, so it grows upward out of the node below it exactly like the tree's edges grow out of a parent.
+- **260ms out, 170ms back, 45ms stagger, `--ease-out`** — the same figures `js/node-tree.js` expands and collapses on, because it is the same gesture. Opening staggers upward from the trigger; closing runs the other way.
+- **`text-shadow` in `--paper`** on the trigger and links. Invisible on an empty corner; on a narrow screen a fixed control has nowhere to open except over the text beneath it, and this keeps the words legible without a scrim or a box.
+
+Two knock-on changes came with it:
+
+- **`works.html` lost the inverted footer slab** and closes on `.end-marks` like every other page. It was the last piece of the pre-canvas design still standing, and it is also a full-width dark field the cue would have vanished into. Its CSS is deleted; git has it.
+- **`.end-marks` now holds both marks to the left** instead of at opposite ends. The lower right belongs to the cue, and a branch opening on top of the copyright is worse than an asymmetry nobody will notice.

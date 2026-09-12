@@ -229,14 +229,15 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 
 ## Embedded video (Sept 12 2026)
 
-`data/works.json` entries can carry an `embed` object — `{ type, id, url, label }`. Only `type: "tiktok"` is implemented, and that is deliberate: another host means another branch in `js/work-detail.js`, **not** a general-purpose field holding iframe HTML. Pasting arbitrary markup out of a content file is how a data file turns into a security problem. The iframe src is built from the id alone (`tiktok.com/embed/v2/<id>`), with the id URL-encoded.
+`data/works.json` entries can carry an `embed` object — `{ type, id, url, author, authorUrl, music, musicUrl, label }`. Only `type: "tiktok"` is implemented, and that is deliberate: another host means another branch in `js/work-detail.js`, **not** a general-purpose field holding iframe HTML. Pasting arbitrary markup out of a content file is how a data file turns into a security problem.
 
-The embed leads the page, in place of the first media frame. Three things about it:
+It is **TikTok's own published embed** — the `blockquote.tiktok-embed` plus `embed.js`, which Frank supplied — not a hand-rolled iframe. Four things to know:
 
-- **It neither drags nor drifts** — the one frame on these pages that doesn't. An iframe swallows pointer events, so a drag would only ever catch its edges, and a player that wanders while you are trying to watch it is worse than a still one.
-- **It is sized to the box TikTok actually serves**, `325 / 745`, not to 9:16. 9:16 is the video; the player is taller because of the strip of TikTok chrome above and below it.
-- **The "Watch on TikTok" link under it is not decoration.** An embed is among the first things strict tracking protection blocks, and without the link the page would have a hole where the work is.
+- **The `<script>` cannot live in the template string.** `innerHTML` does not execute script tags. It is appended as a real element after the page is written (`loadEmbedScript`), guarded so it is added once and only on a project that has an embed. Verified: exactly one request to `embed.js` on this project, none at all on the other one.
+- **The inline `max-width`/`min-width` moved into the stylesheet.** Every other measurement on this site lives there. The script reads the blockquote's box to decide what width to build the player at, so the numbers still have to be right: 605 max, 325 min. Measured 581px at 1280 and 335px at 390 — inside the cap, above the floor, no overflow either way.
+- **The fallback inside `<section>` is trimmed** to the account, the title and the track. TikTok's generator puts the entire caption there — the credits again in handle form, plus five hashtags — which is invisible while the script works and a wall of duplicated text the moment it does not. The credits on the page are the ones Frank wrote out in full names; they do not need a second, shorter, differently-spelled edition above them.
+- **The "Watch on TikTok" link under it is not decoration.** An embed is among the first things strict tracking protection blocks.
 
-We add no border and no tint of our own — the embed brings enough chrome with it already.
+We add no border and no tint of our own — the embed brings enough chrome with it already. The player neither drags nor drifts, the one frame on these pages that doesn't: an iframe swallows pointer events, so a drag would only catch its edges, and a player that wanders while you are trying to watch it is worse than a still one.
 
-**Not verifiable from here:** tiktok.com is blocked in the environment these pages are checked in (robots rules on fetch, and the domain is unreachable from the test browser), so the markup, sizing, placement and fallback link are verified but **actual playback has only been reasoned about, not seen**. Anyone touching this should open the page on a real machine to confirm the player loads and fits.
+**Not verifiable from here:** tiktok.com is unreachable from the environment these pages are checked in — robots rules block fetching it, and the test browser cannot load it. Markup, sizing, placement, script injection and the fallback are all verified; **the player rendering has only been reasoned about, not seen.** Open the page on a real machine to confirm it loads and fits.

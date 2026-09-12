@@ -2164,27 +2164,42 @@ main { display: block; }
    See js/work-detail.js for why it is the one frame on these pages
    that neither drags nor drifts. ---------- */
 
+/* Six columns, because TikTok's card runs to 605px and a column pair
+   would have forced it to its 325px floor. */
 .embed {
-  grid-column: 2 / span 4;
+  grid-column: 2 / span 6;
   margin: 0;
   display: grid;
   gap: 0.85rem;
   justify-items: start;
 }
 
-.embed__frame {
-  display: block;
-  width: min(325px, 100%);
-  aspect-ratio: 325 / 745;
-  background: var(--paper-dim);
-}
-
-.embed__frame iframe {
-  display: block;
+/* The sizes TikTok's generator writes inline, kept here instead -
+   every other measurement on this site lives in this file. The script
+   replaces the blockquote's contents with its player and reads this
+   box for the width to build it at. */
+.embed .tiktok-embed {
+  max-width: 605px;
+  min-width: 325px;
   width: 100%;
-  height: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
 }
+
+/* What shows in the seconds before the script answers - and for good
+   if it never does, which is what a blocked tracker looks like. Quiet
+   enough not to shout during a page load. */
+.embed .tiktok-embed section {
+  display: block;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.embed .tiktok-embed section a { color: inherit; }
+
+.embed iframe { display: block; border: 0; max-width: 100%; }
 
 .embed__link {
   font-family: var(--font);

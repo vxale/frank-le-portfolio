@@ -65,45 +65,64 @@ document.addEventListener('DOMContentLoaded', async () => {
   const shapes = ['wide', 'tall', 'square'];
   const spots = ['lead', 'b', 'c', 'd'];
 
-  /* An embedded player is someone else's box on our paper, and there
-     is no version of it that is not. What we can decide is how little
-     of ours it borrows: no border, no tint, nothing around it, and it
-     leads the page the way a real frame would.
+  /* TikTok's own embed, the markup they publish: a blockquote the
+     script at the end of this file turns into a player.
 
-     It does NOT drag and it does NOT drift, which is a deliberate
-     exception to the rule for every other frame on these pages. An
-     iframe swallows pointer events, so a drag would only ever catch
-     its edges; and a player that wanders while you are trying to
-     watch it is a worse idea than a still one. The link underneath is
-     not decoration either - an embed is the first thing a strict
-     tracking-protection setting blocks, and without it the page would
-     simply have a hole where the work is.
+     Two edits to what their generator emits, both deliberate.
 
-     Only TikTok for now. Another host means another branch here, not
-     a general-purpose embed field: pasting arbitrary iframe HTML out
-     of a data file is how a content file turns into a security
-     problem. */
-  const embed = work.embed && work.embed.type === 'tiktok' && work.embed.id
-    ? `
+     The inline max-width/min-width moved into the stylesheet, where
+     every other measurement on this site lives.
+
+     And the fallback inside the <section> is trimmed to the account,
+     the title line and the track. Theirs carries the whole caption -
+     the credits again, in handle form, plus five hashtags - which is
+     invisible while the script works and a wall of duplicated text
+     the moment it does not. The credits on this page are the ones
+     Frank wrote out, in full names, further down; they do not need a
+     second, shorter, differently-spelled edition above them.
+
+     The <script> cannot ride in this string. innerHTML does not
+     execute script tags, so it is appended as a real element after
+     the page is written - see loadEmbedScript below.
+
+     Only TikTok is implemented, and that is on purpose: another host
+     means another branch here, not a general-purpose field holding
+     iframe HTML. Pasting arbitrary markup out of a content file is
+     how a data file turns into a security problem. */
+  const em = work.embed && work.embed.type === 'tiktok' && work.embed.id ? work.embed : null;
+
+  const embed = em ? `
     <figure class="embed">
-      <span class="embed__frame">
-        <iframe src="https://www.tiktok.com/embed/v2/${encodeURIComponent(work.embed.id)}"
-                title="${esc(work.title)} on TikTok"
-                loading="lazy" allowfullscreen
-                allow="encrypted-media; fullscreen; picture-in-picture"
-                referrerpolicy="strict-origin-when-cross-origin"></iframe>
-      </span>
-      ${work.embed.url ? `
+      <blockquote class="tiktok-embed" cite="${esc(em.url || '')}"
+                  data-video-id="${esc(em.id)}">
+        <section>
+          ${em.author ? `<a href="${esc(em.authorUrl || em.url || '')}"
+             target="_blank" rel="noopener">${esc(em.author)}</a>` : ''}
+          ${esc(work.title)}
+          ${em.music ? `<a href="${esc(em.musicUrl || '')}"
+             target="_blank" rel="noopener">\u266c ${esc(em.music)}</a>` : ''}
+        </section>
+      </blockquote>
+      ${em.url ? `
         <figcaption>
-          <a class="embed__link" href="${esc(work.embed.url)}"
-             target="_blank" rel="noopener">${esc(work.embed.label || 'Watch on TikTok')}<span
+          <a class="embed__link" href="${esc(em.url)}"
+             target="_blank" rel="noopener">${esc(em.label || 'Watch on TikTok')}<span
              class="embed__out" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"
              stroke="currentColor" stroke-width="1.1" stroke-linecap="square" focusable="false"
              ><path d="M3.5 8.5 8.5 3.5"/><path d="M5 3.5H8.5V7"/></svg></span><span
              class="visually-hidden"> (opens in a new tab)</span></a>
         </figcaption>` : ''}
-    </figure>`
-    : '';
+    </figure>` : '';
+
+  /** Appended once, after the markup exists for it to find. */
+  function loadEmbedScript() {
+    if (document.querySelector('script[data-tiktok-embed]')) return;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.tiktok.com/embed.js';
+    s.setAttribute('data-tiktok-embed', '');
+    document.body.appendChild(s);
+  }
 
   const frames = media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}" data-drag>
@@ -200,6 +219,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       </a>` : ''}
 
   `;
+
+  if (em) loadEmbedScript();
 
   /* The beats read as one sequence: numbered, in order, every one of
      them open on arrival. Clicking a number FOLDS a passage away

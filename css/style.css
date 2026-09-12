@@ -2164,8 +2164,8 @@ main { display: block; }
    See js/work-detail.js for why it is the one frame on these pages
    that neither drags nor drifts. ---------- */
 
-/* Six columns, because TikTok's card runs to 605px and a column pair
-   would have forced it to its 325px floor. */
+/* Six columns for the figure; the player inside is narrower than that
+   (see .tiktok-embed) and starts at the figure's left edge. */
 .embed {
   grid-column: 2 / span 6;
   margin: 0;
@@ -2177,9 +2177,17 @@ main { display: block; }
 /* The sizes TikTok's generator writes inline, kept here instead -
    every other measurement on this site lives in this file. The script
    replaces the blockquote's contents with its player and reads this
-   box for the width to build it at. */
+   box for the width to build it at.
+
+   325px, not the 605px the generator suggests. TikTok builds a fixed
+   ~325px card whatever width it is given and centres it, painting the
+   rest of the iframe white - invisible on white paper, a 605px white
+   slab with the player in the middle of it in dark mode. Sized to the
+   card, there is nothing left over to paint. The card's own caption
+   strip below the video is TikTok's chrome inside a cross-origin
+   frame; that part cannot be restyled from here. */
 .embed .tiktok-embed {
-  max-width: 605px;
+  max-width: 325px;
   min-width: 325px;
   width: 100%;
   margin: 0;

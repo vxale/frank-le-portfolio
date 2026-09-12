@@ -124,7 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.appendChild(s);
   }
 
-  const frames = media.map((item, i) => `
+  /* An embed is the project's media on this page. Where one exists the
+     media[] frames are not drawn here — the loop and the published cut
+     are the same film, and a page showing it twice reads as a mistake.
+     media[] still feeds the works-grid card and the node-tree frame,
+     which is where a silent loop earns its keep. If a project ever has
+     an embed AND stills that aren't the same thing, this is the line. */
+  const frames = em ? '' : media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}" data-drag>
       <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>
     </figure>

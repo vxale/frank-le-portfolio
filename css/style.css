@@ -660,20 +660,35 @@ main { display: block; }
    the clip. Still em-based, so it scales with the node's depth
    without a rule per level. */
 .node__media {
+  --edge: 12em;             /* the frame's LONGER side, whichever that is */
   flex: none;
   display: block;
-  width: 12em;
-  aspect-ratio: 4 / 3;
+  width: var(--edge);
+  aspect-ratio: 4 / 3;      /* a holding shape only, until the file's own
+                               ratio is known — see applyRatio() in
+                               js/node-tree.js */
   overflow: hidden;
   background: var(--paper-dim);
 }
 
-/* The root's is a portrait, and proportionally smaller — it sits with
-   the biggest type on the canvas. */
+/* The root's is proportionally smaller — it sits with the biggest type
+   on the canvas — and holds a portrait shape while it waits. */
 .node--d0 .node__media {
-  width: 7.2em;
+  --edge: 9.6em;
+  width: auto;
+  height: var(--edge);
   aspect-ratio: 3 / 4;
 }
+
+/* Every imported file is shown at its native ratio (Frank's rule,
+   Sept 12 2026): the inline aspect-ratio carries the file's own
+   proportions, and the frame is sized by its longer edge. Sizing by
+   width alone would let a portrait clip grow to twice the area of a
+   landscape one; by the longer edge, the two carry the same weight
+   and neither is cropped. Double-class selectors so these outrank the
+   root's holding shape above. */
+.node__media.node__media--wide { width: var(--edge); height: auto; }
+.node__media.node__media--tall { height: var(--edge); width: auto; }
 
 .node__media img,
 .node__media video {

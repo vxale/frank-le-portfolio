@@ -11,6 +11,8 @@
     "thumb": {
       "type": "video",
       "src": "assets/gai-dep-khong-phai-buon.mp4",
+      "width": 721,
+      "height": 404,
       "webm": "assets/gai-dep-khong-phai-buon.webm",
       "poster": "assets/gai-dep-khong-phai-buon-poster.jpg",
       "alt": "Visualizer for Gái Đẹp Không Phải Buồn"
@@ -183,6 +185,8 @@
       {
         "type": "video",
         "src": "assets/tam-cam-by-manh.mp4",
+        "width": 1080,
+        "height": 1920,
         "poster": "assets/tam-cam-by-manh-poster.jpg",
         "alt": "TẤM CÁM BY MẢNH — film loop"
       }

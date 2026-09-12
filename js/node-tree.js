@@ -43,6 +43,8 @@
      Videos work too — { type: 'video', src: 'assets/reel.mp4' } — and
      play on hover rather than autoplaying. */
   const ROOT_MEDIA = { type: 'image', src: '', alt: '' };
+  // Add width and height (the file's pixels) alongside src and the
+  // frame takes the portrait's own proportions before it has loaded.
 
   /* The statement under the root's name. It is copy, so it lives here
      where it can be edited without reading the layout code. */
@@ -777,9 +779,25 @@
       so they carry an empty alt. Video plays on hover/focus only: a
       canvas of autoplaying clips is a lot of moving parts for a menu,
       and on touch the poster frame stands in. */
+  /** Gives a frame the media's own proportions — every imported file
+      is shown at its native ratio, never cropped to a house shape.
+      Taken from width/height in data/works.json when they are there,
+      so the box is right before a byte of the file arrives and the
+      separation pass measures the true size; otherwise read off the
+      file once its metadata lands, and the tree re-settles around
+      the box it turned out to need. */
+  function applyRatio(frame, w, h, late) {
+    if (!(w > 0 && h > 0)) return;
+    frame.style.aspectRatio = `${w} / ${h}`;
+    frame.classList.toggle('node__media--tall', h > w);
+    frame.classList.toggle('node__media--wide', h <= w);
+    if (late) { relax(); requestSync(300); }
+  }
+
   function mediaFrame(media, hit) {
     const frame = document.createElement('span');
     frame.className = 'node__media';
+    applyRatio(frame, media.width, media.height, false);
 
     if (media.type === 'video') {
       const video = document.createElement('video');
@@ -803,6 +821,11 @@
       video.loop = true;
       video.playsInline = true;    // or iOS takes it fullscreen
       if (media.poster) video.poster = media.poster;
+      if (!media.width) {
+        video.addEventListener('loadedmetadata', () => {
+          applyRatio(frame, video.videoWidth, video.videoHeight, true);
+        }, { once: true });
+      }
       frame.appendChild(video);
 
       const play = () => { const p = video.play(); if (p) p.catch(() => {}); };
@@ -830,6 +853,11 @@
       img.alt = '';
       img.loading = 'lazy';
       img.draggable = false; // or the browser drags the picture, not the node
+      if (!media.width) {
+        img.addEventListener('load', () => {
+          applyRatio(frame, img.naturalWidth, img.naturalHeight, true);
+        }, { once: true });
+      }
       frame.appendChild(img);
     }
 

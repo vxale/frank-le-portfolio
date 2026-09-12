@@ -176,7 +176,13 @@
       "what": "A viral video directed and co-edited for the brand MẢNH.",
       "process": "Shot entirely on an iPhone 17 Pro Max."
     },
-    "media": []
+    "media": [],
+    "embed": {
+      "type": "tiktok",
+      "id": "7651239286964047112",
+      "url": "https://www.tiktok.com/@cupcakey.png/video/7651239286964047112",
+      "label": "Watch on TikTok"
+    }
   },
   {
     "id": "placeholder-short-film",

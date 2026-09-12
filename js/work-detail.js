@@ -65,6 +65,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   const shapes = ['wide', 'tall', 'square'];
   const spots = ['lead', 'b', 'c', 'd'];
 
+  /* An embedded player is someone else's box on our paper, and there
+     is no version of it that is not. What we can decide is how little
+     of ours it borrows: no border, no tint, nothing around it, and it
+     leads the page the way a real frame would.
+
+     It does NOT drag and it does NOT drift, which is a deliberate
+     exception to the rule for every other frame on these pages. An
+     iframe swallows pointer events, so a drag would only ever catch
+     its edges; and a player that wanders while you are trying to
+     watch it is a worse idea than a still one. The link underneath is
+     not decoration either - an embed is the first thing a strict
+     tracking-protection setting blocks, and without it the page would
+     simply have a hole where the work is.
+
+     Only TikTok for now. Another host means another branch here, not
+     a general-purpose embed field: pasting arbitrary iframe HTML out
+     of a data file is how a content file turns into a security
+     problem. */
+  const embed = work.embed && work.embed.type === 'tiktok' && work.embed.id
+    ? `
+    <figure class="embed">
+      <span class="embed__frame">
+        <iframe src="https://www.tiktok.com/embed/v2/${encodeURIComponent(work.embed.id)}"
+                title="${esc(work.title)} on TikTok"
+                loading="lazy" allowfullscreen
+                allow="encrypted-media; fullscreen; picture-in-picture"
+                referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </span>
+      ${work.embed.url ? `
+        <figcaption>
+          <a class="embed__link" href="${esc(work.embed.url)}"
+             target="_blank" rel="noopener">${esc(work.embed.label || 'Watch on TikTok')}<span
+             class="embed__out" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"
+             stroke="currentColor" stroke-width="1.1" stroke-linecap="square" focusable="false"
+             ><path d="M3.5 8.5 8.5 3.5"/><path d="M5 3.5H8.5V7"/></svg></span><span
+             class="visually-hidden"> (opens in a new tab)</span></a>
+        </figcaption>` : ''}
+    </figure>`
+    : '';
+
   const frames = media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}" data-drag>
       <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>
@@ -107,6 +147,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   root.innerHTML = `
     <h1 class="work-title">${esc(work.title)}</h1>
     <p class="work-marks">${marks.map((m) => `<span class="label">${esc(m)}</span>`).join('')}</p>
+
+    ${embed}
 
     ${frames}
 

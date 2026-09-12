@@ -225,3 +225,18 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 **The CV moved from Contact to About**, beside the facts list rather than under it — same row, other side of the page (`.reach--cv`, column 7). It belongs where a recruiter is already reading, not on the page they go to afterwards.
 
 **The email addresses carry the outward mark.** A `mailto:` leaves this site as surely as a link to LinkedIn does — it hands you to another application — and a reader who has learned what the mark means on one line should not have to relearn it on the next. No `target` (that would be wrong on a mailto); the hidden text says "opens your email app" rather than "opens in a new tab".
+
+
+## Embedded video (Sept 12 2026)
+
+`data/works.json` entries can carry an `embed` object — `{ type, id, url, label }`. Only `type: "tiktok"` is implemented, and that is deliberate: another host means another branch in `js/work-detail.js`, **not** a general-purpose field holding iframe HTML. Pasting arbitrary markup out of a content file is how a data file turns into a security problem. The iframe src is built from the id alone (`tiktok.com/embed/v2/<id>`), with the id URL-encoded.
+
+The embed leads the page, in place of the first media frame. Three things about it:
+
+- **It neither drags nor drifts** — the one frame on these pages that doesn't. An iframe swallows pointer events, so a drag would only ever catch its edges, and a player that wanders while you are trying to watch it is worse than a still one.
+- **It is sized to the box TikTok actually serves**, `325 / 745`, not to 9:16. 9:16 is the video; the player is taller because of the strip of TikTok chrome above and below it.
+- **The "Watch on TikTok" link under it is not decoration.** An embed is among the first things strict tracking protection blocks, and without the link the page would have a hole where the work is.
+
+We add no border and no tint of our own — the embed brings enough chrome with it already.
+
+**Not verifiable from here:** tiktok.com is blocked in the environment these pages are checked in (robots rules on fetch, and the domain is unreachable from the test browser), so the markup, sizing, placement and fallback link are verified but **actual playback has only been reasoned about, not seen**. Anyone touching this should open the page on a real machine to confirm the player loads and fits.

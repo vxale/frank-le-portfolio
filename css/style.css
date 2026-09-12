@@ -1033,10 +1033,22 @@ main { display: block; }
    flowchart of prose, which is the opposite of what these pages are.
    Order is carried by the numbers and by the step down the page. */
 
+/* Two columns of passages, read down then across, the way columns of
+   prose are read. Multi-column layout rather than a two-column grid:
+   it balances the two columns by height on its own, and a numbered
+   sequence flowing 01-02-03 down the left and 04-05 down the right is
+   the newspaper convention. A grid would have paired 01 with 02 on a
+   row and left holes under whichever of the pair ran shorter.
+
+   The descending stagger the single column had is gone — an indent
+   that climbs with nth-child would have shoved the whole right-hand
+   column six rem in. */
 .beats {
-  grid-column: 2 / span 8;
-  display: grid;
-  gap: clamp(1.5rem, 3.5vw, 2.5rem);
+  grid-column: 2 / span 9; /* one more than the single column had: two
+                              measures side by side need the room, or
+                              each line runs short of 45 characters */
+  column-count: 2;
+  column-gap: clamp(2rem, 4vw, 4rem);
 }
 
 .beat {
@@ -1044,15 +1056,9 @@ main { display: block; }
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: clamp(1rem, 2.5vw, 2rem);
   align-items: start;
+  break-inside: avoid;        /* a passage never splits across the fold */
+  margin-bottom: clamp(1.5rem, 3.5vw, 2.5rem);
 }
-
-/* Each passage sits a little further in than the last, so the chain
-   descends rather than stacking. Capped at the fourth step — past
-   that the indent eats the measure instead of shaping it. */
-.beat:nth-child(2) { margin-left: clamp(0.75rem, 2vw, 2rem); }
-.beat:nth-child(3) { margin-left: clamp(1.5rem, 4vw, 4rem); }
-.beat:nth-child(4),
-.beat:nth-child(n + 5) { margin-left: clamp(2.25rem, 6vw, 6rem); }
 
 .beat__num {
   font-family: var(--font);
@@ -1270,7 +1276,7 @@ main { display: block; }
   .work-field > * { margin-bottom: clamp(2rem, 9vw, 3.5rem); }
 
   .floater--c { margin-top: 0; }
-  .beat:nth-child(even) { margin-left: 0; }
+  .beats { column-count: 1; }  /* one column of prose on a phone */
   .work-title { font-size: var(--step-7); }
 }
 

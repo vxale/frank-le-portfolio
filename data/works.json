@@ -89,6 +89,96 @@
     "media": []
   },
   {
+    "id": "tam-cam-by-manh",
+    "title": "TẤM CÁM BY MẢNH",
+    "type": "film",
+    "year": 2026,
+    "commercial": true,
+    "featured": true,
+    "role": "Director, Co-editor",
+    "tools": "iPhone 17 Pro Max",
+    "credits": [
+      {
+        "role": "Brand",
+        "name": "MẢNH"
+      },
+      {
+        "role": "Creative Director & Executive Producer",
+        "name": "T R A G"
+      },
+      {
+        "role": "Video Director",
+        "name": "Lê Vũ Xuân Anh"
+      },
+      {
+        "role": "Director of Photography",
+        "name": "Ducanh Demen"
+      },
+      {
+        "role": "Camera Operator",
+        "name": "Ducanh Demen"
+      },
+      {
+        "role": "Model",
+        "name": "Vân An, Phan Trâm Anh"
+      },
+      {
+        "role": "Set Design",
+        "name": "Minh Huyền"
+      },
+      {
+        "role": "Line Producer",
+        "name": "Long Le"
+      },
+      {
+        "role": "Art Director",
+        "name": "Hoài Anh"
+      },
+      {
+        "role": "Gaffer",
+        "name": "Nguyễn Tùng"
+      },
+      {
+        "role": "Lighting",
+        "name": "Lễ Chí Nguyễn, behelitht"
+      },
+      {
+        "role": "MUA",
+        "name": "Thị Ly"
+      },
+      {
+        "role": "Nail Artist",
+        "name": "Amy Phạm"
+      },
+      {
+        "role": "Accessories",
+        "name": "Hi'deMaison.silver"
+      },
+      {
+        "role": "Editor",
+        "name": "Ducanh Demen, Lê Vũ Xuân Anh"
+      },
+      {
+        "role": "Colorist",
+        "name": "Quoc Anh Dang"
+      },
+      {
+        "role": "BTS",
+        "name": "behelitht"
+      },
+      {
+        "role": "Project Assist",
+        "name": "Mai Đan Vy, Sundy Đào"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "A viral video directed and co-edited for the brand MẢNH.",
+      "process": "Shot entirely on an iPhone 17 Pro Max."
+    },
+    "media": []
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",

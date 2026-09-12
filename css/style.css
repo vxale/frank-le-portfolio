@@ -1040,18 +1040,29 @@ main { display: block; }
    the newspaper convention. A grid would have paired 01 with 02 on a
    row and left holes under whichever of the pair ran shorter.
 
-   The descending stagger the single column had is gone — an indent
-   that climbs with nth-child would have shoved the whole right-hand
-   column six rem in. */
+   The descending indent from the single column is kept (Frank's
+   call), and it runs as ONE staircase through the whole sequence
+   rather than restarting in each column: passage 03 sits two steps
+   in wherever it lands, 05 four. That is what lets it survive
+   multicol at all — the break between columns moves with content and
+   viewport, so a stagger that restarted at the top of the right
+   column would need to know where the break fell. A continuous one
+   doesn't care.
+
+   The step is about two-thirds of what the single column used.
+   Indent is subtracted from the measure, and five steps of the old
+   size would have taken the last passage under 40 characters. */
 .beats {
-  grid-column: 2 / span 9; /* one more than the single column had: two
-                              measures side by side need the room, or
-                              each line runs short of 45 characters */
+  grid-column: 2 / span 10; /* two more than the single column had:
+                               two measures side by side, each giving
+                               up to five steps of indent, need the
+                               room or the lines run short */
   column-count: 2;
   column-gap: clamp(2rem, 4vw, 4rem);
 }
 
 .beat {
+  --step: clamp(0.75rem, 1.5vw, 1.5rem);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: clamp(1rem, 2.5vw, 2rem);
@@ -1059,6 +1070,14 @@ main { display: block; }
   break-inside: avoid;        /* a passage never splits across the fold */
   margin-bottom: clamp(1.5rem, 3.5vw, 2.5rem);
 }
+
+/* Capped at the fifth step — past that the indent eats the measure
+   instead of shaping it. */
+.beat:nth-child(2) { margin-left: var(--step); }
+.beat:nth-child(3) { margin-left: calc(var(--step) * 2); }
+.beat:nth-child(4) { margin-left: calc(var(--step) * 3); }
+.beat:nth-child(5) { margin-left: calc(var(--step) * 4); }
+.beat:nth-child(n + 6) { margin-left: calc(var(--step) * 5); }
 
 .beat__num {
   font-family: var(--font);
@@ -1277,6 +1296,9 @@ main { display: block; }
 
   .floater--c { margin-top: 0; }
   .beats { column-count: 1; }  /* one column of prose on a phone */
+  .beat { --step: 0.5rem; }    /* the staircase stays, in miniature —
+                                  five full steps would be an eighth
+                                  of a phone's width */
   .work-title { font-size: var(--step-7); }
 }
 

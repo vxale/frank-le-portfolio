@@ -176,7 +176,14 @@
       "what": "A viral video directed and co-edited for the brand MẢNH.",
       "process": "Shot entirely on an iPhone 17 Pro Max."
     },
-    "media": [],
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/tam-cam-by-manh.mp4",
+        "poster": "assets/tam-cam-by-manh-poster.jpg",
+        "alt": "TẤM CÁM BY MẢNH — film loop"
+      }
+    ],
     "embed": {
       "type": "tiktok",
       "id": "7651239286964047112",

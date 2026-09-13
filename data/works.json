@@ -288,6 +288,62 @@
     ]
   },
   {
+    "id": "fci-monthly-recap",
+    "title": "FCI Monthly News Recap",
+    "type": "design",
+    "year": 2025,
+    "commercial": true,
+    "featured": true,
+    "role": "Designer",
+    "credits": [
+      {
+        "role": "Brand",
+        "name": "Future Cities Institute founded by CAIVAN"
+      },
+      {
+        "role": "Design",
+        "name": "Lê Vũ Xuân Anh"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "The FCI Monthly News Recap: a carousel template for Instagram and LinkedIn, designed for the Future Cities Institute founded by CAIVAN during a 2025 co-op term as Communications Assistant.",
+      "problem": "How can stories on urban planning and research be transformed to make them more digestible and accessible to a wider audience?",
+      "process": "Drawing attention through colour — the University of Waterloo's brand palette — and through dynamics: lines, rounded shapes and typographic hierarchy that create the motivation for motion.",
+      "result": "A contribution to 63% higher impressions and 32.5% growth on LinkedIn in two months."
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/fci-monthly-recap-standard.png",
+        "width": 1080,
+        "height": 1350,
+        "alt": "FCI Monthly News Recap — cover slide"
+      },
+      {
+        "type": "image",
+        "src": "assets/fci-monthly-recap-alt-reversed.png",
+        "width": 1080,
+        "height": 1350,
+        "alt": "FCI Monthly News Recap — story slide, reversed layout"
+      },
+      {
+        "type": "image",
+        "src": "assets/fci-monthly-recap-long-form.png",
+        "width": 1080,
+        "height": 1350,
+        "alt": "FCI Monthly News Recap — long-form story slide"
+      },
+      {
+        "type": "image",
+        "src": "assets/fci-monthly-recap-last-page.png",
+        "width": 1080,
+        "height": 1350,
+        "alt": "FCI Monthly News Recap — closing slide"
+      }
+    ]
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",

@@ -346,6 +346,42 @@
     ]
   },
   {
+    "id": "winter-cries-poster",
+    "title": "Winter Cries as It Says Goodbye — Poster Design",
+    "type": "design",
+    "year": 2026,
+    "commercial": false,
+    "featured": true,
+    "role": "Designer",
+    "tools": "Photoshop",
+    "credits": [
+      {
+        "role": "Design",
+        "name": "Lê Vũ Xuân Anh"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "Posters for Winter Cries as It Says Goodbye, a short film written and directed by Lê Vũ Xuân Anh (2026)."
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/winter-cries-poster-1.jpg",
+        "width": 1600,
+        "height": 2000,
+        "alt": "Winter Cries as It Says Goodbye — poster 1, figure lying in the grass"
+      },
+      {
+        "type": "image",
+        "src": "assets/winter-cries-poster-2.jpg",
+        "width": 1600,
+        "height": 2000,
+        "alt": "Winter Cries as It Says Goodbye — poster 2, close-up at the window"
+      }
+    ]
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",

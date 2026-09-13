@@ -79,11 +79,22 @@ function workHref(work) {
     pressing Tab twice for one destination is a keyboard tax with
     nothing on the other side of it. */
 function cardMarkup(work, index, className) {
+  const item = (work.media && work.media[0]) || work.thumb;
+  /* Native ratio, Frank's rule: a frame whose media declares its
+     pixels takes the file's own shape; the composed crops in the CSS
+     apply only to entries that don't (the placeholders). The ratio
+     rides on --ratio rather than an inline aspect-ratio because Tidy
+     up clears style.aspectRatio when it sends a card home. */
+  const native = item && item.width && item.height;
+  const frameClass = native
+    ? `media-frame media-frame--native${item.height > item.width ? ' media-frame--upright' : ''}`
+    : 'media-frame';
+  const frameStyle = native ? ` style="--ratio: ${Number(item.width)} / ${Number(item.height)}"` : '';
   return `
     <article class="${className}">
       <div class="work-card__body" data-reveal>
-        <a class="media-frame" href="${workHref(work)}" tabindex="-1">
-          <div class="media-frame__move">${mediaFrameInner((work.media && work.media[0]) || work.thumb, work.title)}</div>
+        <a class="${frameClass}"${frameStyle} href="${workHref(work)}" tabindex="-1">
+          <div class="media-frame__move">${mediaFrameInner(item, work.title)}</div>
           <span class="media-frame__grip" data-resize-grip aria-hidden="true"></span>
         </a>
         <a class="caption" href="${workHref(work)}">

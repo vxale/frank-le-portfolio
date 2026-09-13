@@ -411,6 +411,20 @@ main { display: block; }
 .work-card:nth-child(4n + 3) .media-frame { aspect-ratio: 4 / 3; }
 .work-card:nth-child(4n)     .media-frame { aspect-ratio: 1 / 1; }
 
+/* Native ratio on the grid too (Frank, Sept 12 2026 — the last place
+   the rule wasn't applied). A frame whose media declares its pixels
+   takes the file's own shape from --ratio, set inline by cardMarkup();
+   the composed crops above are for entries that don't say. Same
+   specificity as those rules and later in the file, so it wins. */
+.work-card .media-frame.media-frame--native { aspect-ratio: var(--ratio); }
+
+/* Portrait media is capped by HEIGHT, width following, so a 9:16 clip
+   in a seven-column card is ~380x680 rather than 1400px tall. It is
+   `width`, not `max-width`, on purpose: the resize grip writes an
+   inline width, and inline wins, so the frame can still be taken
+   larger by hand. */
+.work-card .media-frame--upright { width: min(100%, calc(min(70vh, 48rem) * var(--ratio))); }
+
 @media (max-width: 860px) {
   .work-card,
   .work-card:nth-child(4n + 1),

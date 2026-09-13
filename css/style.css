@@ -903,7 +903,37 @@ main { display: block; }
 
 .passage--a { grid-column: 1 / span 6; }
 .passage--b { grid-column: 3 / span 5; }
-.passage--c { grid-column: 5 / span 5; }
+/* One column further right than b, one fewer than before, so the
+   stair keeps stepping and the passage stays clear of the portrait's
+   columns (9-12). See .floater--portrait for why it now sits directly
+   under b rather than a screen lower. */
+.passage--c { grid-column: 4 / span 5; } /* overridden inside .passage-pair below */
+/* The fourth step of the stair: one column further in again, and the
+   last passage before the CV. Ends at column 9, still clear of the
+   portrait. */
+/* c and d travel together in one grid cell (.passage-pair), so the
+   row gap never comes between them. The portrait spans rows 1-4 and
+   is taller than the passages, so any row it ends in stretches to its
+   height — a passage alone in that row drops to the bottom of it, a
+   screen below the one before. That is where d landed on its own row.
+   Inside the pair, d is one column further in than c, the last step
+   of the stair, and a breath below it. */
+.passage-pair {
+  /* Columns 4-8, ending BEFORE the portrait's column 9. That is what
+     lets auto-placement put the pair in row 3 beside the portrait;
+     one column wider (4 / span 6) reached into column 9, overlapped
+     the portrait's cell, and the grid pushed the pair below the
+     portrait's whole span - a screen down, with an empty row left
+     behind. Passages a and b fit for the same reason: both end at 8. */
+  grid-column: 4 / span 5;
+  align-self: start;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  column-gap: inherit;
+  row-gap: clamp(1.25rem, 3vw, 2.25rem);
+}
+.passage-pair .passage--c { grid-column: 1 / span 5; }
+.passage-pair .passage--d { grid-column: 2 / span 4; } /* one step in: the stair's last tread */
 
 .note {
   margin: 0;
@@ -927,7 +957,6 @@ main { display: block; }
 
 .notes .label { display: block; color: var(--ink-soft); }
 
-.notes--about   { grid-column: 1 / span 5; }
 .notes--work    { grid-column: 9 / span 4; }
 .notes--awards  { grid-column: 9 / span 4; }
 
@@ -1089,7 +1118,23 @@ main { display: block; }
   color: var(--ink-soft);
 }
 
-.floater--portrait { grid-column: 8 / span 4; grid-row: 1 / span 2; }
+.floater--portrait {
+  grid-column: 9 / span 4;
+  /* Three rows: a, b, and the c+d pair - exactly the rows the
+     passages occupy, and no more. The count is load-bearing in a way
+     that took three tries to see (Sept 13 2026). Auto-placed items
+     fill rows the portrait doesn't block, so if its span runs past
+     the last passage row, the next item has to skip to the row after
+     the span and every row in between exists as an EMPTY track. With
+     span 4 that was two empty 46px rows between b and the pair, and
+     the pair sat a screen below b. Measured: tracks were
+     80|107|46|46|197|921; now 80|107|197|921. The portrait is taller
+     than a+b+pair, so the third row stretches to its foot - that is
+     fine, the pair is align-self: start and sits at the row's top.
+     If a fifth passage is ever added, this becomes span 4. */
+  grid-row: 1 / span 3;
+  align-self: start;
+}
 .floater--lead     { grid-column: 2 / span 9; }
 .floater--b        { grid-column: 1 / span 5; }
 .floater--c        { grid-column: 7 / span 5; margin-top: clamp(1.5rem, 5vw, 4rem); }
@@ -2299,7 +2344,69 @@ main { display: block; }
 
 /* The CV, now on About. It sits beside the facts list rather than
    under it - same row, other side of the page. */
-.reach--cv { grid-column: 7 / span 4; }
+/* ---------- The CV (About page, Sept 13 2026) ----------
+   On the page rather than behind a download, in the house voice: no
+   rules, no boxes; small caps for the section names and the dates,
+   the serif for what was done and where. Each entry is one row -
+   when | what / where - so the eye can run down the left edge for
+   dates and the right for substance. Latest to earliest. */
+.cv {
+  grid-column: 1 / span 7;
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3rem);
+}
+
+.cv > .label { margin: 0; }
+
+.cv__lead {
+  margin: 0;
+  font-size: var(--step-2);
+  line-height: 1.5;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
+.cv__download { color: var(--ink-soft); }
+
+.cv__section { display: grid; gap: 0.9rem; }
+.cv__section > .label { margin: 0; }
+
+.cv__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.cv__item {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  column-gap: 1.25rem;
+  align-items: baseline;
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.cv__when {
+  font-size: var(--step-0);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-top: 0.15em;
+}
+
+.cv__note { text-transform: none; letter-spacing: 0.02em; }
+
+.cv__what { grid-column: 2; }
+.cv__where { grid-column: 2; color: var(--ink-soft); }
+.cv__where em { font-style: italic; }
+
+@media (max-width: 620px) {
+  .cv__item { grid-template-columns: 1fr; row-gap: 0.15rem; }
+  .cv__what, .cv__where { grid-column: 1; }
+}
 
 
 /* ---------- Embedded player ----------

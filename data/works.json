@@ -7,7 +7,7 @@
     "commercial": true,
     "featured": true,
     "role": "Director",
-    "tools": "",
+    "tools": "Blackmagic Cinema Camera 6K, DaVinci Resolve",
     "thumb": {
       "type": "video",
       "src": "assets/gai-dep-khong-phai-buon.mp4",
@@ -98,7 +98,7 @@
     "commercial": true,
     "featured": true,
     "role": "Director, Co-editor",
-    "tools": "iPhone 17 Pro Max",
+    "tools": "iPhone 17 Pro Max, DaVinci Resolve",
     "credits": [
       {
         "role": "Brand",
@@ -210,6 +210,7 @@
     "commercial": true,
     "featured": true,
     "role": "Director",
+    "tools": "Sony Alpha 7C II, DaVinci Resolve",
     "credits": [
       {
         "role": "Brand",
@@ -295,6 +296,7 @@
     "commercial": true,
     "featured": true,
     "role": "Designer",
+    "tools": "Canva",
     "credits": [
       {
         "role": "Brand",

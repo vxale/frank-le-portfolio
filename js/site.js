@@ -28,7 +28,8 @@ function mediaFrameInner(mediaItem, altFallback) {
   const src = esc(mediaItem.src);
   const alt = esc(mediaItem.alt || altFallback || '');
   if (mediaItem.type === 'video') {
-    return `<video src="${src}" muted loop playsinline autoplay aria-label="${alt}"></video>`;
+    const poster = mediaItem.poster ? ` poster="${esc(mediaItem.poster)}"` : '';
+    return `<video src="${src}"${poster} muted loop playsinline autoplay aria-label="${alt}"></video>`;
   }
   return `<img src="${src}" alt="${alt}" loading="lazy">`;
 }
@@ -79,7 +80,7 @@ function cardMarkup(work, index, className) {
     <article class="${className}">
       <div class="work-card__body" data-reveal>
         <a class="media-frame" href="${workHref(work)}" tabindex="-1">
-          <div class="media-frame__move">${mediaFrameInner(work.media && work.media[0], work.title)}</div>
+          <div class="media-frame__move">${mediaFrameInner((work.media && work.media[0]) || work.thumb, work.title)}</div>
           <span class="media-frame__grip" data-resize-grip aria-hidden="true"></span>
         </a>
         <a class="caption" href="${workHref(work)}">

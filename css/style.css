@@ -2236,6 +2236,13 @@ main { display: block; }
   margin: 0;
   padding: 0;
   border: 0;
+  /* The one radius on the site (Frank's call, Sept 12 2026). TikTok's
+     card has rounded corners of its own, and at each one the iframe's
+     white body showed through as a little white ear — invisible on
+     white paper, plain in dark mode. Clipping the frame to a larger
+     radius hides them. 24px is Frank's number. */
+  border-radius: 24px;
+  overflow: hidden;
 }
 
 /* What shows in the seconds before the script answers - and for good
@@ -2250,7 +2257,7 @@ main { display: block; }
 
 .embed .tiktok-embed section a { color: inherit; }
 
-.embed iframe { display: block; border: 0; max-width: 100%; }
+.embed iframe { display: block; border: 0; max-width: 100%; border-radius: 24px; }
 
 .embed__link {
   font-family: var(--font);

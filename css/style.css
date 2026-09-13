@@ -824,7 +824,7 @@ main { display: block; }
 .page-head {
   display: flex;
   align-items: baseline;
-  justify-content: flex-end;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
   /* var(--gutter), not 1.5rem. The homepage holds its colour-mode
@@ -833,6 +833,27 @@ main { display: block; }
      the canvas. The two are now the same distance from the same
      corner - measured at 1280px: 38.39px on every page. */
   padding: var(--gutter) var(--gutter) 0;
+}
+
+/* The nameplate, back on the inner pages (Frank, Sept 13 2026) as the
+   full name rather than the alias — the same name the root node
+   carries, so leaving the canvas doesn't change who the site belongs
+   to. It is a link home, quietly: no rule at rest, one on hover, the
+   same small tracked caps as every other mark. The canvas itself has
+   no header; the root node is its nameplate. */
+.page-head__mark {
+  font-family: var(--font);
+  font-size: var(--step-1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .page-head__mark:hover { border-bottom-color: var(--ink); }
 }
 
 

@@ -1877,25 +1877,28 @@ main { display: block; }
 
 .navcue__link:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
 
-/* A halo of paper behind the words. A fixed control has nowhere to
-   open except over whatever is under it - a paragraph on a narrow
-   screen, a project title on the works grid - and three stacked
-   blurs of the page's own colour knock that back far enough to read
-   against without drawing an edge. Invisible on an empty corner, and
-   it keeps the rule that nothing on this site gets a box. */
-.navcue__trigger,
-.navcue__link,
-.navcue .filter-btn,
-.navcue .filter-group__label {
-  /* Five stops, not one. The halo is the page's own colour painted on
-     the page's own colour, so on an empty corner every extra stop is
-     free - it only shows where something is underneath, and a works
-     grid can put a 40px title under a 12px label. */
-  text-shadow: 0 0 0.3em var(--paper),
-               0 0 0.6em var(--paper),
-               0 0 0.9em var(--paper),
-               0 0 1.3em var(--paper),
-               0 0 1.8em var(--paper);
+/* The cues used to wear a halo of paper - five stacked text-shadows
+   in the page's own colour - so they stayed legible when a card slid
+   under them. Over a picture that halo is a white glow around the
+   letters (Frank, Sept 12 2026), so it is gone. Instead a cue that
+   has media under it turns its words white, the way a caption sits on
+   a photograph, and drops the rest-state fade so the white actually
+   reads - 40% white on a mid-tone frame is no colour at all. Same in
+   both modes: a photograph is a photograph whichever paper it sits
+   on. "Under it" is measured by js/navcue.js, not guessed. */
+.navcue.is-over-media .navcue__trigger,
+.navcue.is-over-media .navcue__link,
+.navcue.is-over-media .filter-btn,
+.navcue.is-over-media .filter-group__label {
+  color: #fff;
+  opacity: 1;
+}
+
+.navcue.is-over-media .navcue__item::after { background: #fff; }
+
+@media (hover: hover) and (pointer: fine) {
+  .navcue.is-over-media .navcue__link:hover,
+  .navcue.is-over-media .filter-btn:hover { border-bottom-color: #fff; }
 }
 
 /* The page you are already standing on is named, not offered. */

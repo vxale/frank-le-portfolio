@@ -12,7 +12,7 @@
      Frank Le
        ├── About                    → about.html
        ├── Works                    (branch)
-       │     ├── Film (n)           (branch) → each project
+       │     ├── Moving Image (n)   (branch) → each project
        │     ├── Design (n)         (branch) → each project
        │     ├── Photography (n)    (branch) → each project
        │     └── All works          → works.html
@@ -168,7 +168,7 @@
         })),
     }));
 
-    /* Film / Design / Photography sit directly under the root: the
+    /* Moving Image / Design / Photography sit directly under the root: the
        "Works" node in between was a level that only ever held other
        nodes, so it cost a click and said nothing. "All works" keeps
        works.html — the filterable grid — reachable from the canvas. */
@@ -934,7 +934,7 @@
 
     if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
 
-    /* Opening Film, Design or Photography brings the camera to that
+    /* Opening Moving Image, Design or Photography brings the camera to that
        branch. Not the root: its place on the canvas — hard left,
        vertically centred — is a deliberate composition, and refitting
        on the first click would throw it away. */

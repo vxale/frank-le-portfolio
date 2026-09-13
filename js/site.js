@@ -35,7 +35,10 @@ function mediaFrameInner(mediaItem, altFallback) {
 }
 
 function typeLabel(type) {
-  const map = { film: 'Film', design: 'Design', photography: 'Photography' };
+  // The key in data/works.json is still "film" — short to type, and
+  // ?type=film links keep working. Only the word on the page changed
+  // (Frank, Sept 12 2026).
+  const map = { film: 'Moving Image', design: 'Design', photography: 'Photography' };
   return map[type] || (type ? type.charAt(0).toUpperCase() + type.slice(1) : '');
 }
 

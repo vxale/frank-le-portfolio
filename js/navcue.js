@@ -115,8 +115,60 @@
     });
   }
 
+  /* ---- Over media ------------------------------------------------
+     A cue with a picture under it turns white (see the CSS). Whether
+     one is under it is measured: the trigger's box - plus the rungs'
+     boxes while the branch is open - against every media frame on the
+     page. Checked when a drag or resize lands (cards:moved), live
+     while a button is held so the words change as the frame arrives,
+     on scroll (a fixed corner passes over a page that moves), and on
+     resize. rAF-throttled, so the cost is a handful of rects a frame
+     at most, and nothing at all while the pointer is idle. */
+  const cues = new Set();
+  let checkPending = false;
+
+  function cueBoxes(cue) {
+    const parts = [cue.querySelector('.navcue__trigger')];
+    if (cue.classList.contains('is-open')) {
+      parts.push(...cue.querySelectorAll('.navcue__link, .filter-btn, .filter-group__label'));
+    }
+    return parts.map((el) => el.getBoundingClientRect()).filter((b) => b.width && b.height);
+  }
+
+  function overlaps(a, b) {
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  }
+
+  function checkOverMedia() {
+    checkPending = false;
+    const media = [...document.querySelectorAll('.media-frame, .floater')]
+      .map((el) => el.getBoundingClientRect())
+      .filter((b) => b.width && b.height);
+    cues.forEach((cue) => {
+      const boxes = cueBoxes(cue);
+      const over = media.some((m) => boxes.some((b) => overlaps(m, b)));
+      cue.classList.toggle('is-over-media', over);
+    });
+  }
+
+  function requestCheck() {
+    if (checkPending) return;
+    checkPending = true;
+    requestAnimationFrame(checkOverMedia);
+  }
+
+  window.addEventListener('cards:moved', requestCheck);
+  window.addEventListener('scroll', requestCheck, { passive: true });
+  window.addEventListener('resize', requestCheck);
+  window.addEventListener('pointermove', (event) => {
+    if (event.buttons) requestCheck(); // a held button is a drag or a resize in progress
+  }, { passive: true });
+
   // js/works.js builds its filter cue after this file has run, so the
   // setup function is shared rather than kept inside this closure.
-  window.setupCue = setupCue;
-  document.querySelectorAll('[data-cue]').forEach(setupCue);
+  window.setupCue = (cue) => {
+    setupCue(cue);
+    if (cue && cue.dataset.cueReady === 'on') { cues.add(cue); requestCheck(); }
+  };
+  document.querySelectorAll('[data-cue]').forEach(window.setupCue);
 })();

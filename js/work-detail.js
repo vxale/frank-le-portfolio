@@ -45,9 +45,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       Until real assets land, an untitled tint holds the shape — it
       has no border, and it disappears the moment a src exists. */
   function shot(item, altFallback, shape) {
+    /* A frame that knows its pixels takes its own proportions — Frank's
+       standing rule, every imported file at its native ratio. The
+       composed shapes (wide / tall / square) remain for entries that
+       don't say, which today means the placeholders. */
+    const native = item && item.width && item.height;
+    const cls = native ? 'shot--native' : `shot--${shape}`;
+    const style = native ? ` style="--ratio: ${Number(item.width)} / ${Number(item.height)}"` : '';
     const inner = (() => {
       if (item && item.src && item.type === 'video') {
-        return `<video src="${esc(item.src)}" muted loop playsinline autoplay
+        const poster = item.poster ? ` poster="${esc(item.poster)}"` : '';
+        return `<video src="${esc(item.src)}"${poster} muted loop playsinline autoplay
                   aria-label="${esc(item.alt || altFallback)}"></video>`;
       }
       if (item && item.src) {
@@ -55,7 +63,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return `<span class="shot__empty">Add media in data/works.json</span>`;
     })();
-    return `<span class="shot shot--${shape}">${inner}</span>`;
+    return `<span class="shot ${cls}"${style}>${inner}</span>`;
+  }
+
+  /* Portrait media at its native ratio would run the full width of
+     its grid slot and end up ~1700px tall in the lead spot. The
+     floater carries the ratio too, so CSS can cap it by HEIGHT and
+     let the width follow. */
+  function floaterExtra(item) {
+    if (!(item && item.width && item.height && item.height > item.width)) return '';
+    return ` floater--upright" style="--ratio: ${Number(item.width)} / ${Number(item.height)}`;
   }
 
   /* No media, no frames. The template used to draw one empty tint so
@@ -131,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      which is where a silent loop earns its keep. If a project ever has
      an embed AND stills that aren't the same thing, this is the line. */
   const frames = em ? '' : media.map((item, i) => `
-    <figure class="floater floater--${spots[i % spots.length]}" data-drag>
+    <figure class="floater floater--${spots[i % spots.length]}${floaterExtra(item)}" data-drag>
       <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>
     </figure>
   `).join('');

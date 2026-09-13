@@ -337,35 +337,56 @@
   /** Nodes never leave the canvas, and never sit tight against an
       edge — the padding is what keeps this feeling like paper with
       margins rather than a viewport with things jammed into it. */
+  /* The paper is bigger than the screen. Confining nodes to one
+     screen's worth of world space dates from before the view could
+     pan and zoom, and it deadlocked the separation pass the first
+     time a branch carried three tall frames: they could not all fit
+     in one screen height, relax() shoved them apart, the clamp shoved
+     them straight back, twelve passes, still overlapping. The camera
+     can zoom out to MIN_K, so a paper PAPER times the viewport is
+     always showable; fitTo() brings it into frame when a branch
+     spreads. The LEFT margin stays put — that is where the root lives
+     and its home is a composition — and the extra room is to the
+     right and, evenly, above and below. */
+  const PAPER = 1.75;
   function pads() {
     const { w, h } = bounds();
-    return { w, h, padX: Math.min(140, w * 0.12), padY: Math.min(90, h * 0.12) };
+    const padX = Math.min(140, w * 0.12);
+    const padY = Math.min(90, h * 0.12);
+    const extraY = h * (PAPER - 1) / 2;
+    return {
+      w, h, padX, padY,
+      x0: padX,           x1: w * PAPER - padX,
+      y0: padY - extraY,  y1: h + extraY - padY,
+    };
   }
 
   function clampPosition(node) {
-    const { w, h, padX, padY } = pads();
+    const { w, h, x0, x1, y0, y1 } = pads();
 
     /* Clamp the node's BOX inside the margins, not its centre point.
        A node is drawn centred on its coordinates, so clamping the
        centre let a 230px-wide project title hang half off the right
        edge on a phone. A node too wide to fit between the margins
-       gets centred instead of pushed off one side. */
+       gets centred instead of pushed off one side. The box is in
+       world units — screen size over the zoom — like everything else
+       that touches node.x/node.y. */
     const r = node.el ? node.el.getBoundingClientRect() : null;
-    const hw = r ? r.width / 2 : 0;
-    const hh = r ? r.height / 2 : 0;
+    const hw = r ? (r.width / view.k) / 2 : 0;
+    const hh = r ? (r.height / view.k) / 2 : 0;
 
-    const minX = Math.min(padX + hw, w / 2);
-    const maxX = Math.max(w - padX - hw, w / 2);
-    const minY = Math.min(padY + hh, h / 2);
-    const maxY = Math.max(h - padY - hh, h / 2);
+    const minX = Math.min(x0 + hw, w / 2);
+    const maxX = Math.max(x1 - hw, w / 2);
+    const minY = Math.min(y0 + hh, h / 2);
+    const maxY = Math.max(y1 - hh, h / 2);
 
     node.x = Math.max(minX, Math.min(maxX, node.x));
     node.y = Math.max(minY, Math.min(maxY, node.y));
   }
 
   function onPaper(x, y) {
-    const { w, h, padX, padY } = pads();
-    return x >= padX && x <= w - padX && y >= padY && y <= h - padY;
+    const { x0, x1, y0, y1 } = pads();
+    return x >= x0 && x <= x1 && y >= y0 && y <= y1;
   }
 
   /** The root's home, and where it returns on any resize: hard left,
@@ -462,17 +483,20 @@
     const marks = document.querySelectorAll('.canvas__marks .mark');
     if (!marks.length) return [];
     const c = canvas.getBoundingClientRect();
+    const k = view.k;
     const out = [];
     marks.forEach((el) => {
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) return; // hidden at this breakpoint
+      // The marks are fixed to the screen; their world position moves
+      // with the view, so it is derived the same way centreOf() does.
       out.push({
         node: null,
         pinned: true,
-        x: r.left - c.left + r.width / 2,
-        y: r.top - c.top + r.height / 2,
-        hw: r.width / 2 + 14,
-        hh: r.height / 2 + 12,
+        x: (r.left - c.left - view.x) / k + (r.width / k) / 2,
+        y: (r.top - c.top - view.y) / k + (r.height / k) / 2,
+        hw: (r.width / k) / 2 + 14,
+        hh: (r.height / k) / 2 + 12,
       });
     });
     return out;
@@ -480,6 +504,13 @@
 
   function relax() {
     const live = allNodes.filter((n) => n.el);
+    /* Boxes are measured in WORLD units — screen size divided by the
+       zoom — because that is the space node.x/node.y live in. Read
+       raw, a view zoomed out to 73% under-measures every box by 27%
+       and the pass passes boxes it should have parted. It went
+       unnoticed until a branch was dense enough to zoom the view out
+       and carry three tall frames at once. */
+    const k = view.k;
     const items = live.map((n) => {
       const r = n.el.getBoundingClientRect();
       // The root is an anchor: it holds its home position and the rest
@@ -491,8 +522,8 @@
       return {
         node: n,
         pinned: n.pinned || n === root,
-        hw: r.width / 2 + 18,
-        hh: r.height / 2 + 26,
+        hw: (r.width / k) / 2 + 18,
+        hh: (r.height / k) / 2 + 26,
       };
     }).concat(markObstacles());
 

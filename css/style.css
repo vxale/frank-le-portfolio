@@ -993,6 +993,19 @@ main { display: block; }
 .shot--square   { aspect-ratio: 1 / 1; }
 .shot--portrait { aspect-ratio: 4 / 5; }
 
+/* Native ratio, from --ratio set inline by js/work-detail.js from the
+   file's own pixels. Nothing is cropped: the box IS the file's shape. */
+.shot--native   { aspect-ratio: var(--ratio); }
+
+/* Portrait media is capped by height rather than filling its grid
+   slot's width — a 9:16 clip across nine columns would be taller than
+   the screen. Width follows from the ratio; the figure sits at the
+   start of its slot rather than stretching. */
+.floater--upright {
+  max-width: calc(min(78vh, 56rem) * var(--ratio));
+  justify-self: start;
+}
+
 .shot__empty {
   position: absolute;
   inset: 0;

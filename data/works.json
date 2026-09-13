@@ -203,6 +203,91 @@
     }
   },
   {
+    "id": "vision-of-love",
+    "title": "Vision of Love",
+    "type": "film",
+    "year": 2026,
+    "commercial": true,
+    "featured": true,
+    "role": "Director",
+    "credits": [
+      {
+        "role": "Brand",
+        "name": "Trang Phi Bridal"
+      },
+      {
+        "role": "Director",
+        "name": "Lê Vũ Xuân Anh"
+      },
+      {
+        "role": "Model",
+        "name": "Vân An"
+      },
+      {
+        "role": "Director of Photography",
+        "name": "Ducanh Demen"
+      },
+      {
+        "role": "Camera Operator",
+        "name": "Ducanh Demen"
+      },
+      {
+        "role": "Lighting",
+        "name": "Nguyễn Tùng"
+      },
+      {
+        "role": "Post-production",
+        "name": "Ducanh Demen"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "A collection capturing the elegance, desire, pride, and passion of womanhood in wedding dresses."
+    },
+    "media": [
+      {
+        "type": "video",
+        "src": "assets/vision-of-love-highlight.mp4",
+        "width": 540,
+        "height": 960,
+        "poster": "assets/vision-of-love-poster.jpg",
+        "alt": "Vision of Love — highlight"
+      },
+      {
+        "type": "video",
+        "src": "assets/vision-of-love-1.mp4",
+        "width": 540,
+        "height": 960,
+        "alt": "Vision of Love — look 1",
+        "poster": "assets/vision-of-love-1-poster.jpg"
+      },
+      {
+        "type": "video",
+        "src": "assets/vision-of-love-5.mp4",
+        "width": 540,
+        "height": 960,
+        "alt": "Vision of Love — look 5",
+        "poster": "assets/vision-of-love-5-poster.jpg"
+      },
+      {
+        "type": "video",
+        "src": "assets/vision-of-love-6.mp4",
+        "width": 540,
+        "height": 960,
+        "alt": "Vision of Love — look 6",
+        "poster": "assets/vision-of-love-6-poster.jpg"
+      },
+      {
+        "type": "video",
+        "src": "assets/vision-of-love-8.mp4",
+        "width": 540,
+        "height": 960,
+        "alt": "Vision of Love — look 8",
+        "poster": "assets/vision-of-love-8-poster.jpg"
+      }
+    ]
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",

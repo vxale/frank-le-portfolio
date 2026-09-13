@@ -222,6 +222,14 @@ Nodes live in **world coordinates** and the view is a window onto them. Screen =
 
 **No clamp on a dragged node any more.** On an infinite canvas a node dragged off the edge is a node the visitor put there, not a mistake to correct. Auto-layout still aims inside the viewport, so the tree lays itself out sensibly and only hand-dragging escapes.
 
+## Vision of Love, and what it forced (Sept 12 2026)
+Five 9:16 masters from Frank (2160×3840, ~54 Mbps, 193–337 MB each). Encoded with macOS's `avconvert` at its 960×540 preset — 540×960 for portrait, ~5 Mbps, 101 MB across the five — since there is no ffmpeg on the machine. Posters via `qlmanage` + `sips`. The highlight is `media[0]` (card, node, project lead); the four look films follow it on the project page.
+
+Three things it forced:
+- **Native ratio on the project page.** The template forced the lead frame to 16:9, which on a 9:16 bridal film would cut off the top and bottom third of every dress. Frames with `width`/`height` now render as `.shot--native`; portrait ones are height-capped (`.floater--upright`) so a 9:16 clip is ~395×700 in the lead spot rather than 1700px tall. The works grid still crops — still open.
+- **The canvas paper is 1.75× the viewport.** The Moving Image branch now carries three tall frames, which cannot all fit in one screen height; the separation pass and the viewport clamp deadlocked. See CLAUDE.md, node-tree notes.
+- **World units in `relax()` / `clampPosition()` / `markObstacles()`.** They measured in screen pixels while moving world coordinates. Harmless at 100% zoom, wrong the moment the view fit a branch at 73%.
+
 ## Color (decided)
 Strictly black and white — no accent color, reaffirmed during the Sept 2026 revisions above. Paper is pure `#FFFFFF` as of Sept 8 2026 (Frank's direct instruction — this replaced the earlier off-white "open book paper" value; see the third revision pass above). Ink remains a near-black `#16140f` rather than `#000000`. Hairlines/borders now use that same ink tone directly (`--line: var(--ink)`) rather than a softer gray, for more graphic contrast.
 Assumed (Claude default, unconfirmed): no functional meaning for color — interactive states are shown via weight/underline/motion instead, since there's no accent color to spare.

@@ -688,7 +688,11 @@ main { display: block; }
 /* The root's is proportionally smaller — it sits with the biggest type
    on the canvas — and holds a portrait shape while it waits. */
 .node--d0 .node__media {
-  --edge: 9.6em;
+  --edge: 6em;   /* 9.6em was set before a portrait existed; at the
+                    root's type size it came out at 345px, nearly
+                    twice any project frame. Frank asked for a small
+                    portrait — 6em is ~216px, a portrait beside a
+                    name rather than a hero image. Sept 13 2026. */
   width: auto;
   height: var(--edge);
   aspect-ratio: 3 / 4;
@@ -1244,6 +1248,27 @@ main { display: block; }
 
 @media (hover: hover) and (pointer: fine) {
   .next-node:hover .next-node__title { border-bottom-color: var(--ink); }
+}
+
+/* Two next-nodes side by side, as the About page closes (Sept 13
+   2026). Same component as the project pages' "Next project"; the
+   second sits in the right half of the field so the pair reads as a
+   fork, not a list. */
+.next-nodes {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: clamp(1rem, 2vw, 1.75rem);
+  row-gap: clamp(2rem, 6vw, 4rem);
+}
+
+.next-nodes .next-node { grid-column: 1 / span 5; }
+.next-nodes .next-node--second { grid-column: 7 / span 5; }
+
+@media (max-width: 860px) {
+  .next-nodes { display: grid; }
+  .next-nodes .next-node,
+  .next-nodes .next-node--second { grid-column: 1 / -1; }
 }
 
 /* ---------- Contact ---------- */

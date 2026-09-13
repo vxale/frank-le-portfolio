@@ -37,9 +37,8 @@
 
   <figure class="floater floater--portrait" data-drag>
     <span class="drift">
-      <span class="shot shot--portrait">
-        <!-- Replace with Frank's headshot: <img src="assets/headshot.jpg" alt="Portrait of Frank Le"> -->
-        <span class="shot__empty">Headshot — drop file in /assets</span>
+      <span class="shot shot--native" style="--ratio: 1200 / 1500">
+        <img src="assets/headshot.jpg" width="1200" height="1500" alt="Lê Vũ Xuân Anh, arms folded, at night in the city">
       </span>
     </span>
     <figcaption class="label">Lê Vũ Xuân Anh (Frank Le)</figcaption>
@@ -66,11 +65,27 @@
     <span class="reach__link reach__link--waiting">Coming soon</span>
     <!-- once ready: <a class="reach__link drift" href="assets/frank-le-cv.pdf" download>Download CV</a> -->
   </p>
+
+  <!-- Where to go from here: the project pages end on a "Next project"
+       node, and this page ends the same way, on two. The address and
+       LinkedIn that used to sit in the footer live on the Contact
+       page, one of these two nodes away (Frank, Sept 13 2026). -->
+  <nav class="next-nodes" aria-label="Where next">
+    <a class="next-node" href="works.html">
+      <span class="label">Next</span>
+      <span class="next-node__title">All works</span>
+      <span class="label">Every project, filterable</span>
+    </a>
+    <a class="next-node next-node--second" href="contact.html">
+      <span class="label">Or</span>
+      <span class="next-node__title">Contact</span>
+      <span class="label">Email, LinkedIn, and more</span>
+    </a>
+  </nav>
 </main>
 
 <footer class="end-marks">
-  <a class="end-marks__mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
-  <p class="label"><a href="https://www.linkedin.com/in/frank-lvxa/" target="_blank" rel="noopener">LinkedIn</a> · &copy; 2026 Lê Vũ Xuân Anh</p>
+  <p class="label">&copy; 2026 Lê Vũ Xuân Anh</p>
 </footer>
 
 <!-- Navigation, lower right: the node tree's logic folded into one

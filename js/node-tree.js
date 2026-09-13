@@ -42,7 +42,7 @@
      and name it here; leave src empty and the root stays type-only.
      Videos work too — { type: 'video', src: 'assets/reel.mp4' } — and
      play on hover rather than autoplaying. */
-  const ROOT_MEDIA = { type: 'image', src: '', alt: '' };
+  const ROOT_MEDIA = { type: 'image', src: 'assets/headshot.jpg', width: 1200, height: 1500, alt: '' };
   // Add width and height (the file's pixels) alongside src and the
   // frame takes the portrait's own proportions before it has loaded.
 

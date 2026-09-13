@@ -66,12 +66,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     return `<span class="shot ${cls}"${style}>${inner}</span>`;
   }
 
-  /* Portrait media at its native ratio would run the full width of
-     its grid slot and end up ~1700px tall in the lead spot. The
+  /* Portrait and square media at their native ratio would run the
+     full width of the grid slot and end up taller than the screen —
+     ~1700px for 9:16 in the lead spot, ~1000px for a square. The
      floater carries the ratio too, so CSS can cap it by HEIGHT and
-     let the width follow. */
+     let the width follow. Landscape doesn't need it: wide media is
+     never taller than its slot is wide. */
   function floaterExtra(item) {
-    if (!(item && item.width && item.height && item.height > item.width)) return '';
+    if (!(item && item.width && item.height && item.height >= item.width)) return '';
     return ` floater--upright" style="--ratio: ${Number(item.width)} / ${Number(item.height)}`;
   }
 

@@ -382,6 +382,57 @@
     ]
   },
   {
+    "id": "gai-dep-key-visuals",
+    "title": "Gái Đẹp Không Phải Buồn — Key Visuals",
+    "type": "design",
+    "year": 2026,
+    "commercial": true,
+    "featured": true,
+    "role": "Creative Director",
+    "tools": "Photoshop",
+    "credits": [
+      {
+        "role": "Artists",
+        "name": "An Chinh, Su Ha"
+      },
+      {
+        "role": "Creative Director",
+        "name": "Lê Vũ Xuân Anh"
+      },
+      {
+        "role": "Designer",
+        "name": "Nguyễn Hải Phương Anh"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "Cover art, poster and thumbnail for the Afro-House single “Gái Đẹp Không Phải Buồn” by An Chinh × Su Ha, designed alongside its visualizer."
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/gai-dep-key-visual-cover.jpg",
+        "width": 1600,
+        "height": 1600,
+        "alt": "Gái Đẹp Không Phải Buồn — cover art"
+      },
+      {
+        "type": "image",
+        "src": "assets/gai-dep-key-visual-poster.jpg",
+        "width": 1080,
+        "height": 1350,
+        "alt": "Gái Đẹp Không Phải Buồn — poster"
+      },
+      {
+        "type": "image",
+        "src": "assets/gai-dep-key-visual-thumbnail.jpg",
+        "width": 1920,
+        "height": 1080,
+        "alt": "Gái Đẹp Không Phải Buồn — thumbnail"
+      }
+    ]
+  },
+  {
     "id": "placeholder-short-film",
     "title": "PLACEHOLDER — Short Film Title",
     "type": "film",

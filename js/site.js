@@ -87,7 +87,7 @@ function cardMarkup(work, index, className) {
      up clears style.aspectRatio when it sends a card home. */
   const native = item && item.width && item.height;
   const frameClass = native
-    ? `media-frame media-frame--native${item.height > item.width ? ' media-frame--upright' : ''}`
+    ? `media-frame media-frame--native${item.height >= item.width ? ' media-frame--upright' : ''}`
     : 'media-frame';
   const frameStyle = native ? ` style="--ratio: ${Number(item.width)} / ${Number(item.height)}"` : '';
   return `

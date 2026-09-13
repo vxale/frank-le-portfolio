@@ -973,6 +973,37 @@ main { display: block; }
 .floater.is-dragging { cursor: grabbing; z-index: 6; }
 .floater figcaption { margin-top: 0.6rem; }
 
+/* The sound switch under a clip. No box - a word with a rule under it
+   when it is on, the way a selected filter reads. It starts soft and
+   goes to full ink when on, so the one clip with audio is the one
+   that reads loudest on the page. */
+.shot__sound {
+  font-family: var(--font);
+  font-size: var(--step-0);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0.25rem 0;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.shot__sound:active { transform: scale(0.97); }
+.shot__sound:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.shot__sound[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+@media (hover: hover) and (pointer: fine) {
+  .shot__sound:hover { color: var(--ink); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shot__sound:active { transform: none; }
+}
+
 /* The drift layer exists so three transforms never fight over one
    element: .floater carries the drag offset, .drift carries the
    ambient motion, and anything inside is free to do its own thing. */

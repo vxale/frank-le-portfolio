@@ -170,9 +170,21 @@ document.addEventListener('DOMContentLoaded', async () => {
      media[] still feeds the works-grid card and the node-tree frame,
      which is where a silent loop earns its keep. If a project ever has
      an embed AND stills that aren't the same thing, this is the line. */
+  /* Every browser blocks autoplay with sound, so a clip's audio has
+     to be the visitor's own doing: the loop runs silent as before, and
+     the caption under it is a switch. It reads as a status - SOUND
+     OFF / SOUND ON - because that is what a mute toggle means to
+     people, and aria-pressed carries the state for anyone not looking
+     at it. Frank's call, Sept 13 2026. */
+  const soundToggle = (item) => item && item.src && item.type === 'video' ? `
+      <figcaption>
+        <button type="button" class="shot__sound" data-sound aria-pressed="false"
+                aria-label="Turn sound on">Sound off</button>
+      </figcaption>` : '';
+
   const frames = em ? '' : media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}${floaterExtra(item)}" data-drag>
-      <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>
+      <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>${soundToggle(item)}
     </figure>
   `).join('');
 
@@ -307,5 +319,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Built after render, since none of this markup existed at load.
   root.querySelectorAll('[data-drag]').forEach((el) => window.makeDraggable(el));
   window.driftAll(root.querySelectorAll('.drift'));
+
+  /* Sound. One clip at a time - switching one on switches the others
+     off - and a clip that scrolls out of view goes quiet again, so
+     nothing plays audio from somewhere the visitor can't see. The
+     loop itself never stops; only the mute changes hands. */
+  const soundButtons = [...root.querySelectorAll('[data-sound]')];
+  const videoFor = (btn) => btn.closest('.floater').querySelector('video');
+  function setSound(btn, on) {
+    const video = videoFor(btn);
+    if (!video) return;
+    video.muted = !on;
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on');
+    btn.textContent = on ? 'Sound on' : 'Sound off';
+    if (on) { const p = video.play(); if (p) p.catch(() => {}); }
+  }
+  soundButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-pressed') !== 'true';
+      soundButtons.forEach((other) => { if (other !== btn) setSound(other, false); });
+      setSound(btn, on);
+    });
+  });
+  if (soundButtons.length && 'IntersectionObserver' in window) {
+    const quiet = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) return;
+        const btn = entry.target.closest('.floater').querySelector('[data-sound]');
+        if (btn && btn.getAttribute('aria-pressed') === 'true') setSound(btn, false);
+      });
+    }, { threshold: 0.25 });
+    soundButtons.forEach((btn) => { const v = videoFor(btn); if (v) quiet.observe(v); });
+  }
   initReveals(root);
 });

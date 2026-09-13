@@ -2289,6 +2289,20 @@ main { display: block; }
 
 .embed iframe { display: block; border: 0; max-width: 100%; border-radius: 24px; }
 
+/* YouTube: the whole slot, 16:9, no radius. The 24px above is for
+   TikTok's rounded card and the white ears its iframe leaves at each
+   corner; YouTube's player is a plain rectangle, so the site's square
+   corners hold. Wider than TikTok's column too — a landscape player
+   in a 325px slot would be a postage stamp. */
+.embed--youtube { grid-column: 2 / span 9; }
+.embed--youtube .embed__frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: 0;
+  background: var(--paper-dim);
+}
+
 .embed__link {
   font-family: var(--font);
   font-size: var(--step-0);

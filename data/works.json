@@ -88,7 +88,13 @@
       "what": "A visualizer directed for the Afro-House single “Gái Đẹp Không Phải Buồn.”",
       "process": "An experimental combination of digital cinematography and laser lighting installation."
     },
-    "media": []
+    "media": [],
+    "embed": {
+      "type": "youtube",
+      "id": "Ofmr8S61alg",
+      "url": "https://www.youtube.com/watch?v=Ofmr8S61alg",
+      "label": "Watch on YouTube"
+    }
   },
   {
     "id": "tam-cam-by-manh",

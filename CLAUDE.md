@@ -237,7 +237,9 @@ The cue also stands down when the **foot of the page** arrives, not only when th
 
 ## Embedded video (Sept 12 2026)
 
-`data/works.json` entries can carry an `embed` object — `{ type, id, url, author, authorUrl, music, musicUrl, label }`. Only `type: "tiktok"` is implemented, and that is deliberate: another host means another branch in `js/work-detail.js`, **not** a general-purpose field holding iframe HTML. Pasting arbitrary markup out of a content file is how a data file turns into a security problem.
+`data/works.json` entries can carry an `embed` object — `{ type, id, url, author, authorUrl, music, musicUrl, label }`. Two hosts are implemented, `tiktok` and `youtube` (the latter added Sept 13 2026 for Gái Đẹp Không Phải Buồn's visualizer), and that is deliberate: another host means another branch in `js/work-detail.js`, **not** a general-purpose field holding iframe HTML. Pasting arbitrary markup out of a content file is how a data file turns into a security problem. When Frank pastes an embed code, take the video id out of it and discard the rest.
+
+**YouTube** is the simpler of the two: a plain `<iframe>` built in code from `embed.id`, on `youtube-nocookie.com`, with the `allow`/`referrerpolicy`/`allowfullscreen` attributes YouTube's generator emits. Three things are decisions: the `?si=` share token YouTube appends is **dropped** (it identifies who shared the link and does nothing for playback); the frame takes nine columns at 16:9 rather than TikTok's 325px column, because a landscape player in a portrait slot is a postage stamp; and it keeps **square corners** — the 24px radius below is for TikTok's rounded card, and YouTube's player has no ears to hide. `loadEmbedScript()` runs for TikTok only. Unlike TikTok, YouTube is reachable from the test environment, so this player has been seen loading, not only reasoned about.
 
 It is **TikTok's own published embed** — the `blockquote.tiktok-embed` plus `embed.js`, which Frank supplied — not a hand-rolled iframe. Four things to know:
 

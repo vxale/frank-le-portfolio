@@ -108,9 +108,38 @@ document.addEventListener('DOMContentLoaded', async () => {
      means another branch here, not a general-purpose field holding
      iframe HTML. Pasting arbitrary markup out of a content file is
      how a data file turns into a security problem. */
-  const em = work.embed && work.embed.type === 'tiktok' && work.embed.id ? work.embed : null;
+  const em = work.embed && ['tiktok', 'youtube'].includes(work.embed.type) && work.embed.id
+    ? work.embed : null;
 
-  const embed = em ? `
+  /* The link under an embed is not decoration: an embed is among the
+     first things strict tracking protection blocks, and the page still
+     has to lead somewhere. */
+  const outLink = (href, label) => `
+        <figcaption>
+          <a class="embed__link" href="${esc(href)}"
+             target="_blank" rel="noopener">${esc(label)}<span
+             class="embed__out" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"
+             stroke="currentColor" stroke-width="1.1" stroke-linecap="square" focusable="false"
+             ><path d="M3.5 8.5 8.5 3.5"/><path d="M5 3.5H8.5V7"/></svg></span><span
+             class="visually-hidden"> (opens in a new tab)</span></a>
+        </figcaption>`;
+
+  /* YouTube: a plain iframe on the privacy-enhanced domain, built here
+     from the video id. The share token (?si=) YouTube appends to its
+     generated code is dropped — it identifies who shared the link,
+     and does nothing for playback. 16:9 at the width of its slot; no
+     radius, since the player has no rounded card to leave white ears
+     around, so the site's square corners hold. */
+  const youtube = em && em.type === 'youtube' ? `
+    <figure class="embed embed--youtube">
+      <iframe class="embed__frame" src="https://www.youtube-nocookie.com/embed/${esc(em.id)}"
+              title="${esc(work.title)} — YouTube"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+      ${outLink(em.url || `https://www.youtube.com/watch?v=${em.id}`, em.label || 'Watch on YouTube')}
+    </figure>` : '';
+
+  const embed = youtube || (em ? `
     <figure class="embed">
       <blockquote class="tiktok-embed" cite="${esc(em.url || '')}"
                   data-video-id="${esc(em.id)}">
@@ -122,16 +151,8 @@ document.addEventListener('DOMContentLoaded', async () => {
              target="_blank" rel="noopener">\u266c ${esc(em.music)}</a>` : ''}
         </section>
       </blockquote>
-      ${em.url ? `
-        <figcaption>
-          <a class="embed__link" href="${esc(em.url)}"
-             target="_blank" rel="noopener">${esc(em.label || 'Watch on TikTok')}<span
-             class="embed__out" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"
-             stroke="currentColor" stroke-width="1.1" stroke-linecap="square" focusable="false"
-             ><path d="M3.5 8.5 8.5 3.5"/><path d="M5 3.5H8.5V7"/></svg></span><span
-             class="visually-hidden"> (opens in a new tab)</span></a>
-        </figcaption>` : ''}
-    </figure>` : '';
+      ${em.url ? outLink(em.url, em.label || 'Watch on TikTok') : ''}
+    </figure>` : '');
 
   /** Appended once, after the markup exists for it to find. */
   function loadEmbedScript() {
@@ -245,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   `;
 
-  if (em) loadEmbedScript();
+  if (em && em.type === 'tiktok') loadEmbedScript();
 
   /* The beats read as one sequence: numbered, in order, every one of
      them open on arrival. Clicking a number FOLDS a passage away

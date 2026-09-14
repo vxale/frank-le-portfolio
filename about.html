@@ -63,7 +63,7 @@
        redacted from its footer, so docs/contact.md's rule holds; see
        CLAUDE.md for how, and why a text-only redaction was not
        enough. -->
-  <section class="cv" aria-labelledby="cv-heading">
+  <section class="cv" aria-labelledby="cv-heading" data-stop>
     <h2 id="cv-heading" class="label">Curriculum vitae</h2>
     <p class="cv__lead">Based in Waterloo, Ontario — originally Hanoi, Vietnam.
       <a class="cv__download label" href="assets/le-vu-xuan-anh-cv-2026.pdf" download="Le Vu Xuan Anh - CV 2026.pdf">Download PDF<span class="visually-hidden"> (2 MB)</span></a></p>
@@ -181,7 +181,7 @@
        node, and this page ends the same way, on two. The address and
        LinkedIn that used to sit in the footer live on the Contact
        page, one of these two nodes away (Frank, Sept 13 2026). -->
-  <nav class="next-nodes" aria-label="Where next">
+  <nav class="next-nodes" aria-label="Where next" data-stop>
     <a class="next-node" href="works.html">
       <span class="label">Next</span>
       <span class="next-node__title">All works</span>
@@ -195,7 +195,7 @@
   </nav>
 </main>
 
-<footer class="end-marks">
+<footer class="end-marks" data-stop>
   <p class="label">&copy; 2026 Lê Vũ Xuân Anh</p>
 </footer>
 
@@ -208,7 +208,6 @@
 <nav class="navcue" data-cue aria-label="Site">
   <button class="navcue__trigger" type="button" aria-expanded="false">Navigate</button>
   <ul class="navcue__list">
-    <li class="navcue__item"><button class="navcue__link" type="button" data-scroll-top>Back to top</button></li>
     <li class="navcue__item"><a class="navcue__link" href="contact.html">Contact</a></li>
     <li class="navcue__item"><a class="navcue__link" href="works.html">All works</a></li>
     <li class="navcue__item"><a class="navcue__link" href="index.html">Home</a></li>
@@ -218,6 +217,7 @@
 <script src="js/site.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/navcue.js"></script>
+<script src="js/stepper.js"></script>
 <script src="js/drag.js"></script>
 <script src="js/about.js"></script>
 </body>

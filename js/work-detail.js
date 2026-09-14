@@ -259,12 +259,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     ${em && em.alongside ? embed : frames}
 
     ${facts.length ? `
-      <ul class="notes notes--work">
+      <ul class="notes notes--work" data-stop>
         ${facts.map(([k, v]) => `<li><span class="label">${esc(k)}</span> ${esc(v)}</li>`).join('')}
       </ul>` : ''}
 
     ${beats.length ? `
-      <div class="beats">
+      <div class="beats" data-stop>
         ${beats.map(([k, v], i) => {
           const n = String(i + 1).padStart(2, '0');
           return `
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>` : ''}
 
     ${credits.length ? `
-      <div class="credits">
+      <div class="credits" data-stop>
         <ul class="notes notes--credits${foldCredits ? ' is-folded' : ''}" id="credit-list">
           ${credits.map((c) => `<li><span class="label">${esc(c.role)}</span> ${esc(c.name)}</li>`).join('')}
         </ul>
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </ul>` : ''}
 
     ${next && next.id !== work.id ? `
-      <a class="next-node" href="work.html?id=${encodeURIComponent(next.id)}">
+      <a class="next-node" href="work.html?id=${encodeURIComponent(next.id)}" data-stop>
         <span class="label">Next project</span>
         <span class="next-node__title">${esc(next.title)}</span>
         <span class="label">${esc(workMetaLine(next))}</span>

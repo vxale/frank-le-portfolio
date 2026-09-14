@@ -1992,7 +1992,10 @@ main { display: block; }
 
 .navcue {
   --navcue-gap: 1.1rem;
-  --rungs: 4;              /* how many sit above the trigger */
+  --rungs: 3;              /* how many sit above the trigger: Contact,
+                              All works, Home. Feeds the closing
+                              stagger only. The filter cue overrides
+                              it - it has four. */
   position: fixed;
   right: var(--gutter);
   bottom: var(--gutter);
@@ -2264,7 +2267,54 @@ main { display: block; }
    while the real bar is off screen and the foot of the page is not.
    ---------- */
 
+/* ---------- Section stepper ----------
+   Two arrows, bottom centre, between the two corner cues. Same rest
+   opacity, same hairline arrow as the sort control, same turn white
+   over media. The pair keeps its shape at either end: the arrow with
+   nowhere to go fades, it doesn't leave. Built by js/stepper.js. */
+.stepper {
+  position: fixed;
+  left: 50%;
+  bottom: var(--gutter);
+  translate: -50% 0;
+  z-index: 30;
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+.stepper[hidden] { display: none; }
+
+.stepper__btn {
+  background: none;
+  border: 0;
+  padding: 0.35rem 0.3rem;
+  margin: 0;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 200ms var(--ease-out), transform 140ms var(--ease-out);
+}
+
+.stepper__btn:active { transform: scale(0.94); }
+.stepper__btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; opacity: 1; }
+
+@media (hover: hover) and (pointer: fine) {
+  .stepper__btn:hover { opacity: 1; }
+}
+
+.stepper__btn.is-end { opacity: 0.15; pointer-events: none; }
+
+.stepper__glyph { display: block; width: 0.72rem; }
+.stepper__glyph svg { display: block; width: 100%; height: auto; }
+.stepper__btn--up .stepper__glyph { transform: rotate(180deg); }
+
+/* Over a picture the arrows go white and full, like the cues. */
+.stepper.is-over-media .stepper__btn { color: #fff; opacity: 1; }
+.stepper.is-over-media .stepper__btn.is-end { opacity: 0.35; }
+
 .navcue--filter {
+  --rungs: 4;              /* Type, Year, Made for, and the tools */
   top: auto;
   right: auto;
   bottom: var(--gutter);
@@ -2419,7 +2469,7 @@ main { display: block; }
 /* A rung that has nothing to offer is not a rung. display:none rather
    than a fade, so the branch closes up behind it and the edge above
    reaches the trigger instead of a gap. */
-.navcue__item.is-off { display: none; }
+
 
 /* The CV, now on About. It sits beside the facts list rather than
    under it - same row, other side of the page. */

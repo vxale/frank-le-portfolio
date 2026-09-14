@@ -91,7 +91,7 @@ function cardMarkup(work, index, className) {
     : 'media-frame';
   const frameStyle = native ? ` style="--ratio: ${Number(item.width)} / ${Number(item.height)}"` : '';
   return `
-    <article class="${className}">
+    <article class="${className}" data-stop>
       <div class="work-card__body" data-reveal>
         <a class="${frameClass}"${frameStyle} href="${workHref(work)}" tabindex="-1">
           <div class="media-frame__move">${mediaFrameInner(item, work.title)}</div>

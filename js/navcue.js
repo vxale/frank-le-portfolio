@@ -73,41 +73,6 @@
       if (!cue.contains(event.target)) open(false);
     });
 
-    /* Back to top is a rung like the others, and the nearest one to
-       the trigger: the cheapest thing the branch offers and the one
-       most often wanted on a long page. It closes the branch behind
-       itself - the visitor asked to go somewhere, not to keep looking
-       at a menu. */
-    const toTop = cue.querySelector('[data-scroll-top]');
-    if (toTop) {
-      toTop.addEventListener('click', () => {
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-        open(false);
-      });
-
-      /* And it is not a rung at all while you are already at the top.
-         The rung is removed from the layout rather than faded, so the
-         branch closes up behind it and the hairline above it reaches
-         down to the trigger instead of to a gap.
-
-         40px rather than zero: a page can sit a hair off the top after
-         a reload or a rubber-band, and a rung that flickers in and out
-         of a menu is worse than one that waits a moment. */
-      const rung = toTop.closest('.navcue__item');
-      let wasScrolled = null;
-
-      function syncToTop() {
-        const scrolled = window.scrollY > 40;
-        if (scrolled === wasScrolled) return;   // nothing to write
-        wasScrolled = scrolled;
-        if (rung) rung.classList.toggle('is-off', !scrolled);
-      }
-
-      window.addEventListener('scroll', syncToTop, { passive: true });
-      syncToTop();
-    }
-
     // A link to the page you are already standing on is not a link.
     const here = window.location.pathname.split('/').pop() || 'index.html';
     cue.querySelectorAll('.navcue__link').forEach((link) => {
@@ -148,6 +113,13 @@
       const boxes = cueBoxes(cue);
       const over = media.some((m) => boxes.some((b) => overlaps(m, b)));
       cue.classList.toggle('is-over-media', over);
+    });
+    // Anything else that asks for it — the section stepper — gets the
+    // same check on its own box, so the bottom row changes together.
+    document.querySelectorAll('[data-over-media]').forEach((el) => {
+      const b = el.getBoundingClientRect();
+      if (!b.width) return;
+      el.classList.toggle('is-over-media', media.some((m) => overlaps(m, b)));
     });
   }
 

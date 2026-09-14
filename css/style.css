@@ -2478,6 +2478,35 @@ main { display: block; }
    corner; YouTube's player is a plain rectangle, so the site's square
    corners hold. Wider than TikTok's column too — a landscape player
    in a 325px slot would be a postage stamp. */
+/* Instagram: their generator's max/min width, kept here where every
+   other measurement lives. Their box-shadow, white fill and 3px radius
+   are not carried over — embed.js paints the post inside an iframe
+   with its own white card regardless, and we add nothing around it.
+   Square corners: no rounded card here to leave ears around.
+   In dark mode the post stays a white card; Instagram has no dark
+   embed, and the frame is cross-origin. */
+.embed--instagram { grid-column: 2 / span 7; }
+.embed--instagram .instagram-media {
+  width: 100%;
+  max-width: 540px;
+  min-width: 326px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.embed--instagram .instagram-media > a {
+  display: block;
+  padding: 1rem 0;
+  font-size: var(--step-1);
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+}
+.embed--instagram iframe { border-radius: 0; }
+
 .embed--youtube { grid-column: 2 / span 9; }
 .embed--youtube .embed__frame {
   width: 100%;

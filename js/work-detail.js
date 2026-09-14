@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      means another branch here, not a general-purpose field holding
      iframe HTML. Pasting arbitrary markup out of a content file is
      how a data file turns into a security problem. */
-  const em = work.embed && ['tiktok', 'youtube'].includes(work.embed.type) && work.embed.id
+  const em = work.embed && ['tiktok', 'youtube', 'instagram'].includes(work.embed.type) && work.embed.id
     ? work.embed : null;
 
   /* The link under an embed is not decoration: an embed is among the
@@ -139,7 +139,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       ${outLink(em.url || `https://www.youtube.com/watch?v=${em.id}`, em.label || 'Watch on YouTube')}
     </figure>` : '';
 
-  const embed = youtube || (em ? `
+  /* Instagram: their blockquote + embed.js, like TikTok. The
+     generator's markup carries a fake loading skeleton in inline
+     styles — gray circles and bars, their logo, a box-shadow and a
+     white fill — none of which embed.js keeps: it reads the class,
+     the permalink and the version, and replaces everything inside.
+     So the inside is one real link, for when the script is blocked.
+     The utm_source/utm_campaign the generator appends to the
+     permalink are dropped; they credit the embed as a traffic source
+     and do nothing for the post. */
+  const instagram = em && em.type === 'instagram' ? `
+    <figure class="embed embed--instagram">
+      <blockquote class="instagram-media" data-instgrm-captioned
+                  data-instgrm-permalink="https://www.instagram.com/p/${esc(em.id)}/"
+                  data-instgrm-version="14">
+        <a href="https://www.instagram.com/p/${esc(em.id)}/" target="_blank" rel="noopener">${
+          em.authorName ? `A post shared by ${esc(em.authorName)}` : 'View this post on Instagram'
+        }${em.author ? ` (${esc(em.author)})` : ''}</a>
+      </blockquote>
+      ${outLink(em.url || `https://www.instagram.com/p/${em.id}/`, em.label || 'View on Instagram')}
+    </figure>` : '';
+
+  const embed = youtube || instagram || (em ? `
     <figure class="embed">
       <blockquote class="tiktok-embed" cite="${esc(em.url || '')}"
                   data-video-id="${esc(em.id)}">
@@ -155,12 +176,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     </figure>` : '');
 
   /** Appended once, after the markup exists for it to find. */
-  function loadEmbedScript() {
-    if (document.querySelector('script[data-tiktok-embed]')) return;
+  const EMBED_SCRIPTS = {
+    tiktok: 'https://www.tiktok.com/embed.js',
+    instagram: 'https://www.instagram.com/embed.js',
+  };
+  function loadEmbedScript(host) {
+    const src = EMBED_SCRIPTS[host];
+    if (!src || document.querySelector(`script[data-embed-host="${host}"]`)) return;
     const s = document.createElement('script');
     s.async = true;
-    s.src = 'https://www.tiktok.com/embed.js';
-    s.setAttribute('data-tiktok-embed', '');
+    s.src = src;
+    s.setAttribute('data-embed-host', host);
     document.body.appendChild(s);
   }
 
@@ -182,7 +208,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 aria-label="Turn sound on">Sound off</button>
       </figcaption>` : '';
 
-  const frames = em ? '' : media.map((item, i) => `
+  /* An embed normally replaces the frames (see above). embed.alongside
+     keeps them: the FCI recap's slides ARE the design and its
+     Instagram post is the design in use, so the page shows both. */
+  const frames = (em && !em.alongside) ? '' : media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}${floaterExtra(item)}" data-drag>
       <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>${soundToggle(item)}
     </figure>
@@ -225,9 +254,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     <h1 class="work-title">${esc(work.title)}</h1>
     <p class="work-marks">${marks.map((m) => `<span class="label">${esc(m)}</span>`).join('')}</p>
 
-    ${embed}
+    ${em && em.alongside ? frames : embed}
 
-    ${frames}
+    ${em && em.alongside ? embed : frames}
 
     ${facts.length ? `
       <ul class="notes notes--work">
@@ -278,7 +307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   `;
 
-  if (em && em.type === 'tiktok') loadEmbedScript();
+  if (em) loadEmbedScript(em.type); // no-op for hosts that are a plain iframe
 
   /* The beats read as one sequence: numbered, in order, every one of
      them open on arrival. Clicking a number FOLDS a passage away

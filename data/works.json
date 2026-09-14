@@ -430,7 +430,16 @@
         "height": 1350,
         "alt": "FCI Monthly News Recap — closing slide"
       }
-    ]
+    ],
+    "embed": {
+      "type": "instagram",
+      "id": "DRfK5kqjZt-",
+      "url": "https://www.instagram.com/p/DRfK5kqjZt-/",
+      "author": "@futurecitiesinstitute",
+      "authorName": "Future Cities Institute founded by CAIVAN",
+      "label": "View on Instagram",
+      "alongside": true
+    }
   },
   {
     "id": "winter-cries-poster",

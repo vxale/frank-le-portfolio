@@ -901,39 +901,18 @@ main { display: block; }
   text-wrap: pretty;
 }
 
-.passage--a { grid-column: 1 / span 6; }
-.passage--b { grid-column: 3 / span 5; }
-/* One column further right than b, one fewer than before, so the
-   stair keeps stepping and the passage stays clear of the portrait's
-   columns (9-12). See .floater--portrait for why it now sits directly
-   under b rather than a screen lower. */
-.passage--c { grid-column: 4 / span 5; } /* overridden inside .passage-pair below */
-/* The fourth step of the stair: one column further in again, and the
-   last passage before the CV. Ends at column 9, still clear of the
-   portrait. */
-/* c and d travel together in one grid cell (.passage-pair), so the
-   row gap never comes between them. The portrait spans rows 1-4 and
-   is taller than the passages, so any row it ends in stretches to its
-   height — a passage alone in that row drops to the bottom of it, a
-   screen below the one before. That is where d landed on its own row.
-   Inside the pair, d is one column further in than c, the last step
-   of the stair, and a breath below it. */
-.passage-pair {
-  /* Columns 4-8, ending BEFORE the portrait's column 9. That is what
-     lets auto-placement put the pair in row 3 beside the portrait;
-     one column wider (4 / span 6) reached into column 9, overlapped
-     the portrait's cell, and the grid pushed the pair below the
-     portrait's whole span - a screen down, with an empty row left
-     behind. Passages a and b fit for the same reason: both end at 8. */
-  grid-column: 4 / span 5;
-  align-self: start;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  column-gap: inherit;
-  row-gap: clamp(1.25rem, 3vw, 2.25rem);
-}
-.passage-pair .passage--c { grid-column: 1 / span 5; }
-.passage-pair .passage--d { grid-column: 2 / span 4; } /* one step in: the stair's last tread */
+/* Four passages, evenly distributed (Frank, Sept 14 2026): the same
+   measure for each (5 columns), one column of stair between steps,
+   and one row-gap between rows — no pair pulled tight, no step wider
+   than the next. All four end at column 8 or earlier, which is what
+   lets auto-placement keep them in rows 1-4 beside the portrait; a
+   passage reaching column 9 overlaps the portrait's cell and the grid
+   pushes it below the portrait's whole span (Sept 13 — see
+   .floater--portrait). */
+.passage--a { grid-column: 1 / span 5; }
+.passage--b { grid-column: 2 / span 5; }
+.passage--c { grid-column: 3 / span 5; }
+.passage--d { grid-column: 4 / span 5; }
 
 .note {
   margin: 0;
@@ -1120,19 +1099,17 @@ main { display: block; }
 
 .floater--portrait {
   grid-column: 9 / span 4;
-  /* Three rows: a, b, and the c+d pair - exactly the rows the
-     passages occupy, and no more. The count is load-bearing in a way
-     that took three tries to see (Sept 13 2026). Auto-placed items
-     fill rows the portrait doesn't block, so if its span runs past
-     the last passage row, the next item has to skip to the row after
-     the span and every row in between exists as an EMPTY track. With
-     span 4 that was two empty 46px rows between b and the pair, and
-     the pair sat a screen below b. Measured: tracks were
-     80|107|46|46|197|921; now 80|107|197|921. The portrait is taller
-     than a+b+pair, so the third row stretches to its foot - that is
-     fine, the pair is align-self: start and sits at the row's top.
-     If a fifth passage is ever added, this becomes span 4. */
-  grid-row: 1 / span 3;
+  /* Four rows: a, b, c, d - exactly the rows the passages occupy,
+     and no more. The count is load-bearing in a way that took three
+     tries to see (Sept 13 2026). Auto-placed items fill rows the
+     portrait doesn't block, so if its span runs past the last passage
+     row, the next item has to skip to the row after the span and
+     every row in between exists as an EMPTY track - two 46px rows,
+     once, and a passage a screen below the one before it. Four
+     passages with a row-gap between them are taller than the
+     portrait, so nothing stretches. If a fifth passage is ever
+     added, this becomes span 5. */
+  grid-row: 1 / span 4;
   align-self: start;
 }
 .floater--lead     { grid-column: 2 / span 9; }
@@ -2367,7 +2344,16 @@ main { display: block; }
   justify-items: start;
 }
 
-.cv__download { color: var(--ink-soft); }
+.cv__download {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-soft);
+  padding-bottom: 1px;
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cv__download:hover { color: var(--ink); border-color: var(--ink); }
+}
 
 .cv__section { display: grid; gap: 0.9rem; }
 .cv__section > .label { margin: 0; }

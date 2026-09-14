@@ -51,7 +51,7 @@
 
   <p class="passage passage--c">Since then, I have been producing, writing, and directing my own short films, as well as working with micro-level clients in the music and fashion industry.</p>
 
-  <p class="passage passage--d">My interest now lies in the human condition in a society deeply integrated with AI and automation. My personal work explores our struggles and our psychology as the world learns to live with the technologies it keeps inventing — what we hold on to, and what we let go.</p>
+  <p class="passage passage--d">My interest now lies in the arts and the human condition in a society deeply integrated with AI and automation. My personal work explores our struggles and our psychology as the world learns to live with the technologies it keeps inventing — what we hold on to, and what we let go. Open to work and collaboration. Let's sync up our wavelengths.</p>
 
   <!-- The CV, on the page rather than behind a download (Frank,
        Sept 13 2026). Latest to earliest within every section. Dated
@@ -63,6 +63,33 @@
        redacted from its footer, so docs/contact.md's rule holds; see
        CLAUDE.md for how, and why a text-only redaction was not
        enough. -->
+  <!-- Behind the scenes (Frank, Sept 14 2026): three set photos as a
+       pile — offset, tilted a degree or two, like prints left on a
+       desk. Each is a .floater, so it takes the same drag and drift
+       as the portrait; spread them across the page, and "Stack"
+       (which appears once anything has moved) puts them back the way
+       Tidy up does on the works grid. DOM order is the resting
+       stacking order; js/about.js brings whichever was last touched to
+       the top. Native ratios, per the standing rule. -->
+  <section class="pile" aria-labelledby="pile-heading">
+    <div class="pile__head">
+      <h2 id="pile-heading" class="label">Behind the scenes</h2>
+      <p class="pile__hint label">Drag to spread</p>
+      <button class="pile__stack label" type="button" data-stack hidden>Stack</button>
+    </div>
+    <div class="pile__stage">
+      <figure class="floater pile__item pile__item--1" data-drag>
+        <span class="drift"><img src="assets/bts-monitor.jpg" width="1600" height="900" alt="Frank at the monitor on set, headphones on, watching a take" loading="lazy" draggable="false"></span>
+      </figure>
+      <figure class="floater pile__item pile__item--2" data-drag>
+        <span class="drift"><img src="assets/bts-camera.jpg" width="1600" height="1066" alt="Frank directing beside the camera operator, pointing across the set" loading="lazy" draggable="false"></span>
+      </figure>
+      <figure class="floater pile__item pile__item--3" data-drag>
+        <span class="drift"><img src="assets/bts-studio.jpg" width="1200" height="1600" alt="Frank at a cart of monitors in a studio, light raking across the wall behind him" loading="lazy" draggable="false"></span>
+      </figure>
+    </div>
+  </section>
+
   <section class="cv" aria-labelledby="cv-heading">
     <h2 id="cv-heading" class="label">Curriculum vitae</h2>
     <p class="cv__lead">Based in Waterloo, Ontario — originally Hanoi, Vietnam.
@@ -193,5 +220,6 @@
 <script src="js/theme.js"></script>
 <script src="js/navcue.js"></script>
 <script src="js/drag.js"></script>
+<script src="js/about.js"></script>
 </body>
 </html>

@@ -1010,6 +1010,94 @@ main { display: block; }
 }
 
 .floater.is-dragging { cursor: grabbing; z-index: 6; }
+
+/* ---------- Behind the scenes: the pile ----------
+   Three prints on a desk. The stage is a fixed-height field so a
+   drag never reflows anything below it; the prints are absolutely
+   placed inside it with small offsets and tilts. Sized by the LONGER
+   edge (--edge), like the node frames, so the portrait and the two
+   landscapes carry the same weight. */
+.pile {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: inherit;
+  row-gap: 1.25rem;
+}
+
+.pile__head {
+  grid-column: 1 / span 4;
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+}
+
+.pile__hint { color: var(--ink-soft); margin: 0; }
+
+.pile__stack {
+  background: none;
+  border: 0;
+  padding: 0 0 1px;
+  margin: 0;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease-out), transform 0.14s var(--ease-out);
+}
+.pile__stack:active { transform: scale(0.97); }
+.pile__stack[hidden] { display: none; }
+
+.pile__stage {
+  grid-column: 1 / span 12;
+  position: relative;
+  --edge: clamp(14rem, 26vw, 24rem);
+  height: calc(var(--edge) * 1.15);
+}
+
+.pile__item {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  aspect-ratio: var(--ratio);
+  --rot: 0deg;
+  rotate: var(--rot);                 /* independent of the drag's transform */
+  transform-origin: 50% 50%;
+}
+
+.pile__item .drift { display: block; }
+
+.pile__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Resting places. The portrait's --w comes from its height so its
+   longer edge matches the landscapes' longer edge. Later in the DOM
+   sits on top; js/about.js re-orders on touch. */
+.pile__item--1 { --ratio: 16 / 9;   --w: var(--edge);                          --x: 0;                        --y: 0.4rem; --rot: -2.2deg; }
+.pile__item--2 { --ratio: 1600 / 1066; --w: var(--edge);                       --x: calc(var(--edge) * 0.42); --y: 1.6rem; --rot: 1.6deg; }
+.pile__item--3 { --ratio: 3 / 4;    --w: calc(var(--edge) * 0.75);            --x: calc(var(--edge) * 0.98); --y: 0;      --rot: -1deg; }
+
+/* Last touched stays on top: js/about.js sets --z. */
+.pile__item { z-index: var(--z, 1); }
+.pile__item.is-dragging { z-index: 60; }
+
+@media (max-width: 860px) {
+  .pile { display: block; }
+  .pile__head { margin-bottom: 1rem; }
+  /* No dragging on touch (a drag needs to capture the gesture, and
+     that stops the page scrolling over the pile), so the prints just
+     stack, tighter, and the hint and Stack go away. */
+  .pile__hint, .pile__stack { display: none; }
+  .pile__stage { --edge: min(70vw, 18rem); height: calc(var(--edge) * 1.25); }
+  .pile__item--2 { --x: calc(var(--edge) * 0.18); --y: 2rem; }
+  .pile__item--3 { --x: calc(var(--edge) * 0.36); --y: 3.4rem; }
+}
 .floater figcaption { margin-top: 0.6rem; }
 
 /* The sound switch under a clip. No box - a word with a rule under it

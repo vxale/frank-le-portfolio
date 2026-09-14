@@ -1012,57 +1012,58 @@ main { display: block; }
 .floater.is-dragging { cursor: grabbing; z-index: 6; }
 
 /* ---------- Behind the scenes: the pile ----------
-   Three prints on a desk. The stage is a fixed-height field so a
-   drag never reflows anything below it; the prints are absolutely
-   placed inside it with small offsets and tilts. Sized by the LONGER
-   edge (--edge), like the node frames, so the portrait and the two
-   landscapes carry the same weight. */
+   Three prints at the right margin, beside the CV. The .pile grid
+   item has NO height of its own — the stage is absolute — so the CV's
+   row is exactly as tall as the CV and the prints simply hang over
+   the empty columns to its right. One click spreads the pile into a
+   cascade down and to the left; another stacks it. Prints are sized
+   by their longer edge (--edge), like the node frames, so the
+   portrait and the two landscapes carry the same weight. */
 .pile {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: inherit;
-  row-gap: 1.25rem;
+  grid-column: 9 / span 4;
+  align-self: start;
+  position: relative;
+  height: 0;
 }
-
-.pile__head {
-  grid-column: 1 / span 4;
-  display: flex;
-  align-items: baseline;
-  gap: 1.25rem;
-}
-
-.pile__hint { color: var(--ink-soft); margin: 0; }
-
-.pile__stack {
-  background: none;
-  border: 0;
-  padding: 0 0 1px;
-  margin: 0;
-  color: var(--ink);
-  border-bottom: 1px solid var(--ink);
-  cursor: pointer;
-  transition: opacity 0.2s var(--ease-out), transform 0.14s var(--ease-out);
-}
-.pile__stack:active { transform: scale(0.97); }
-.pile__stack[hidden] { display: none; }
 
 .pile__stage {
-  grid-column: 1 / span 12;
-  position: relative;
-  --edge: clamp(14rem, 26vw, 24rem);
-  height: calc(var(--edge) * 1.15);
+  position: absolute;
+  top: 0;
+  right: 0;
+  --edge: clamp(11rem, 18vw, 16rem);
+  width: calc(var(--edge) * 1.1);
+  height: calc(var(--edge) * 1.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+
+.pile__stage:focus-visible { outline: 1px solid var(--ink); outline-offset: 6px; }
 
 .pile__item {
   position: absolute;
-  left: var(--x);
+  right: var(--x);
   top: var(--y);
+  margin: 0;
   width: var(--w);
   aspect-ratio: var(--ratio);
-  --rot: 0deg;
-  rotate: var(--rot);                 /* independent of the drag's transform */
+  z-index: var(--z);
+  /* Two of the three transforms this print carries live here, on the
+     figure, as the separate translate and rotate properties; the
+     drift animates transform on the inner layer. None overwrites
+     another. Spread moves translate and rotate only — compositor
+     work, no layout. */
+  translate: var(--tx, 0) var(--ty, 0);
+  rotate: var(--rot);
   transform-origin: 50% 50%;
+  transition: translate 260ms var(--ease-out), rotate 260ms var(--ease-out);
+  transition-delay: var(--delay, 0ms);
+}
+
+/* Stacking back is faster than spreading, and reverses the stagger,
+   the way a branch closes on the canvas. */
+.pile__stage[aria-pressed="false"] .pile__item {
+  transition-duration: 170ms;
+  transition-delay: calc(90ms - var(--delay, 0ms));
 }
 
 .pile__item .drift { display: block; }
@@ -1076,27 +1077,34 @@ main { display: block; }
   -webkit-user-drag: none;
 }
 
-/* Resting places. The portrait's --w comes from its height so its
-   longer edge matches the landscapes' longer edge. Later in the DOM
-   sits on top; js/about.js re-orders on touch. */
-.pile__item--1 { --ratio: 16 / 9;   --w: var(--edge);                          --x: 0;                        --y: 0.4rem; --rot: -2.2deg; }
-.pile__item--2 { --ratio: 1600 / 1066; --w: var(--edge);                       --x: calc(var(--edge) * 0.42); --y: 1.6rem; --rot: 1.6deg; }
-.pile__item--3 { --ratio: 3 / 4;    --w: calc(var(--edge) * 0.75);            --x: calc(var(--edge) * 0.98); --y: 0;      --rot: -1deg; }
+/* Resting: a tight stack, offsets of a few pixels, a degree or two
+   each way. Later in the DOM sits on top; the portrait leads. */
+.pile__item--1 { --ratio: 16 / 9;      --w: var(--edge);               --x: 0.6rem; --y: 1.1rem; --rot: -2deg;  --z: 1; --delay: 0ms; }
+.pile__item--2 { --ratio: 1600 / 1066; --w: var(--edge);               --x: 0.2rem; --y: 0.5rem; --rot: 1.5deg; --z: 2; --delay: 45ms; }
+.pile__item--3 { --ratio: 3 / 4;       --w: calc(var(--edge) * 0.75);  --x: 0;      --y: 0;      --rot: -1deg;  --z: 3; --delay: 90ms; }
 
-/* Last touched stays on top: js/about.js sets --z. */
-.pile__item { z-index: var(--z, 1); }
-.pile__item.is-dragging { z-index: 60; }
+/* Spread: a cascade down and to the left, off the top of the stack —
+   the print on top travels least, the one at the bottom furthest, so
+   all three end up fully visible in a loose diagonal beside the CV. */
+.pile__stage[aria-pressed="true"] .pile__item--3 { --tx: 0;                            --ty: 0;                          --rot: 1deg; }
+.pile__stage[aria-pressed="true"] .pile__item--2 { --tx: calc(var(--edge) * -0.55);   --ty: calc(var(--edge) * 0.62);   --rot: -2.5deg; }
+.pile__stage[aria-pressed="true"] .pile__item--1 { --tx: calc(var(--edge) * -0.2);    --ty: calc(var(--edge) * 1.3);    --rot: 2deg; }
 
 @media (max-width: 860px) {
-  .pile { display: block; }
-  .pile__head { margin-bottom: 1rem; }
-  /* No dragging on touch (a drag needs to capture the gesture, and
-     that stops the page scrolling over the pile), so the prints just
-     stack, tighter, and the hint and Stack go away. */
-  .pile__hint, .pile__stack { display: none; }
-  .pile__stage { --edge: min(70vw, 18rem); height: calc(var(--edge) * 1.25); }
-  .pile__item--2 { --x: calc(var(--edge) * 0.18); --y: 2rem; }
-  .pile__item--3 { --x: calc(var(--edge) * 0.36); --y: 3.4rem; }
+  /* The field is a block stack here, so the pile takes real height
+     and sits between the bio and the CV; the stage is centred and the
+     cascade goes straight down. */
+  .pile { height: auto; margin-bottom: clamp(2rem, 9vw, 3.5rem); }
+  .pile__stage {
+    position: relative;
+    margin-inline: auto;
+    --edge: min(64vw, 15rem);
+    height: calc(var(--edge) * 1.35);
+    transition: height 260ms var(--ease-out);
+  }
+  .pile__stage[aria-pressed="true"] { height: calc(var(--edge) * 2.6); }
+  .pile__stage[aria-pressed="true"] .pile__item--2 { --tx: calc(var(--edge) * -0.08); --ty: calc(var(--edge) * 0.7); }
+  .pile__stage[aria-pressed="true"] .pile__item--1 { --tx: calc(var(--edge) * 0.05);  --ty: calc(var(--edge) * 1.5); }
 }
 .floater figcaption { margin-top: 0.6rem; }
 

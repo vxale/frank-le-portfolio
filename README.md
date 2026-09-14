@@ -18,7 +18,7 @@ Then visit `http://localhost:8080/`.
 - `js/nav.js` — the menu: list/tree display toggle and the node-tree panel
 - `js/works.js`, `js/work-detail.js` — per-page behavior
 - `data/works.json` — all project content; edit this to add/update work samples
-- `assets/` — images, video, headshot, CV (only `favicon.svg` so far — placeholders in use everywhere else)
+- `assets/` — images, video, the headshot, the CV PDF, and the project media
 - `docs/` — the full design brief, sitemap, bio, and contact content that shaped this build
 
 See `CLAUDE.md` for a condensed project brief if you're picking this up with Claude Code.

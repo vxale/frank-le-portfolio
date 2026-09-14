@@ -2317,7 +2317,7 @@ main { display: block; }
 
 .stepper__btn.is-end { opacity: 0.15; pointer-events: none; }
 
-.stepper__glyph { display: block; width: 1.15rem; } /* half again the sort arrow's size */
+.stepper__glyph { display: block; width: 0.72rem; } /* the sort arrow's size */
 .stepper__glyph svg { display: block; width: 100%; height: auto; }
 .stepper__btn--up .stepper__glyph { transform: rotate(180deg); }
 

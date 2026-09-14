@@ -49,7 +49,20 @@
       .filter((t) => t > 0);
     // The top of the page is always a stop, and nothing sits past the
     // furthest the page can scroll.
-    return [...new Set([0, ...tops.map((t) => Math.min(t, max))])].sort((a, b) => a - b);
+    const all = [...new Set([0, ...tops.map((t) => Math.min(t, max))])].sort((a, b) => a - b);
+    /* A step should move the screen, not nudge it. Any stop within
+       four-tenths of a screen of the one already kept is folded into
+       it — on the grid the cards come in staggered pairs about 110px
+       apart, so this makes one stop per row rather than one per card,
+       and the first card, which is already in view at the top, folds
+       into the top. Measured against the viewport, so a phone (where
+       the cards stack) and a desktop get the right answer each. */
+    const minGap = window.innerHeight * 0.4;
+    const kept = [];
+    all.forEach((t) => { if (!kept.length || t - kept[kept.length - 1] >= minGap) kept.push(t); });
+    // The very end is always reachable, whatever the spacing.
+    if (max > 0 && kept[kept.length - 1] !== max && max - kept[kept.length - 1] > 4) kept.push(max);
+    return kept;
   }
 
   function go(dir) {

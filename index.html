@@ -76,7 +76,10 @@
     </div>
   </div>
 
-  <a class="mark mark--mail" href="mailto:frank.lvxa@gmail.com">frank.lvxa@gmail.com</a>
+  <!-- Reads as an invitation, not an address (Frank, Sept 14 2026).
+       The address itself still travels in the href, and in the hidden
+       text so a screen reader hears where the click goes. -->
+  <a class="mark mark--mail" href="mailto:frank.lvxa@gmail.com">Shoot me an email!<span class="visually-hidden"> (frank.lvxa@gmail.com — opens your email app)</span></a>
 </div>
 
 <script src="js/site.js"></script>

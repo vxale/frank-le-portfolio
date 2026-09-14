@@ -1891,9 +1891,18 @@ main { display: block; }
 
 .compass__arrow {
   display: block;
-  font-family: var(--font);
-  font-size: var(--step-4);
-  line-height: 1;
+  width: 1.15rem;   /* the stepper's arrow, at the stepper's size */
+}
+
+/* The shared arrow points down; the canvas aims this span with 0deg
+   meaning right (atan2 in js/node-tree.js). So the SVG itself is
+   turned a quarter anticlockwise, once, and the span's rotation
+   composes on top of it. */
+.compass__arrow svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: rotate(-90deg);
 }
 
 .compass:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
@@ -2278,8 +2287,11 @@ main { display: block; }
   bottom: var(--gutter);
   translate: -50% 0;
   z-index: 30;
+  /* Up above down — a two-way control, like the pair on a lift —
+     rather than side by side. */
   display: flex;
-  gap: 1.1rem;
+  flex-direction: column;
+  gap: 0.55rem;
   align-items: center;
 }
 
@@ -2305,7 +2317,7 @@ main { display: block; }
 
 .stepper__btn.is-end { opacity: 0.15; pointer-events: none; }
 
-.stepper__glyph { display: block; width: 0.72rem; }
+.stepper__glyph { display: block; width: 1.15rem; } /* half again the sort arrow's size */
 .stepper__glyph svg { display: block; width: 100%; height: auto; }
 .stepper__btn--up .stepper__glyph { transform: rotate(180deg); }
 

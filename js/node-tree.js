@@ -549,15 +549,30 @@
           if (gapX <= 0 || gapY <= 0) continue;
 
           // Separate along whichever axis needs the smaller shove.
-          let ux = 0;
-          let uy = 0;
-          if (gapX < gapY) ux = (dx >= 0 ? 1 : -1) * gapX / 2;
-          else uy = (dy >= 0 ? 1 : -1) * gapY / 2;
-
           // One side being fixed means the other takes the whole move.
           const share = (a.pinned || b.pinned) ? 2 : 1;
-          if (!a.pinned) { pa.x -= ux * share; pa.y -= uy * share; clampPosition(pa); }
-          if (!b.pinned) { pb.x += ux * share; pb.y += uy * share; clampPosition(pb); }
+          const push = (ux, uy) => {
+            const before = Math.abs(pa.x) + Math.abs(pa.y) + Math.abs(pb.x) + Math.abs(pb.y);
+            if (!a.pinned) { pa.x -= ux * share; pa.y -= uy * share; clampPosition(pa); }
+            if (!b.pinned) { pb.x += ux * share; pb.y += uy * share; clampPosition(pb); }
+            const after = Math.abs(pa.x) + Math.abs(pa.y) + Math.abs(pb.x) + Math.abs(pb.y);
+            // How much of the intended move survived the clamp.
+            return Math.abs(after - before) / (Math.abs(ux) + Math.abs(uy));
+          };
+          const alongX = (dx >= 0 ? 1 : -1) * gapX / 2;
+          const alongY = (dy >= 0 ? 1 : -1) * gapY / 2;
+          /* If the paper's edge absorbs the push on the preferred
+             axis, use the other one. Without this, two boxes against
+             the top edge were pushed apart along Y and clamped
+             straight back, pass after pass, and stayed overlapping —
+             the deadlock the enlarged paper was meant to end, back
+             the moment a wider face (Inter Tight, Sept 14 2026) made
+             one branch's labels a little bigger. */
+          if (gapX < gapY) {
+            if (push(alongX, 0) < 0.25) push(0, alongY);
+          } else {
+            if (push(0, alongY) < 0.25) push(alongX, 0);
+          }
           moved = true;
         }
       }

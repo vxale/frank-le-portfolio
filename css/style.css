@@ -30,7 +30,12 @@
      serif in small tracked caps is what carries the "structural"
      voice the grotesk used to. Don't reintroduce a second family
      without asking — it undoes the whole idea. */
-  --font: "Times New Roman", Times, Georgia, "Noto Serif", serif;
+  /* Inter Tight (Frank, Sept 14 2026) — replaces Times, which had
+     been the one face since Sept 8. Loaded from Google Fonts in each
+     page's <head> as a variable font, so every weight is available
+     without a second file. The fallbacks are sans, so a slow load
+     shows a grotesk rather than a serif for a moment. */
+  --font: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* Scale — one modular ladder, ratio 1.2 (Sept 8 2026 rebuild).
      Every size on the site comes from this ladder; there are no
@@ -111,6 +116,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
+  font-optical-sizing: auto;
   font-size: var(--step-2);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;

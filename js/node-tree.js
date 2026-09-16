@@ -83,6 +83,7 @@
   const FIT_MAX_K = 1.15;
   const view = { x: 0, y: 0, k: 1 };
   let viewAnimating = false;
+  let viewTimer = null;
 
   /* The zoom bar in the lower left. The track is mapped
      logarithmically, not linearly: 0.3x to 1x and 1x to 3x are the
@@ -126,6 +127,7 @@
       y: 0,
       pinned: false,   // true once the visitor has dragged it
       expanded: false,
+      leaving: false,  // true from a collapse until its element is removed
       el: null,
       hit: null,
     };
@@ -202,8 +204,9 @@
       `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.k})`;
 
     viewAnimating = move;
+    window.clearTimeout(viewTimer);
     if (move) {
-      window.setTimeout(() => {
+      viewTimer = window.setTimeout(() => {
         viewAnimating = false;
         // One last look after the move has settled. The rAF loop reads
         // positions mid-transition; this is the only frame guaranteed
@@ -220,6 +223,25 @@
     syncZoom();
 
     requestSync(move ? VIEW_MS + 60 : 0);
+  }
+
+  /** Where the paper actually is, mid-move. `view` holds the
+      destination of an animated move from the moment the move starts;
+      the transform on the world is what the visitor is looking at.
+      Any direct input that arrives during a camera move — a wheel
+      tick, a finger on the paper, the zoom bar — has to start from
+      the second one, or it paints the destination plus the input: a
+      10px wheel tick 160ms into a fit used to throw the paper 200px.
+      Reading the live matrix and adopting it as the view is what lets
+      the hand take over from the camera without a seam. */
+  function adoptLiveView() {
+    if (!viewAnimating) return;
+    const m = new DOMMatrix(getComputedStyle(world).transform);
+    view.x = m.e;
+    view.y = m.f;
+    view.k = m.a;
+    viewAnimating = false;
+    window.clearTimeout(viewTimer);
   }
 
   /** Put the bar where the view actually is. Called from applyView,
@@ -259,7 +281,7 @@
   /** Move the view so a set of nodes sits comfortably in frame. Sizes
       are read off the screen and divided by k, because a measured
       rect is already scaled. */
-  function fitTo(nodes, animate) {
+  function fitTo(nodes, animate, backoff = FIT_BACKOFF) {
     const live = nodes.filter((n) => n.el);
     if (!live.length) return;
 
@@ -286,10 +308,26 @@
        number of pixels that means more to a small branch than a big
        one. */
     const tight = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh);
-    view.k = clamp(tight * FIT_BACKOFF, MIN_K, Math.min(MAX_K, FIT_MAX_K));
+    view.k = clamp(tight * backoff, MIN_K, Math.min(MAX_K, FIT_MAX_K));
     view.x = w / 2 - (minX + bw / 2) * view.k;
     view.y = h / 2 - (minY + bh / 2) * view.k;
     applyView(animate);
+  }
+
+  /** Whether every one of these nodes, at the position the layout has
+      just given it, would sit wholly on screen under the current view.
+      Positions are the targets (the elements may still be travelling),
+      sizes are read off the screen. */
+  function inFrame(nodes) {
+    const { w, h } = bounds();
+    return nodes.every((n) => {
+      if (!n.el) return true;
+      const r = n.el.getBoundingClientRect();
+      const sx = n.x * view.k + view.x;
+      const sy = n.y * view.k + view.y;
+      return sx - r.width / 2 >= 0 && sx + r.width / 2 <= w
+          && sy - r.height / 2 >= 0 && sy + r.height / 2 <= h;
+    });
   }
 
   /** Bring a node back into frame without changing how far in we are.
@@ -951,8 +989,23 @@
     }
 
     const still = reduceMotion();
+    const rescued = new Set();
 
     node.children.forEach((kid) => {
+      /* A child still retreating from a collapse a moment ago is not
+         rebuilt: its element and edge are kept, its removal is called
+         off (collapse's timer checks the flag), and it turns round
+         mid-flight toward wherever the layout puts it next. Every
+         move on this canvas can be interrupted and reversed, and this
+         was the one that could not — a second click inside the 170ms
+         of a collapse built new children, then the collapse's timer
+         deleted them, and the branch sat "open" with nothing in it. */
+      if (kid.el && kid.leaving) {
+        kid.leaving = false;
+        kid.el.classList.remove('is-leaving');
+        rescued.add(kid);
+        return;
+      }
       // Start life at the parent: children grow out of where they
       // came from rather than materialising in open space. Set the
       // position before the element exists so the browser never
@@ -970,7 +1023,9 @@
     void layer.offsetHeight;
 
     node.children.forEach((kid, i) => {
-      kid.el.style.transitionDelay = still ? '0ms' : `${i * STAGGER_MS}ms`;
+      // A rescued child turns round now, not after its place in the
+      // stagger: a reversal that waits its turn reads as a stall.
+      kid.el.style.transitionDelay = (still || rescued.has(kid)) ? '0ms' : `${i * STAGGER_MS}ms`;
       kid.el.classList.remove('is-entering');
       applyPosition(kid);
     });
@@ -980,11 +1035,20 @@
 
     if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
 
-    /* Opening Moving Image, Design or Photography brings the camera to that
-       branch. Not the root: its place on the canvas — hard left,
-       vertically centred — is a deliberate composition, and refitting
-       on the first click would throw it away. */
-    if (node.depth > 0) fitTo([node].concat(node.children), true);
+    /* Opening Moving Image, Design or Photography brings the camera to
+       that branch. The root is left alone as long as its branch fits
+       on screen: its place on the canvas — hard left, vertically
+       centred — is a deliberate composition, and refitting on the
+       first click would throw it away. Where the branch does not fit
+       there is no composition to protect, and the camera fits there
+       too — on a phone, four of the five children used to land off
+       the right edge with nothing on screen to say so. That fit holds
+       nothing back: the 20% the branch fits keep in hand is a framing
+       courtesy, and on a 375px screen it cost the labels a third of
+       their size for no room anyone could use. */
+    const opened = [node].concat(node.children);
+    if (node.depth > 0) fitTo(opened, true);
+    else if (!inFrame(opened)) fitTo(opened, true, 1);
 
     requestSync(ENTER_MS + node.children.length * STAGGER_MS + 80);
   }
@@ -1014,6 +1078,7 @@
     doomed.forEach((kid) => {
       if (!kid.el) return;
       kid.pinned = false;
+      kid.leaving = true;
       kid.el.classList.add('is-leaving');
       // Retreat into the parent that spawned them.
       const home = kid.parent;
@@ -1021,7 +1086,13 @@
         `translate3d(${home.x}px, ${home.y}px, 0) translate(-50%, -50%)`;
     });
 
-    const finish = () => doomed.forEach(removeNodeElement);
+    // Only the ones still on their way out: a child re-opened inside
+    // the exit window was rescued by expand() and has dropped the flag.
+    const finish = () => doomed.forEach((kid) => {
+      if (!kid.leaving) return;
+      kid.leaving = false;
+      removeNodeElement(kid);
+    });
     if (reduceMotion()) finish();
     else window.setTimeout(finish, EXIT_MS);
 
@@ -1134,6 +1205,7 @@
 
        No transition on the way through: this tracks a hand. */
     zoomRange.addEventListener('input', () => {
+      adoptLiveView();
       const t = Number(zoomRange.value) / 100;
       const target = Math.exp(LOG_MIN + (LOG_MAX - LOG_MIN) * t);
       const { w, h } = bounds();
@@ -1153,6 +1225,7 @@
     if (event.button !== undefined && event.button > 0) return;
 
     pinch.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    adoptLiveView();
 
     if (pinch.size === 1) {
       panning = {
@@ -1210,6 +1283,7 @@
      set, so honouring it is what makes pinch work on a laptop. */
   canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
+    adoptLiveView();
     if (event.ctrlKey) {
       const p = localPoint(event);
       zoomAt(p.x, p.y, Math.exp(-event.deltaY * 0.01));
@@ -1231,9 +1305,9 @@
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     const { w, h } = bounds();
     if (event.key === '+' || event.key === '=') {
-      event.preventDefault(); zoomAt(w / 2, h / 2, 1.2);
+      event.preventDefault(); adoptLiveView(); zoomAt(w / 2, h / 2, 1.2);
     } else if (event.key === '-' || event.key === '_') {
-      event.preventDefault(); zoomAt(w / 2, h / 2, 1 / 1.2);
+      event.preventDefault(); adoptLiveView(); zoomAt(w / 2, h / 2, 1 / 1.2);
     } else if (event.key === '0') {
       event.preventDefault(); resetView();
     }

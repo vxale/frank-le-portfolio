@@ -2090,6 +2090,28 @@ main { display: block; }
   margin: 0;
 }
 
+/* The cue's own box is not a target (Sept 16 2026). A closed cue is a
+   word in a corner, but its <nav> still spans the width of its widest
+   rung and the height of the folded column — invisible, and in front
+   of everything under it. On a phone the filter cue's box (300px wide
+   at 375) reached across the bottom of the screen and sat on top of
+   the Navigate trigger, so Navigate could not be tapped on the works
+   page at all; on every page the empty column above a closed trigger
+   was swallowing taps meant for the content beneath it. Only the
+   trigger, the rungs and their buttons take the pointer. A fine
+   pointer gets the whole box back while the cue is open, so the hand
+   can travel across the gaps between rungs without the cue closing
+   under it. */
+.navcue { pointer-events: none; }
+.navcue__trigger,
+.navcue__link,
+.navcue .filter-btn,
+.navcue .tool-btn { pointer-events: auto; }
+
+@media (hover: hover) and (pointer: fine) {
+  .navcue.is-open { pointer-events: auto; }
+}
+
 .navcue__trigger {
   font-family: var(--font);
   font-size: var(--step-0);
@@ -2398,6 +2420,69 @@ main { display: block; }
 /* Over a picture the arrows go white and full, like the cues. */
 .stepper.is-over-media .stepper__btn { color: #fff; opacity: 1; }
 .stepper.is-over-media .stepper__btn.is-end { opacity: 0.35; }
+
+/* ---------- Touch targets (Sept 16 2026) ----------
+   Every control in the corners is drawn small on purpose — a quiet
+   word, a hairline arrow — and on a desk a fine pointer lands on
+   twenty pixels without trouble. A thumb does not. Apple's floor is
+   44pt; measured on a phone the stepper arrows were 21×26, Navigate
+   67×19, the sort arrow 22×22, the resize grip 18×18, the filter
+   buttons 28×24.
+
+   The hit area grows here and nothing visible changes. An invisible
+   ::before reaches out from each control (a pseudo-element hit-tests
+   to the element that owns it), only where the pointer is coarse, and
+   each one is sized against its neighbours so targets tile rather
+   than overlap — the stepper's up arrow reaches up, its down arrow
+   reaches down, the two meet in the gap between them. Where a row's
+   pitch is under 44px (the filter rows at 36px, the cue's rungs at
+   36px) the target fills the pitch instead: a dead zone between two
+   buttons is worse than a target a few pixels under the ideal. The
+   grip simply gets a bigger box — its two hairlines are anchored to
+   its bottom-right corner and stay where they were. ---------- */
+@media (pointer: coarse) {
+  .stepper__btn,
+  .navcue__trigger,
+  .navcue__link,
+  .filter-btn,
+  .tool-btn,
+  .theme__btn,
+  .page-head__mark,
+  .credits__more,
+  .beat__num,
+  .shot__sound,
+  .node__hit { position: relative; }
+
+  .stepper__btn::before,
+  .navcue__trigger::before,
+  .navcue__link::before,
+  .filter-btn::before,
+  .tool-btn::before,
+  .theme__btn::before,
+  .page-head__mark::before,
+  .credits__more::before,
+  .beat__num::before,
+  .shot__sound::before,
+  .node__hit::before,
+  .compass::before {
+    content: "";
+    position: absolute;
+    inset: -10px -8px;
+  }
+
+  .stepper__btn--up::before   { inset: -14px -12px -4px; }   /* 21×26 → 45×44 */
+  .stepper__btn--down::before { inset: -4px -12px -14px; }
+  .navcue__trigger::before    { inset: -8px -10px -17px; }   /* 67×19 → 87×44, down into the gutter */
+  .navcue__link::before       { inset: -8px -10px; }         /* fills the 36px rung pitch */
+  .filter-btn::before         { inset: -6px; }               /* fills the 36px row pitch, 13px gaps */
+  .tool-btn::before           { inset: -11px -6px -11px -11px; } /* 22×22 → 39×44; less toward Tidy up */
+  .theme__btn::before         { inset: -12px -6px; }         /* 42×20 → 54×44, 14px between Light and Dark */
+  .page-head__mark::before    { inset: -12px -8px; }
+  .node__hit::before          { inset: -8px -6px; }          /* a bare branch label is 28px tall on a phone */
+  .compass::before            { inset: -1px; }               /* 42 → 44 */
+
+  .media-frame__grip { width: 2.75rem; height: 2.75rem; }
+}
 
 .navcue--filter {
   --rungs: 4;              /* Type, Year, Made for, and the tools */

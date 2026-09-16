@@ -1311,7 +1311,7 @@ main { display: block; }
   font-size: var(--step-8);
   font-weight: 400;
   line-height: 1.04;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;   /* see "Tracking follows size" at the end of this file */
 }
 
 .work-marks {
@@ -1619,7 +1619,7 @@ main { display: block; }
   .beat { --step: 0.5rem; }    /* the staircase stays, in miniature —
                                   five full steps would be an eighth
                                   of a phone's width */
-  .work-title { font-size: var(--step-7); }
+  .work-title { font-size: var(--step-7); letter-spacing: -0.015em; }
 }
 
 /* ============================================================
@@ -2908,4 +2908,65 @@ i,
 cite {
   --slnt: -12;
   font-style: normal;   /* the axis does it; no synthesis on top */
+}
+
+
+/* ============================================================
+   More contrast (Sept 16 2026)
+
+   The quiet corners are quiet by opacity: Navigate and the stepper
+   rest at 0.4, an exhausted stepper arrow at 0.15, the tree's edges
+   at 0.32, and secondary text is a softer ink. For someone who has
+   asked their system for more contrast, quiet is the wrong answer
+   and every one of those goes to full ink. The exhausted arrow keeps
+   half — it still has to read as unavailable — and the hover-lift on
+   the compass is moot at 1. Soft ink becomes ink in all three theme
+   states, which is why the selector list is three long: the dark
+   blocks redefine --ink-soft with more specificity than :root, and
+   this block has to be the one that wins in each.
+   ============================================================ */
+@media (prefers-contrast: more) {
+  :root,
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]) { --ink-soft: var(--ink); }
+
+  .navcue__trigger,
+  .stepper__btn,
+  .beat.is-closed .beat__num,
+  .zoom__track::after,
+  .zoom__range::-webkit-slider-runnable-track,
+  .zoom__range::-moz-range-track { opacity: 1; }
+
+  .stepper__btn.is-end,
+  .stepper.is-over-media .stepper__btn.is-end { opacity: 0.5; }
+
+  .canvas__edge { stroke-opacity: 1; }
+}
+
+
+/* ============================================================
+   Tracking follows size (Sept 16 2026)
+
+   Letter-spacing is not one number: as type grows the letters read
+   further apart than the designer set them, so display sizes want
+   negative tracking and small text wants none or a touch positive.
+   The site's small tracked caps already carry their own (0.08–0.18em
+   on the labels); this is the other end of the ladder. The work
+   title at step 8 had -0.01em; the root of the tree, the name on
+   About and the closing "next" nodes sit at step 6 with none, so the
+   largest words on the site were the loosest.
+
+     step 8   -0.02em    .work-title
+     step 7   -0.015em   .work-title on a narrow screen
+     step 6   -0.01em    the root's name, About's name, next-nodes
+
+   The alias beside the root's name keeps its own +0.01em — it is
+   set at 0.62em of the name and needs the air. Below 720px the root
+   drops to step 4 and takes no tracking with it.
+   ============================================================ */
+.next-node__title,
+.passage--name { letter-spacing: -0.01em; }
+
+@media (min-width: 721px) {
+  .node--d0 .node__hit { letter-spacing: -0.01em; }
 }

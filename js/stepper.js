@@ -65,8 +65,23 @@
     return kept;
   }
 
+  /* Where the page is heading, while a smooth scroll is still on its
+     way. Two quick presses used to move one section, not two: the
+     second press read the live scroll position, which mid-flight was
+     still short of the first target, and re-targeted the same stop.
+     A press while travelling now steps from the stop being travelled
+     to. The memory clears when the page arrives, when the visitor
+     takes over (wheel, touch, keyboard), and on a timer in case the
+     browser's smooth scroll never quite lands. */
+  let heading = null;
+  let headingTimer = null;
+  function forget() {
+    heading = null;
+    window.clearTimeout(headingTimer);
+  }
+
   function go(dir) {
-    const y = Math.round(window.scrollY);
+    const y = heading !== null ? heading : Math.round(window.scrollY);
     const list = stops();
     // A few pixels of slack: a smooth scroll can settle a pixel short
     // of its target, and that must not count as "still here".
@@ -74,8 +89,19 @@
       ? list.find((t) => t > y + 4)
       : [...list].reverse().find((t) => t < y - 4);
     if (target === undefined) return;
+    heading = target;
+    window.clearTimeout(headingTimer);
+    headingTimer = window.setTimeout(forget, 1500);
     window.scrollTo({ top: target, behavior: reduce.matches ? 'auto' : 'smooth' });
   }
+
+  ['wheel', 'touchstart', 'keydown'].forEach((type) => {
+    window.addEventListener(type, (event) => {
+      // Enter or Space on the arrows themselves is a press, not a takeover.
+      if (type === 'keydown' && nav.contains(event.target)) return;
+      forget();
+    }, { passive: true });
+  });
 
   up.addEventListener('click', () => go(-1));
   down.addEventListener('click', () => go(1));
@@ -94,6 +120,7 @@
     nav.hidden = max < 200;
     if (nav.hidden) return;
     const y = Math.round(window.scrollY);
+    if (heading !== null && Math.abs(y - heading) <= 4) forget();   // arrived
     const list = stops();
     const hasPrev = list.some((t) => t < y - 4);
     const hasNext = list.some((t) => t > y + 4);

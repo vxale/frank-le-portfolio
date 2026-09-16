@@ -74,16 +74,42 @@
      which is nothing to look at. */
   const MIN_K = 1 / 3;
   const MAX_K = 3;
-  const VIEW_MS = 420;          // a camera move, not a UI transition
   const FIT_BACKOFF = 0.8;      // hold 20% back from a tight fit
   /* And never magnify past this, however small the branch. The type
      scale is tuned at 1x; a fit is for FRAMING a branch, not for
      enlarging it, and without this cap a one-child branch zooms to
      nearly 2x purely because its bounding box is small. */
   const FIT_MAX_K = 1.15;
+  /* ---------- The camera is a spring (Sept 16 2026) ----------
+     `view` is always where the paper IS. A programmatic move — a
+     branch opening, Reset view, the compass, a flick coasting to a
+     stop — sets `target` and lets a spring carry `view` toward it on
+     requestAnimationFrame. That replaced a 420ms CSS transition, and
+     the reason is interruption: a transition owns the property until
+     it ends, so a wheel tick or a finger landing mid-move had to read
+     the live matrix back out of the compositor before it could do
+     anything (adoptLiveView, which lived here for a day). A spring
+     has no end state to fight — new input just writes `view`, and a
+     spring that was running is stopped or retargeted from wherever
+     the paper is, carrying whatever velocity it has.
+
+     Apple's two numbers rather than mass/stiffness/damping. RESPONSE
+     is roughly how long a move takes to arrive, in seconds; DAMPING 1
+     is critically damped — no overshoot unless the hand supplied the
+     velocity for one. Their own table has "move / reposition" at
+     1.0 / 0.4, and this is a reposition. A flicked pan arrives with
+     the finger's velocity, so against an edge it overshoots a little
+     and settles back — the rubber-band return, for free. */
+  const RESPONSE = 0.4;
+  const DAMPING = 1;
   const view = { x: 0, y: 0, k: 1 };
-  let viewAnimating = false;
-  let viewTimer = null;
+  const target = { x: 0, y: 0, k: 1 };
+  const velocity = { x: 0, y: 0, k: 0 };
+  let springId = null;
+  let springLast = 0;
+  // "Arrived": a twentieth of a pixel, a ten-thousandth of a scale
+  // step — below anything the compositor can show.
+  const SETTLE = { x: 0.05, y: 0.05, k: 0.0001 };
 
   /* The zoom bar in the lower left. The track is mapped
      logarithmically, not linearly: 0.3x to 1x and 1x to 3x are the
@@ -92,7 +118,7 @@
      magnification nobody uses. Log also puts 1x a little past the
      middle, where it belongs.
 
-     These are read inside applyView, which can run before the corner
+     These are read inside paintView, which can run before the corner
      marks are looked up further down, so they are resolved here at
      the top rather than beside their listener. */
   const LOG_MIN = Math.log(MIN_K);
@@ -192,28 +218,10 @@
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  /** Paint the view. `animate` is only for programmatic moves — a
-      wheel or a drag has to track the input exactly, and a transition
-      there would lag a quarter second behind the hand. */
-  function applyView(animate) {
-    const move = animate && !reduceMotion();
-    world.style.transition = move
-      ? `transform ${VIEW_MS}ms var(--ease-in-out)`
-      : 'none';
+  /** Paint whatever `view` says, and everything that reports on it. */
+  function paintView() {
     world.style.transform =
       `translate3d(${view.x}px, ${view.y}px, 0) scale(${view.k})`;
-
-    viewAnimating = move;
-    window.clearTimeout(viewTimer);
-    if (move) {
-      viewTimer = window.setTimeout(() => {
-        viewAnimating = false;
-        // One last look after the move has settled. The rAF loop reads
-        // positions mid-transition; this is the only frame guaranteed
-        // to see where everything actually came to rest.
-        updateCompass();
-      }, VIEW_MS + 40);
-    }
 
     const moved = Math.abs(view.x) > 1 || Math.abs(view.y) > 1
       || Math.abs(view.k - 1) > 0.01;
@@ -221,30 +229,163 @@
     // the button's row is held open whether it shows or not.
     if (resetMark) resetMark.classList.toggle('is-shown', moved);
     syncZoom();
-
-    requestSync(move ? VIEW_MS + 60 : 0);
+    updateCompass();
   }
 
-  /** Where the paper actually is, mid-move. `view` holds the
-      destination of an animated move from the moment the move starts;
-      the transform on the world is what the visitor is looking at.
-      Any direct input that arrives during a camera move — a wheel
-      tick, a finger on the paper, the zoom bar — has to start from
-      the second one, or it paints the destination plus the input: a
-      10px wheel tick 160ms into a fit used to throw the paper 200px.
-      Reading the live matrix and adopting it as the view is what lets
-      the hand take over from the camera without a seam. */
-  function adoptLiveView() {
-    if (!viewAnimating) return;
-    const m = new DOMMatrix(getComputedStyle(world).transform);
-    view.x = m.e;
-    view.y = m.f;
-    view.k = m.a;
-    viewAnimating = false;
-    window.clearTimeout(viewTimer);
+  function stopSpring() {
+    if (springId !== null) cancelAnimationFrame(springId);
+    springId = null;
+    velocity.x = 0; velocity.y = 0; velocity.k = 0;
   }
 
-  /** Put the bar where the view actually is. Called from applyView,
+  function startSpring() {
+    if (springId !== null) return;
+    springLast = performance.now();
+    springId = requestAnimationFrame(springFrame);
+  }
+
+  /* One step of a damped spring per axis, semi-implicit Euler. dt is
+     capped so a tab that was hidden for a while resumes with one long
+     step rather than a leap: at ω·dt under 2 the integration is
+     stable, and 0.05s puts it at 0.8. x, y and k spring on the same
+     numbers from rest, so a zoom about a point holds that point still
+     all the way through — their progress curves are identical. */
+  function springFrame(now) {
+    const dt = Math.min(0.05, Math.max(0.001, (now - springLast) / 1000));
+    springLast = now;
+    const w0 = (2 * Math.PI) / RESPONSE;
+    let done = true;
+    ['x', 'y', 'k'].forEach((axis) => {
+      const gap = view[axis] - target[axis];
+      const a = -w0 * w0 * gap - 2 * DAMPING * w0 * velocity[axis];
+      velocity[axis] += a * dt;
+      view[axis] += velocity[axis] * dt;
+      if (Math.abs(view[axis] - target[axis]) > SETTLE[axis]
+          || Math.abs(velocity[axis]) * dt > SETTLE[axis]) done = false;
+    });
+    if (done) {
+      view.x = target.x; view.y = target.y; view.k = target.k;
+      springId = null;
+      velocity.x = 0; velocity.y = 0; velocity.k = 0;
+    } else {
+      springId = requestAnimationFrame(springFrame);
+    }
+    paintView();
+  }
+
+  /** Move the camera to `to`. Animated, the spring takes it from
+      wherever the view is now — carrying `v` (screen px per second)
+      if a gesture handed one over — and a move already under way is
+      simply retargeted. Not animated, or under reduced motion, it is
+      there on the next paint. */
+  function moveView(to, animate, v) {
+    target.x = to.x;
+    target.y = to.y;
+    target.k = clamp(to.k, MIN_K, MAX_K);
+    if (!animate || reduceMotion()) {
+      stopSpring();
+      view.x = target.x; view.y = target.y; view.k = target.k;
+      paintView();
+      return;
+    }
+    if (v) { velocity.x = v.x || 0; velocity.y = v.y || 0; }
+    startSpring();
+  }
+
+  /* ---------- Edges of the paper ----------
+     How far the view may pan. The paper (PAPER × the viewport, see
+     pads) must cover the screen, or when the paper is smaller than the
+     screen — a third out — sit inside it; and a node the visitor has
+     dragged past the paper's edge extends the edge to include it, so
+     nothing placed by hand can ever be out of reach. Before this the
+     view was unbounded, and the tree could be pushed clean off the
+     screen — the compass exists to recover from exactly that, and it
+     now has less to do. */
+  function viewLimits(k = view.k) {
+    const { w, h } = bounds();
+    const { extraY } = pads();
+    let x0 = 0, x1 = w * PAPER, y0 = -extraY, y1 = h + extraY;
+    allNodes.forEach((n) => {
+      if (!n.el) return;
+      const r = n.el.getBoundingClientRect();
+      const hw = (r.width / view.k) / 2;
+      const hh = (r.height / view.k) / 2;
+      x0 = Math.min(x0, n.x - hw); x1 = Math.max(x1, n.x + hw);
+      y0 = Math.min(y0, n.y - hh); y1 = Math.max(y1, n.y + hh);
+    });
+    // Covering: lo·k + v ≤ 0 and hi·k + v ≥ screen. Contained (content
+    // narrower than the screen) is the same pair the other way round.
+    const span = (lo, hi, screen) => {
+      const a = screen - hi * k;
+      const b = -lo * k;
+      return a <= b ? { min: a, max: b } : { min: b, max: a };
+    };
+    return { x: span(x0, x1, w), y: span(y0, y1, h) };
+  }
+
+  function clampToLimits(to) {
+    const lim = viewLimits(to.k);
+    return {
+      x: clamp(to.x, lim.x.min, lim.x.max),
+      y: clamp(to.y, lim.y.min, lim.y.max),
+      k: to.k,
+    };
+  }
+
+  /* Rubber-banding, Apple's own curve: past an edge the paper keeps
+     following the hand, but less and less, and can never get further
+     than the screen's own width from where it should be. A hard stop
+     reads as frozen; continuous resistance reads as "there is nothing
+     more here". */
+  function rubberband(over, dim, c = 0.55) {
+    return (over * dim * c) / (dim + c * Math.abs(over));
+  }
+
+  function withBand(v, lim, dim) {
+    if (v < lim.min) return lim.min + rubberband(v - lim.min, dim);
+    if (v > lim.max) return lim.max + rubberband(v - lim.max, dim);
+    return v;
+  }
+
+  /** Whatever a gesture left past an edge springs back. */
+  function settleView() {
+    const to = clampToLimits({ x: view.x, y: view.y, k: view.k });
+    if (to.x === view.x && to.y === view.y) return;
+    moveView(to, true);
+  }
+
+  /* Momentum. A flick is not a request to stop where the finger left
+     the paper; it is a throw, and the paper should land where the
+     throw was going. Apple's projection: with a deceleration rate of
+     0.998 per millisecond, a release at v px/s comes to rest
+     v·0.499 px further on — the same sum every scroll view does. The
+     landing point is clamped to the edges and the spring is handed
+     the release velocity, so there is no seam between the finger
+     moving the paper and the paper moving itself. */
+  const DECELERATION = 0.998;
+  function project(v) {
+    return (v / 1000) * DECELERATION / (1 - DECELERATION);
+  }
+
+  /* The last hundred milliseconds of the pointer, for the velocity at
+     release. A finger that stopped before lifting reads as zero: the
+     newest sample is too old to count. */
+  const VELOCITY_WINDOW = 100;
+  function sample(list, event) {
+    const now = performance.now();
+    list.push({ t: now, x: event.clientX, y: event.clientY });
+    while (list.length > 2 && now - list[0].t > VELOCITY_WINDOW) list.shift();
+  }
+  function releaseVelocity(list) {
+    if (list.length < 2) return { x: 0, y: 0 };
+    const a = list[0];
+    const b = list[list.length - 1];
+    const dt = (b.t - a.t) / 1000;
+    if (dt <= 0 || performance.now() - b.t > 80) return { x: 0, y: 0 };
+    return { x: (b.x - a.x) / dt, y: (b.y - a.y) / dt };
+  }
+
+  /** Put the bar where the view actually is. Called from paintView,
       so every route to a new scale - wheel, pinch, keyboard, a branch
       opening, reset - reports through the same one place. */
   function syncZoom() {
@@ -268,14 +409,19 @@
   /** Zoom about a fixed point: whatever sits under (sx, sy) stays
       under it. Without this the view lurches toward the origin on
       every wheel tick. */
-  function zoomAt(sx, sy, factor) {
+  function zoomAt(sx, sy, factor, animate) {
     const k2 = clamp(view.k * factor, MIN_K, MAX_K);
     if (k2 === view.k) return;
     const f = k2 / view.k;
-    view.x = sx - (sx - view.x) * f;
-    view.y = sy - (sy - view.y) * f;
-    view.k = k2;
-    applyView(false);
+    const to = {
+      x: sx - (sx - view.x) * f,
+      y: sy - (sy - view.y) * f,
+      k: k2,
+    };
+    // A gesture is not clamped mid-flight (the point under the fingers
+    // would drift); it settles once it ends. A keyboard step goes
+    // straight to a legal place.
+    moveView(animate ? clampToLimits(to) : to, animate);
   }
 
   /** Move the view so a set of nodes sits comfortably in frame. Sizes
@@ -308,10 +454,12 @@
        number of pixels that means more to a small branch than a big
        one. */
     const tight = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh);
-    view.k = clamp(tight * backoff, MIN_K, Math.min(MAX_K, FIT_MAX_K));
-    view.x = w / 2 - (minX + bw / 2) * view.k;
-    view.y = h / 2 - (minY + bh / 2) * view.k;
-    applyView(animate);
+    const k = clamp(tight * backoff, MIN_K, Math.min(MAX_K, FIT_MAX_K));
+    moveView(clampToLimits({
+      x: w / 2 - (minX + bw / 2) * k,
+      y: h / 2 - (minY + bh / 2) * k,
+      k,
+    }), animate);
   }
 
   /** Whether every one of these nodes, at the position the layout has
@@ -335,9 +483,11 @@
   function centreOn(node, animate) {
     if (!node || !node.el) return;
     const { w, h } = bounds();
-    view.x = w / 2 - node.x * view.k;
-    view.y = h / 2 - node.y * view.k;
-    applyView(animate);
+    moveView(clampToLimits({
+      x: w / 2 - node.x * view.k,
+      y: h / 2 - node.y * view.k,
+      k: view.k,
+    }), animate);
   }
 
   function resetView() {
@@ -359,10 +509,7 @@
     })(root);
     allNodes.forEach((n) => { if (n.el) applyPosition(n); });
 
-    view.x = 0;
-    view.y = 0;
-    view.k = 1;
-    applyView(true);
+    moveView(clampToLimits({ x: 0, y: 0, k: 1 }), true);
   }
 
   // ---------- Geometry ----------
@@ -393,7 +540,7 @@
     const padY = Math.min(90, h * 0.12);
     const extraY = h * (PAPER - 1) / 2;
     return {
-      w, h, padX, padY,
+      w, h, padX, padY, extraY,
       x0: padX,           x1: w * PAPER - padX,
       y0: padY - extraY,  y1: h + extraY - padY,
     };
@@ -1205,19 +1352,21 @@
 
        No transition on the way through: this tracks a hand. */
     zoomRange.addEventListener('input', () => {
-      adoptLiveView();
+      stopSpring();
       const t = Number(zoomRange.value) / 100;
-      const target = Math.exp(LOG_MIN + (LOG_MAX - LOG_MIN) * t);
+      const k = Math.exp(LOG_MIN + (LOG_MAX - LOG_MIN) * t);
       const { w, h } = bounds();
-      zoomAt(w / 2, h / 2, target / view.k);
-      syncZoom();
+      zoomAt(w / 2, h / 2, k / view.k);
     });
+    // Letting go of the bar is the end of the gesture.
+    zoomRange.addEventListener('change', settleView);
   }
   syncZoom();
 
   let panning = null;
   let pinchDist = 0;
   const pinch = new Map();     // pointerId -> last position, for two fingers
+  let wheelTimer = null;
 
   /** A press that did not land on a node is a press on the paper. */
   canvas.addEventListener('pointerdown', (event) => {
@@ -1225,7 +1374,9 @@
     if (event.button !== undefined && event.button > 0) return;
 
     pinch.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    adoptLiveView();
+    // A finger on the paper takes over from wherever the camera is,
+    // mid-move or not. Nothing to read back: `view` is the live value.
+    stopSpring();
 
     if (pinch.size === 1) {
       panning = {
@@ -1234,7 +1385,11 @@
         startY: event.clientY,
         originX: view.x,
         originY: view.y,
+        limits: viewLimits(),   // nodes do not move during a pan
+        samples: [],
+        pinched: false,
       };
+      sample(panning.samples, event);
       canvas.classList.add('is-panning');
       window.addEventListener('pointermove', onPanMove);
       window.addEventListener('pointerup', onPanUp);
@@ -1249,6 +1404,7 @@
     // Two fingers: the distance between them drives the zoom, their
     // midpoint is the fixed point.
     if (pinch.size >= 2) {
+      if (panning) panning.pinched = true;
       const [a, b] = [...pinch.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       if (pinchDist) {
@@ -1261,9 +1417,13 @@
     }
 
     if (!panning || event.pointerId !== panning.pointerId) return;
-    view.x = panning.originX + (event.clientX - panning.startX);
-    view.y = panning.originY + (event.clientY - panning.startY);
-    applyView(false);
+    // 1:1 with the hand, from the raw offset every time — the band is
+    // applied to the true overshoot, not compounded on itself.
+    const { w, h } = bounds();
+    view.x = withBand(panning.originX + (event.clientX - panning.startX), panning.limits.x, w);
+    view.y = withBand(panning.originY + (event.clientY - panning.startY), panning.limits.y, h);
+    sample(panning.samples, event);
+    paintView();
   }
 
   function onPanUp(event) {
@@ -1275,7 +1435,22 @@
     window.removeEventListener('pointerup', onPanUp);
     window.removeEventListener('pointercancel', onPanUp);
     canvas.classList.remove('is-panning');
+
+    const pan = panning;
     panning = null;
+    if (!pan || pan.pinched || event.type === 'pointercancel') {
+      settleView();          // a pinch, or a cancelled gesture: just come home
+      return;
+    }
+    // The throw: land where the flick was going, inside the edges,
+    // arriving at the finger's own speed.
+    const v = releaseVelocity(pan.samples);
+    const lim = viewLimits();
+    moveView({
+      x: clamp(view.x + project(v.x), lim.x.min, lim.x.max),
+      y: clamp(view.y + project(v.y), lim.y.min, lim.y.max),
+      k: view.k,
+    }, true, v);
   }
 
   /* Scroll pans, ctrl+scroll zooms. That split is not arbitrary: a
@@ -1283,15 +1458,21 @@
      set, so honouring it is what makes pinch work on a laptop. */
   canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
-    adoptLiveView();
+    stopSpring();
     if (event.ctrlKey) {
       const p = localPoint(event);
       zoomAt(p.x, p.y, Math.exp(-event.deltaY * 0.01));
     } else {
-      view.x -= event.deltaX;
-      view.y -= event.deltaY;
-      applyView(false);
+      const { w, h } = bounds();
+      const lim = viewLimits();
+      view.x = withBand(view.x - event.deltaX, lim.x, w);
+      view.y = withBand(view.y - event.deltaY, lim.y, h);
+      paintView();
     }
+    // A wheel has no "up". Once it has been quiet for a moment,
+    // whatever it left past an edge springs back.
+    window.clearTimeout(wheelTimer);
+    wheelTimer = window.setTimeout(settleView, 150);
   }, { passive: false });
 
   /* Keyboard, because none of the above is reachable without a
@@ -1305,9 +1486,9 @@
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     const { w, h } = bounds();
     if (event.key === '+' || event.key === '=') {
-      event.preventDefault(); adoptLiveView(); zoomAt(w / 2, h / 2, 1.2);
+      event.preventDefault(); zoomAt(w / 2, h / 2, 1.2, true);
     } else if (event.key === '-' || event.key === '_') {
-      event.preventDefault(); adoptLiveView(); zoomAt(w / 2, h / 2, 1 / 1.2);
+      event.preventDefault(); zoomAt(w / 2, h / 2, 1 / 1.2, true);
     } else if (event.key === '0') {
       event.preventDefault(); resetView();
     }
@@ -1358,7 +1539,8 @@
        corner hint carries the instruction, so the page doesn't have
        to prove it is a menu by opening itself. */
     if (window.driftAll) window.driftAll(layer.querySelectorAll('.node__drift'));
-    applyView(false);
+    world.style.transition = 'none';   // the spring paints every frame itself
+    moveView({ x: 0, y: 0, k: 1 }, false);
     requestSync(600);
   })();
 })();

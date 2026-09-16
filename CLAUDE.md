@@ -15,6 +15,7 @@ A single unified portfolio (not split by discipline) covering both his design wo
 - `work.html?id=<id>` — one flexible detail template (not a separate file per project) driven by the same JSON. Content order: title/role/tools metadata → credits → awards slot → five-beat insight passage (what / problem / audience / process / result) → full-bleed media → next-project pager.
 - `contact.html` — public email (academic + business, see `docs/contact.md`), LinkedIn, CV download slot (no file yet).
 - Nav: **the node-tree canvas is the navigation.** There is no list menu on any page. Inner pages carry `.page-head` — the nameplate **Lê Vũ Xuân Anh** (full name, a quiet link home; back since Sept 13 2026) on the left and the colour mode on the right; the Navigate cue in the lower right does the rest. See "Canvas rebuild" and "Inner-page chrome" below.
+- Page titles carry the full name too (Frank, Sept 16 2026): `Lê Vũ Xuân Anh — Filmmaker & Designer` on the homepage (and its `og:title`), `Works — Lê Vũ Xuân Anh`, `About — …`, `Contact — …`, `Project — …` as the fallback and `<project title> — Lê Vũ Xuân Anh` once `js/work-detail.js` has the data. "Frank Le" stays in the meta descriptions and body copy as the alias, in brackets after the name.
 
 ## Design system (see docs/style-direction.md for full rationale)
 - Palette: strictly black/white. **Paper is pure `#FFFFFF` as of Sept 8 2026** (Frank's direct instruction — this reversed the earlier off-white `#f5f2ea` "open book paper" value; don't restore it). Ink stays near-black `--ink: #16140f`, and the two grays (`--paper-dim`, `--ink-soft`) were retoned neutral at the same time so they don't read dirty on a white sheet. No accent color. Hairlines/borders (`--line`) resolve to ink directly.
@@ -280,32 +281,31 @@ We add no border and no tint of our own — the embed brings enough chrome with 
 
 Replaces Inter Tight, which replaced Times. **Self-hosted** at `assets/fonts/ABCArealSuperfamilyVariable.woff2`, preloaded from each page's `<head>`; the Google Fonts links and preconnects are gone. One 264KB file carries proportional, semi mono and mono, 400–700, upright and oblique, and full Vietnamese.
 
-### Four axes, all four used
+### Four axes, three used — MONO is held at 0
 
 | axis | range | what it does here |
 | --- | --- | --- |
-| `MONO` | 0–100 | 0 Areal, 50 Semi Mono, 100 Mono. This is the hierarchy. |
+| `MONO` | 0–100 | 0 Areal, 50 Semi Mono, 100 Mono. **Held at 0 everywhere** — Frank, Sept 16 2026: "I don't like the use of mono typefaces. Use sans serif only." The first cut set the node tree and the cue rungs in Semi Mono and every label in Mono; it lasted a day. **Don't bring it back.** |
 | `wght` | 400–700 | Regular, Medium, Bold. **Nothing below 400 exists** in this family. |
 | `slnt` | −12–0 | A real oblique. `em`/`i`/`cite` set `--slnt: -12`. |
 | `DRKM` | 0–1 | "Darkmode" — takes out the optical weight light type gains on a dark ground. Switched on with the colour tokens in both dark blocks. |
 
-**There is no slab axis**, so the slab half of the brief could not be built. Semi Mono does that job.
+**There is no slab axis**, so the slab half of the brief could not be built, and the Semi Mono that stood in for it went with the mono. Hierarchy is size, case, tracking and weight — the one-typeface discipline the site has kept since Sept 8.
 
 ### How to change anything
 
-Nothing in this file writes `font-variation-settings` except one rule. The four axes are custom properties on `:root`, and a selector changes register by setting `--mono` or `--wght` and nothing else.
+Nothing in this file writes `font-variation-settings` except one rule. The four axes are custom properties on `:root`, and a selector changes register by setting `--wght` and nothing else (`--mono` exists in the composition, at 0, and nothing overrides it).
 
-That rule is on the **universal selector on purpose**, and the reason is the trap: `font-variation-settings` inherits as a *computed string*, so a `var()` inside it is substituted once and children inherit the result. Declare it on `body` alone and a descendant setting `--mono: 100` changes nothing at all. Declaring it everywhere is what makes the custom properties behave like real axes.
+That rule is on the **universal selector on purpose**, and the reason is the trap: `font-variation-settings` inherits as a *computed string*, so a `var()` inside it is substituted once and children inherit the result. Declare it on `body` alone and a descendant setting `--wght: 500` changes nothing at all. Declaring it everywhere is what makes the custom properties behave like real axes.
 
 **`font-weight` is now inert.** `font-variation-settings` beats it, so a stray `font-weight: 700` silently does nothing. Set `--wght`.
 
-### Three registers
+### Two registers
 
-- **Voice, `MONO 0`** — anything read as language: titles, passages, captions, names, the root of the node tree.
-- **Diagram, `MONO 50`** — the node tree and the branch rungs in the corner cues. Drawn rather than written; semi mono reads as schematic without the rigidity of full mono. The root node is excepted back to 0 — it is a name before it is a node.
-- **Apparatus, `MONO 100` at `wght 500`** — everything that labels rather than says: marks, metadata, filters, numbers, corner controls. Already uppercase and tracked; mono is the voice that was reaching for. 500 rather than 400 because small tracked caps at Regular go weak.
+- **Voice, `wght 400`** — anything read as language: titles, passages, captions, names, the node tree, the cue rungs.
+- **Apparatus, `wght 500`** — everything that labels rather than says: marks, metadata, filters, numbers, corner controls. Already uppercase and tracked; Medium rather than Regular because small tracked caps at Regular go weak.
 
-A selected filter or theme button goes to `--wght: 700`. That is free here in a way it is not elsewhere: at `MONO 100` every weight has the same advance width, so a row cannot reflow when one option is chosen. Measured: 28.45px at both 400 and 700.
+A chosen filter or theme button is **full ink with a rule under the word, not a heavier weight**. The `--wght: 700` on `[aria-pressed="true"]` came out with the mono: it was only ever free at `MONO 100`, where every weight has the same advance width; in the proportional face a bolder word is a wider word and the row would reflow on every choice. Verified: the Type group is 297.53px before and after choosing Moving Image.
 
 One consequence worth knowing: `DRKM` changes metrics slightly, so a line of prose can rewrap between light and dark. That is the axis doing its job, not a bug.
 

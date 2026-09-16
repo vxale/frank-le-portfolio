@@ -7,10 +7,14 @@
    oblique, and full Vietnamese — so there is nothing to round-trip
    to Google for and nothing to break when they change a URL.
 
-   FOUR AXES, and the site uses all of them:
+   FOUR AXES, three of them in use:
 
      MONO  0–100   0 is Areal, 50 is Semi Mono, 100 is Mono.
-                   This is the hierarchy. See "Three registers".
+                   HELD AT 0 EVERYWHERE — Frank, Sept 16 2026: "I
+                   don't like the use of mono typefaces. Use sans
+                   serif only." The first cut of this stylesheet set
+                   the node tree in Semi Mono and every label in
+                   Mono; that lasted a day. Don't bring it back.
      wght  400–700 Regular, Medium, Bold. There is nothing below
                    400 in this family — no Light, no Thin.
      slnt  −12–0   A real oblique, not a synthesised slant.
@@ -20,7 +24,9 @@
                    is switched on with the colour tokens.
 
    There is no slab axis in this family, so the slab half of Frank's
-   brief could not be built — Semi Mono does that job instead.
+   brief could not be built, and the semi mono that stood in for it
+   is gone too. Hierarchy is size, case, tracking and weight — the
+   one-typeface discipline the site has kept since Sept 8.
 
    LICENSING, read before deploying: the font's own name table says
    lawful use "excludes … storing on publicly available servers".
@@ -80,7 +86,8 @@
   /* The four axes, as numbers you can change one at a time. Nothing
      on this site writes font-variation-settings directly: the rule
      under :root composes these four, and a selector changes a
-     register by setting --mono or --wght and nothing else.
+     register by setting --wght and nothing else. --mono stays at 0
+     (see the font-face note at the top of this file).
 
      This is also why font-weight is no longer used anywhere.
      font-variation-settings wins over font-weight, so a stray
@@ -96,7 +103,7 @@
    font-variation-settings is inherited as a COMPUTED string, so a
    var() inside it is substituted once and the result is what
    children inherit. Declare it on body alone and a child setting
-   --mono: 100 changes nothing at all. Declaring it everywhere is
+   --wght: 500 changes nothing at all. Declaring it everywhere is
    what makes the custom properties behave like real axes. */
 *,
 *::before,
@@ -2848,34 +2855,27 @@ main { display: block; }
 
 
 /* ============================================================
-   Three registers
+   Two registers
 
-   The superfamily replaces the job size and case used to do alone.
-   Every piece of type on the site now belongs to one of three
-   voices, and the voice is set by ONE number — --mono.
+   Everything is Areal proportional — sans only, Frank's call (Sept
+   16 2026). The first cut set the node tree in Semi Mono and the
+   labels in Mono as three registers on one axis; both are gone, and
+   what is left is the split the site has had since Sept 8:
 
-     VOICE      MONO 0    Areal, proportional. Anything you read as
-                          language: titles, passages, captions,
-                          names, the root of the node tree.
+     VOICE      wght 400  Anything you read as language: titles,
+                          passages, captions, names, the node tree.
 
-     DIAGRAM    MONO 50   Areal Semi Mono. The node tree and the
-                          branches in the corner cues. Drawn, not
-                          written — semi mono reads as a schematic
-                          without the rigidity of full mono.
+     APPARATUS  wght 500  Everything that labels rather than says:
+                          marks, metadata, filters, numbers, corner
+                          controls. Already uppercase and tracked;
+                          Medium rather than Regular because small
+                          tracked caps at Regular go weak.
 
-     APPARATUS  MONO 100  Areal Mono. Everything that labels rather
-                          than says: marks, metadata, filters,
-                          numbers, corner controls. Already uppercase
-                          and tracked; mono is what that voice was
-                          reaching for.
-
-   Apparatus sits at wght 500 rather than 400. Small tracked caps at
-   Regular go weak, and mono has enough air in it already.
-
-   A selected filter goes to 700. That is free here in a way it never
-   is elsewhere: MONO 100 is monospaced, so every weight occupies the
-   same advance width and a row of options cannot reflow when one of
-   them is chosen.
+   A chosen filter or theme button is full ink with a rule under the
+   word (see .filter-btn / .theme__btn [aria-pressed]), and NOT a
+   heavier weight: a bolder word is a wider word in a proportional
+   face, and the row would reflow every time one was chosen. The
+   weight change was only ever free in mono.
    ============================================================ */
 
 /* ---------- Apparatus ---------- */
@@ -2896,22 +2896,8 @@ main { display: block; }
 .shot__sound,
 .embed__link,
 .page-head__mark {
-  --mono: 100;
   --wght: 500;
 }
-
-/* Chosen, not just inked. No reflow: mono holds its widths. */
-.filter-btn[aria-pressed="true"],
-.theme__btn[aria-pressed="true"] { --wght: 700; }
-
-/* ---------- Diagram ---------- */
-.node__hit,
-.navcue__link {
-  --mono: 50;
-}
-
-/* Except the root, which is a name before it is a node. */
-.node--d0 .node__hit { --mono: 0; }
 
 /* ---------- Oblique ----------
    A real slant off the slnt axis rather than a browser's synthetic

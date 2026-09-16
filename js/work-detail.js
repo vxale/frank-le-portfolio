@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  document.title = `${work.title} — Frank Le`;
+  document.title = `${work.title} — Lê Vũ Xuân Anh`;
 
   /** A frame with no frame: the media sits on the paper directly.
       Until real assets land, an untitled tint holds the shape — it

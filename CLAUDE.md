@@ -268,3 +268,41 @@ It is **TikTok's own published embed** — the `blockquote.tiktok-embed` plus `e
 We add no border and no tint of our own — the embed brings enough chrome with it already. The player neither drags nor drifts, the one frame on these pages that doesn't: an iframe swallows pointer events, so a drag would only catch its edges, and a player that wanders while you are trying to watch it is worse than a still one.
 
 **Not verifiable from here:** tiktok.com is unreachable from the environment these pages are checked in — robots rules block fetching it, and the test browser cannot load it. Markup, sizing, placement, script injection and the fallback are all verified; **the player rendering has only been reasoned about, not seen.** Open the page on a real machine to confirm it loads and fits.
+
+
+## The typeface: ABC Areal Superfamily Variable (Sept 16 2026)
+
+Replaces Inter Tight, which replaced Times. **Self-hosted** at `assets/fonts/ABCArealSuperfamilyVariable.woff2`, preloaded from each page's `<head>`; the Google Fonts links and preconnects are gone. One 264KB file carries proportional, semi mono and mono, 400–700, upright and oblique, and full Vietnamese.
+
+### Four axes, all four used
+
+| axis | range | what it does here |
+| --- | --- | --- |
+| `MONO` | 0–100 | 0 Areal, 50 Semi Mono, 100 Mono. This is the hierarchy. |
+| `wght` | 400–700 | Regular, Medium, Bold. **Nothing below 400 exists** in this family. |
+| `slnt` | −12–0 | A real oblique. `em`/`i`/`cite` set `--slnt: -12`. |
+| `DRKM` | 0–1 | "Darkmode" — takes out the optical weight light type gains on a dark ground. Switched on with the colour tokens in both dark blocks. |
+
+**There is no slab axis**, so the slab half of the brief could not be built. Semi Mono does that job.
+
+### How to change anything
+
+Nothing in this file writes `font-variation-settings` except one rule. The four axes are custom properties on `:root`, and a selector changes register by setting `--mono` or `--wght` and nothing else.
+
+That rule is on the **universal selector on purpose**, and the reason is the trap: `font-variation-settings` inherits as a *computed string*, so a `var()` inside it is substituted once and children inherit the result. Declare it on `body` alone and a descendant setting `--mono: 100` changes nothing at all. Declaring it everywhere is what makes the custom properties behave like real axes.
+
+**`font-weight` is now inert.** `font-variation-settings` beats it, so a stray `font-weight: 700` silently does nothing. Set `--wght`.
+
+### Three registers
+
+- **Voice, `MONO 0`** — anything read as language: titles, passages, captions, names, the root of the node tree.
+- **Diagram, `MONO 50`** — the node tree and the branch rungs in the corner cues. Drawn rather than written; semi mono reads as schematic without the rigidity of full mono. The root node is excepted back to 0 — it is a name before it is a node.
+- **Apparatus, `MONO 100` at `wght 500`** — everything that labels rather than says: marks, metadata, filters, numbers, corner controls. Already uppercase and tracked; mono is the voice that was reaching for. 500 rather than 400 because small tracked caps at Regular go weak.
+
+A selected filter or theme button goes to `--wght: 700`. That is free here in a way it is not elsewhere: at `MONO 100` every weight has the same advance width, so a row cannot reflow when one option is chosen. Measured: 28.45px at both 400 and 700.
+
+One consequence worth knowing: `DRKM` changes metrics slightly, so a line of prose can rewrap between light and dark. That is the axis doing its job, not a bug.
+
+### Licensing — read before the next deploy
+
+The font's own name table states that lawful use "excludes … storing on publicly available servers". **levuxuananh.com is a publicly available server.** Dinamo sells web licences separately from desktop ones. This package did ship WOFF2 files, which usually means a web licence is included, but that is worth confirming with Dinamo rather than assuming. If it turns out to be desktop-only, the fix is to buy the web licence — not to obfuscate the file.

@@ -1,4 +1,44 @@
 /* ============================================================
+   ABC Areal Superfamily Variable — Dinamo (Frank, Sept 16 2026)
+
+   Replaces Inter Tight, which replaced Times. Self-hosted rather
+   than fetched: one 264KB file carries the whole superfamily —
+   proportional, semi mono and mono, 400 to 700, upright and
+   oblique, and full Vietnamese — so there is nothing to round-trip
+   to Google for and nothing to break when they change a URL.
+
+   FOUR AXES, and the site uses all of them:
+
+     MONO  0–100   0 is Areal, 50 is Semi Mono, 100 is Mono.
+                   This is the hierarchy. See "Three registers".
+     wght  400–700 Regular, Medium, Bold. There is nothing below
+                   400 in this family — no Light, no Thin.
+     slnt  −12–0   A real oblique, not a synthesised slant.
+     DRKM  0–1     "Darkmode". Light type on a dark ground gains
+                   optical weight; this axis takes it back out. The
+                   site has had a dark mode since Sept 11, so this
+                   is switched on with the colour tokens.
+
+   There is no slab axis in this family, so the slab half of Frank's
+   brief could not be built — Semi Mono does that job instead.
+
+   LICENSING, read before deploying: the font's own name table says
+   lawful use "excludes … storing on publicly available servers".
+   levuxuananh.com is a publicly available server. Dinamo sells web
+   licences separately from desktop ones; this package did ship
+   WOFF2 files, which usually means a web licence is included, but
+   that is worth confirming with Dinamo rather than assuming.
+   ============================================================ */
+
+@font-face {
+  font-family: "ABC Areal";
+  src: url("../assets/fonts/ABCArealSuperfamilyVariable.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: oblique 0deg 12deg;
+  font-display: swap;
+}
+
+/* ============================================================
    Frank Le — Portfolio
    Style system: black ink on white paper, ONE typeface doing
    every job, a restrained type scale, no boxes around anything
@@ -30,12 +70,42 @@
      serif in small tracked caps is what carries the "structural"
      voice the grotesk used to. Don't reintroduce a second family
      without asking — it undoes the whole idea. */
-  /* Inter Tight (Frank, Sept 14 2026) — replaces Times, which had
-     been the one face since Sept 8. Loaded from Google Fonts in each
-     page's <head> as a variable font, so every weight is available
-     without a second file. The fallbacks are sans, so a slow load
-     shows a grotesk rather than a serif for a moment. */
-  --font: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* ABC Areal Superfamily Variable (Frank, Sept 16 2026) — replaces
+     Inter Tight, which replaced Times. Self-hosted; see the @font-face
+     block at the top of this file for the axes and the licensing note.
+     The fallbacks are grotesks, so a slow load shows something of the
+     right shape rather than a serif for a moment. */
+  --font: "ABC Areal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* The four axes, as numbers you can change one at a time. Nothing
+     on this site writes font-variation-settings directly: the rule
+     under :root composes these four, and a selector changes a
+     register by setting --mono or --wght and nothing else.
+
+     This is also why font-weight is no longer used anywhere.
+     font-variation-settings wins over font-weight, so a stray
+     `font-weight: 700` would silently do nothing. Set --wght. */
+  --mono: 0;
+  --wght: 400;
+  --slnt: 0;
+  --drkm: 0;
+}
+
+/* The only font-variation-settings in the file. It is on the
+   universal selector on purpose, and the reason is worth knowing:
+   font-variation-settings is inherited as a COMPUTED string, so a
+   var() inside it is substituted once and the result is what
+   children inherit. Declare it on body alone and a child setting
+   --mono: 100 changes nothing at all. Declaring it everywhere is
+   what makes the custom properties behave like real axes. */
+*,
+*::before,
+*::after {
+  font-variation-settings:
+    "MONO" var(--mono),
+    "wght" var(--wght),
+    "slnt" var(--slnt),
+    "DRKM" var(--drkm);
 
   /* Scale — one modular ladder, ratio 1.2 (Sept 8 2026 rebuild).
      Every size on the site comes from this ladder; there are no
@@ -1630,6 +1700,9 @@ main { display: block; }
     --ink: #f2f0ea;
     --ink-soft: #a5a29a;
     color-scheme: dark;
+    /* Light type on a dark ground looks heavier than it is. Areal
+       has an axis for exactly this; it comes on with the colours. */
+    --drkm: 1;
   }
 }
 
@@ -1639,6 +1712,7 @@ main { display: block; }
   --ink: #f2f0ea;
   --ink-soft: #a5a29a;
   color-scheme: dark;
+  --drkm: 1;
 }
 
 /* ---------- The light / dark control ----------
@@ -2685,4 +2759,82 @@ main { display: block; }
 
 @media (hover: hover) and (pointer: fine) {
   .embed__link:hover { color: var(--ink); border-bottom-color: var(--ink); }
+}
+
+
+/* ============================================================
+   Three registers
+
+   The superfamily replaces the job size and case used to do alone.
+   Every piece of type on the site now belongs to one of three
+   voices, and the voice is set by ONE number — --mono.
+
+     VOICE      MONO 0    Areal, proportional. Anything you read as
+                          language: titles, passages, captions,
+                          names, the root of the node tree.
+
+     DIAGRAM    MONO 50   Areal Semi Mono. The node tree and the
+                          branches in the corner cues. Drawn, not
+                          written — semi mono reads as a schematic
+                          without the rigidity of full mono.
+
+     APPARATUS  MONO 100  Areal Mono. Everything that labels rather
+                          than says: marks, metadata, filters,
+                          numbers, corner controls. Already uppercase
+                          and tracked; mono is what that voice was
+                          reaching for.
+
+   Apparatus sits at wght 500 rather than 400. Small tracked caps at
+   Regular go weak, and mono has enough air in it already.
+
+   A selected filter goes to 700. That is free here in a way it never
+   is elsewhere: MONO 100 is monospaced, so every weight occupies the
+   same advance width and a row of options cannot reflow when one of
+   them is chosen.
+   ============================================================ */
+
+/* ---------- Apparatus ---------- */
+.label,
+.mark,
+.skip-link,
+.link-line,
+.caption__index,
+.caption__meta,
+.filters,
+.filter-group__label,
+.filter-btn,
+.theme__btn,
+.navcue__trigger,
+.zoom__value,
+.beat__num,
+.credits__more,
+.shot__sound,
+.embed__link,
+.page-head__mark {
+  --mono: 100;
+  --wght: 500;
+}
+
+/* Chosen, not just inked. No reflow: mono holds its widths. */
+.filter-btn[aria-pressed="true"],
+.theme__btn[aria-pressed="true"] { --wght: 700; }
+
+/* ---------- Diagram ---------- */
+.node__hit,
+.navcue__link {
+  --mono: 50;
+}
+
+/* Except the root, which is a name before it is a node. */
+.node--d0 .node__hit { --mono: 0; }
+
+/* ---------- Oblique ----------
+   A real slant off the slnt axis rather than a browser's synthetic
+   lean. Set here because font-variation-settings pins slnt at 0 and
+   would otherwise render <em> upright. */
+em,
+i,
+cite {
+  --slnt: -12;
+  font-style: normal;   /* the axis does it; no synthesis on top */
 }

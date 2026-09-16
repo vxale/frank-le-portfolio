@@ -2706,6 +2706,13 @@ main { display: block; }
 }
 
 .cv__when {
+  /* Spans both rows of the entry. Left to the first row alone, a date
+     that wraps — "2022 – 2023 first year, not completed" is two lines
+     in a 9rem column — makes that row as tall as itself and the
+     extra lands as a gap between the degree and the school (17px on
+     the Diplomatic Academy entry, Sept 16 2026). Spanning, its height
+     is shared across the pair instead. */
+  grid-row: 1 / span 2;
   font-size: var(--step-0);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2721,6 +2728,7 @@ main { display: block; }
 
 @media (max-width: 620px) {
   .cv__item { grid-template-columns: 1fr; row-gap: 0.15rem; }
+  .cv__when { grid-row: auto; }   /* stacked: the date is its own row again */
   .cv__what, .cv__where { grid-column: 1; }
 }
 

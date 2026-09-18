@@ -12,14 +12,17 @@
    click on a frame is the shortcut in; Escape, the corner word, or a
    press on the bare paper is the way out.
 
-   Full screen means the browser's own: the show asks for the
-   Fullscreen API on the way in (a click is the gesture it needs) and
-   gives it back on the way out. Where the API is missing — iPhone
-   Safari, for anything but a <video> — the show is a fixed layer that
-   covers the viewport, which is the same picture without the chrome
-   leaving. When the browser drops out of fullscreen on its own (Esc
-   in Chrome, the banner in Safari) the show closes with it, so one
-   press means one thing.
+   Full screen is the layer: fixed, covering the viewport, the same
+   on every device. The browser's own fullscreen is offered, not
+   imposed — a FULL SCREEN word in the bottom row (Frank, Sept 18
+   2026, after living with the first cut: the window swelling into
+   fullscreen is the OS's animation, half a second we cannot shape,
+   and run on top of our lift-off it made the whole thing feel rough;
+   asked for by hand, it is the visitor's choice and no surprise).
+   Where the API is missing — iPhone Safari, for anything but a
+   <video> — the word is not offered. Leaving the browser's fullscreen
+   (Esc, the banner, the word again) leaves only that; the show stays
+   up, the way a player keeps playing when its window shrinks.
 
    The bottom row is the site's bottom row: the mode word lower left,
    `← 02 / 05 →` at the centre in the stepper's arrows turned on their
@@ -101,7 +104,10 @@
         <span class="show__count label" aria-live="polite"><span data-show-index>01</span> / <span data-show-total>01</span></span>
         <button class="show__arrow show__arrow--next" type="button" data-show-dir="1" aria-label="Next slide"><span class="show__glyph" aria-hidden="true">${ARROW}</span></button>
       </div>
-      <button class="show__sound shot__sound" type="button" data-show-sound aria-pressed="false" aria-label="Turn sound on" hidden>Sound off</button>`;
+      <div class="show__tools">
+        <button class="show__sound shot__sound" type="button" data-show-sound aria-pressed="false" aria-label="Turn sound on" hidden>Sound off</button>
+        <button class="show__full shot__sound" type="button" data-show-full aria-pressed="false" aria-label="Enter full screen" hidden>Full screen</button>
+      </div>`;
     document.body.appendChild(show);
 
     // Wrapped, not `close` itself: a listener is handed the event, and
@@ -116,6 +122,19 @@
     });
     show.querySelector('[data-show-sound]').addEventListener('click', toggleSound);
 
+    /* The browser's fullscreen, on request. Offered only where the API
+       exists; the word reads as a status the way SOUND does. */
+    const full = show.querySelector('[data-show-full]');
+    full.hidden = !show.requestFullscreen;
+    full.addEventListener('click', () => {
+      if (document.fullscreenElement === show) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      } else if (show.requestFullscreen) {
+        const p = show.requestFullscreen({ navigationUI: 'hide' });
+        if (p && p.catch) p.catch(() => {});
+      }
+    });
+
     // The bare paper closes; the picture advances. A swipe that moved
     // is neither — the stage's own handler swallows that click.
     show.addEventListener('click', (event) => {
@@ -126,10 +145,14 @@
       else if (event.target === show || event.target.closest('[data-show-stage]') === event.target) close();
     });
 
-    // The browser leaving fullscreen — by our request, or by its own
-    // Esc or banner — is the moment the layer goes.
+    // Whichever way fullscreen changes — the word, Esc, the banner —
+    // the word says where things stand; and if the show was on its way
+    // out when the browser left fullscreen, this is the moment it goes.
     document.addEventListener('fullscreenchange', () => {
-      if (open && !document.fullscreenElement) finishClose();
+      const on = document.fullscreenElement === show;
+      full.setAttribute('aria-pressed', String(on));
+      full.setAttribute('aria-label', on ? 'Leave full screen' : 'Enter full screen');
+      if (closing && !document.fullscreenElement) finishClose();
     });
 
     setupSwipe(show.querySelector('[data-show-stage]'));
@@ -322,19 +345,14 @@
       window.setTimeout(() => { if (media.isConnected) media.style.transition = ''; }, OPEN_MS + 20);
     }
     show.classList.add('is-open');
-
-    if (show.requestFullscreen) {
-      const p = show.requestFullscreen({ navigationUI: 'hide' });
-      if (p && p.catch) p.catch(() => {});
-    }
     show.focus({ preventScroll: true });
   }
 
-  /* Closing has two halves when the browser is in fullscreen: ask it
-     to leave, then take the layer down once it has — otherwise the
-     page shows for half a second inside a window that is still
-     fullscreen while the exit animates. A safety timer covers a
-     browser that never answers. */
+  /* Closing has two halves when the visitor took the browser into
+     fullscreen: ask it to leave, then take the layer down once it has
+     — otherwise the page shows for half a second inside a window that
+     is still fullscreen while the exit animates. A safety timer
+     covers a browser that never answers. */
   let closing = null;
   function close() {
     if (!open || closing) return;
@@ -384,7 +402,12 @@
 
   window.addEventListener('keydown', (event) => {
     if (!open) return;
-    if (event.key === 'Escape') { event.preventDefault(); close(); }
+    if (event.key === 'Escape') {
+      // In the browser's fullscreen, Esc is the browser's: it leaves
+      // fullscreen and the show stays. The next Esc closes.
+      if (document.fullscreenElement) return;
+      event.preventDefault(); close();
+    }
     else if (event.key === 'ArrowRight') { event.preventDefault(); step(1); }
     else if (event.key === 'ArrowLeft') { event.preventDefault(); step(-1); }
     else if (event.key === 'Tab') {

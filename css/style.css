@@ -3075,24 +3075,33 @@ html.is-showing { overflow: hidden; }
 
 /* The bottom row. */
 .show__mode,
-.show__sound {
+.show__tools {
   position: absolute;
   bottom: var(--gutter);
-  background: none;
-  border: 0;
-  padding: 0.2rem 0;
-  margin: 0;
-  cursor: pointer;
   z-index: 2;
 }
 .show__mode {
   left: var(--gutter);
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  margin: 0;
   color: var(--ink);
+  cursor: pointer;
   transition: opacity 200ms var(--ease-out), transform 140ms var(--ease-out);
 }
 .show__mode:active { transform: scale(0.94); }
 .show__mode:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
-.show__sound { right: var(--gutter); }
+
+/* Lower right: the sound switch for a clip, and the browser's
+   fullscreen on request. Both read as a status, like SOUND does. */
+.show__tools {
+  right: var(--gutter);
+  display: flex;
+  align-items: baseline;
+  gap: 1.6rem;
+}
+.show__tools [hidden] { display: none; }
 
 .show__step {
   position: absolute;
@@ -3129,12 +3138,23 @@ html.is-showing { overflow: hidden; }
   .show__arrow:hover { opacity: 1; }
 }
 
+/* A phone has no room for three things on one line — DEFAULT, the
+   arrows and count, SOUND and FULL SCREEN — so the arrows take a line
+   of their own above the words, and the picture's room shrinks by
+   that line. */
+@media (max-width: 600px) {
+  .show__step { bottom: calc(var(--gutter) + 2.4rem); }
+  .show__stage { inset: var(--gutter) var(--gutter) calc(var(--gutter) * 2 + 4rem); }
+  .show__media { width: min(100%, calc((100vh - var(--gutter) * 3 - 4rem) * var(--ratio))); }
+  .show--many .show__media { width: min(72%, calc((100vh - var(--gutter) * 3 - 4rem) * var(--ratio))); }
+}
+
 /* Touch targets, as in the block of that name: the mark, mode word
    and sound switch are already positioned; the arrows are flex items
    and only need a containing box for the reach. */
 @media (pointer: coarse) {
-  .show__arrow { position: relative; }
-  .show-mark::before, .show__mode::before, .show__arrow::before, .show__sound::before {
+  .show__arrow, .show__sound, .show__full { position: relative; }
+  .show-mark::before, .show__mode::before, .show__arrow::before, .show__sound::before, .show__full::before {
     content: ""; position: absolute; inset: -12px -10px;
   }
   .show__arrow::before { inset: -10px -8px; }

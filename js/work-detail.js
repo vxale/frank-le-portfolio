@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   /** A frame with no frame: the media sits on the paper directly.
       Until real assets land, an untitled tint holds the shape — it
       has no border, and it disappears the moment a src exists. */
-  function shot(item, altFallback, shape) {
+  function shot(item, altFallback, shape, index) {
     /* A frame that knows its pixels takes its own proportions — Frank's
        standing rule, every imported file at its native ratio. The
        composed shapes (wide / tall / square) remain for entries that
@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return `<span class="shot__empty">Add media in data/works.json</span>`;
     })();
-    return `<span class="shot ${cls}"${style}>${inner}</span>`;
+    // data-slide: a press on the frame opens the slideshow at this one.
+    const slide = item && item.src && index !== undefined ? ` data-slide="${index}"` : '';
+    return `<span class="shot ${cls}"${style}${slide}>${inner}</span>`;
   }
 
   /* Portrait and square media at their native ratio would run the
@@ -213,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      Instagram post is the design in use, so the page shows both. */
   const frames = (em && !em.alongside) ? '' : media.map((item, i) => `
     <figure class="floater floater--${spots[i % spots.length]}${floaterExtra(item)}" data-drag>
-      <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length])}</span>${soundToggle(item)}
+      <span class="drift">${shot(item, work.title, i === 0 ? 'wide' : shapes[i % shapes.length], i)}</span>${soundToggle(item)}
     </figure>
   `).join('');
 
@@ -348,6 +350,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Built after render, since none of this markup existed at load.
   root.querySelectorAll('[data-drag]').forEach((el) => window.makeDraggable(el));
   window.driftAll(root.querySelectorAll('.drift'));
+
+  /* The slideshow takes the frames this page actually draws — none
+     where an embed stands in for them — in the order they appear. */
+  if (window.setupSlideshow && frames) window.setupSlideshow(root, media);
 
   /* Sound. One clip at a time - switching one on switches the others
      off - and a clip that scrolls out of view goes quiet again, so

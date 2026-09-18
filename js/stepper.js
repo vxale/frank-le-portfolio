@@ -99,7 +99,7 @@
   ['wheel', 'touchstart', 'keydown'].forEach((type) => {
     window.addEventListener(type, (event) => {
       // Enter or Space on the arrows themselves is a press, not a takeover.
-      if (type === 'keydown' && nav.contains(event.target)) return;
+      if (type === 'keydown' && event.target instanceof Node && nav.contains(event.target)) return;
       forget();
     }, { passive: true });
   });

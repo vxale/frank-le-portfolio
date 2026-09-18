@@ -1229,6 +1229,11 @@ main { display: block; }
   background: var(--paper-dim);
 }
 
+/* A frame that opens the slideshow says so. The press still drags
+   past the 4px threshold; a click without movement opens. */
+.shot[data-slide] { cursor: zoom-in; }
+.floater.is-dragging .shot[data-slide] { cursor: grabbing; }
+
 .shot img,
 .shot video {
   display: block;
@@ -2957,4 +2962,175 @@ cite {
 
 @media (min-width: 721px) {
   .node--d0 .node__hit { letter-spacing: -0.01em; }
+}
+
+
+/* ============================================================
+   Slideshow (Sept 18 2026) — js/slideshow.js
+
+   A project page's media, full screen, one at a time. The layer is
+   the same paper as the page in either colour mode, not a black
+   room: it is the sheet with everything but the picture taken off
+   it. The bottom row is the site's bottom row — the mode word lower
+   left where the Filter cue stands on the grid, the stepper's arrows
+   turned on their side around a count at the centre, the sound
+   switch lower right — and the picture sits above that row at its
+   native ratio, as large as the space allows, never cropped.
+
+   The same corner word does both jobs: SLIDESHOW on the page opens
+   it, DEFAULT inside closes it. Two elements, one place, one control.
+   ============================================================ */
+
+.show-mark {
+  position: fixed;
+  left: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 6;               /* the cues' layer */
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  margin: 0;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 200ms var(--ease-out), transform 140ms var(--ease-out);
+}
+.show-mark:active { transform: scale(0.94); }
+.show-mark:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; opacity: 1; }
+.show-mark.is-over-media { color: #fff; opacity: 1; }
+
+@media (hover: hover) and (pointer: fine) {
+  .show-mark:hover { opacity: 1; }
+}
+
+.show {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--paper);
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 220ms var(--ease-out);
+}
+.show.is-open { opacity: 1; }
+.show[hidden] { display: none; }
+
+/* The page behind cannot scroll while the show is up. */
+html.is-showing { overflow: hidden; }
+
+/* The picture's room: the gutter on three sides and the bottom row's
+   height below, so nothing in that row ever sits on the picture. */
+.show__stage {
+  position: absolute;
+  inset: var(--gutter) var(--gutter) calc(var(--gutter) * 2 + 1.6rem);
+  display: grid;
+  place-items: center;
+  touch-action: pan-y;      /* a horizontal drag is ours; a vertical one is the browser's */
+  cursor: pointer;
+}
+
+.show__media {
+  --ratio: 16 / 9;
+  position: absolute;
+  margin: 0;
+  /* As wide as the room allows, or as wide as its height allows at
+     its own ratio — whichever is smaller. Both edges hold. */
+  width: min(100%, calc((100vh - var(--gutter) * 3 - 1.6rem) * var(--ratio)));
+  aspect-ratio: var(--ratio);
+  max-height: 100%;
+  cursor: pointer;
+  transition: transform 170ms var(--ease-out), opacity 170ms var(--ease-out);
+  will-change: transform, opacity;
+}
+
+.show__media img,
+.show__media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Between slides: a crossfade with a short push in the direction of
+   travel, so the in-between frames say which way the show went. */
+.show__media.is-from-right { transform: translate3d(2.5%, 0, 0); opacity: 0; }
+.show__media.is-from-left  { transform: translate3d(-2.5%, 0, 0); opacity: 0; }
+.show__media.is-to-left    { transform: translate3d(-2.5%, 0, 0); }
+.show__media.is-to-right   { transform: translate3d(2.5%, 0, 0); }
+.show__media.is-leaving    { opacity: 0; pointer-events: none; }
+
+/* The bottom row. */
+.show__mode,
+.show__sound {
+  position: absolute;
+  bottom: var(--gutter);
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.show__mode {
+  left: var(--gutter);
+  color: var(--ink);
+  transition: opacity 200ms var(--ease-out), transform 140ms var(--ease-out);
+}
+.show__mode:active { transform: scale(0.94); }
+.show__mode:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+.show__sound { right: var(--gutter); }
+
+.show__step {
+  position: absolute;
+  left: 50%;
+  bottom: var(--gutter);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  z-index: 2;
+}
+.show--single .show__step { visibility: hidden; }
+
+.show__count { color: var(--ink); white-space: nowrap; }
+
+.show__arrow {
+  background: none;
+  border: 0;
+  padding: 0.35rem 0.3rem;
+  margin: 0;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 200ms var(--ease-out), transform 140ms var(--ease-out);
+}
+.show__arrow:active { transform: scale(0.94); }
+.show__arrow:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; opacity: 1; }
+.show__glyph { display: block; width: 0.72rem; }         /* the stepper's arrow */
+.show__glyph svg { display: block; width: 100%; height: auto; }
+.show__arrow--prev .show__glyph { transform: rotate(90deg); }
+.show__arrow--next .show__glyph { transform: rotate(-90deg); }
+
+@media (hover: hover) and (pointer: fine) {
+  .show__arrow:hover { opacity: 1; }
+}
+
+/* Touch targets, as in the block of that name: the mark, mode word
+   and sound switch are already positioned; the arrows are flex items
+   and only need a containing box for the reach. */
+@media (pointer: coarse) {
+  .show__arrow { position: relative; }
+  .show-mark::before, .show__mode::before, .show__arrow::before, .show__sound::before {
+    content: ""; position: absolute; inset: -12px -10px;
+  }
+  .show__arrow::before { inset: -10px -8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .show, .show__media { transition: none; }
+  .show-mark:active, .show__mode:active, .show__arrow:active { transform: none; }
+}
+
+@media (prefers-contrast: more) {
+  .show-mark, .show__arrow { opacity: 1; }
 }

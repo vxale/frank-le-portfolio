@@ -1611,6 +1611,14 @@ main { display: block; }
   .field > *,
   .work-field > * { margin-bottom: clamp(2rem, 9vw, 3.5rem); }
 
+  /* The embed figure resets its own margins further down the file
+     (`.embed { margin: 0 }`, a <figure> reset), and that later rule
+     beat the stack margin above at equal specificity — so on a phone
+     the "Watch on …" caption sat straight on top of ROLE with 0px
+     between them (Frank, Sept 18 2026). One more level of
+     specificity puts the embed back in the stack. */
+  .work-field > .embed { margin-bottom: clamp(2rem, 9vw, 3.5rem); }
+
   .floater--c { margin-top: 0; }
   .beats { column-count: 1; }  /* one column of prose on a phone */
   .beat { --step: 0.5rem; }    /* the staircase stays, in miniature —

@@ -297,6 +297,8 @@ It is **TikTok's own published embed** — the `blockquote.tiktok-embed` plus `e
 
 We add no border and no tint of our own — the embed brings enough chrome with it already. The player neither drags nor drifts, the one frame on these pages that doesn't: an iframe swallows pointer events, so a drag would only catch its edges, and a player that wanders while you are trying to watch it is worse than a still one.
 
+**On a phone the embed keeps the stack's rhythm** (Sept 18 2026). Under 860px the project page stacks its blocks with `margin-bottom: clamp(2rem, 9vw, 3.5rem)` on every `.work-field > *` — but `.embed { margin: 0 }`, a `<figure>` reset further down the file, beat that rule at equal specificity, so the "Watch on …" caption sat with **0px** between it and ROLE (Frank spotted it). `.work-field > .embed` in the narrow-screen block restores the margin; measured 33.75px on the YouTube and Instagram pages at 375, the same as every other block.
+
 **Not verifiable from here:** tiktok.com is unreachable from the environment these pages are checked in — robots rules block fetching it, and the test browser cannot load it. Markup, sizing, placement, script injection and the fallback are all verified; **the player rendering has only been reasoned about, not seen.** Open the page on a real machine to confirm it loads and fits.
 
 

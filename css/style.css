@@ -2131,29 +2131,67 @@ main { display: block; }
    press outside the cue still closes it through the document.
 
    Someone who has asked for less transparency gets a near-solid
-   sheet and no blur — the same readability by a plainer route. */
+   sheet and no blur — the same readability by a plainer route.
+
+   HOW IT ARRIVES (Frank, Sept 18 2026, second pass: "increase the
+   delay of the blur and make it fade in/out like gradient"). Not an
+   opacity fade of a finished blur — that reads as a sharp page and a
+   blurred one crossfading, a double image. The blur RADIUS itself
+   ramps, 0 to 14px, with the wash rising alongside: a focus pull,
+   the page going softly out of focus and coming back into it, on
+   --ease-out so the first frames do the most. 600ms in and 420ms out
+   — Frank's own figures for the mode switch and the camera; slower
+   than the branch's 260ms, so the words are there first and the
+   page keeps softening behind them. visibility rides along, delayed
+   on the way out, so a closed cue costs no backdrop at all. */
 .navcue::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
+  background: color-mix(in srgb, var(--paper) 0%, transparent);
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: -webkit-backdrop-filter 420ms var(--ease-out),
+              backdrop-filter 420ms var(--ease-out),
+              background-color 420ms var(--ease-out),
+              visibility 0s linear 420ms;
+}
+.navcue.is-open::before {
   background: color-mix(in srgb, var(--paper) 55%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 170ms var(--ease-out);
-}
-.navcue.is-open::before {
-  opacity: 1;
-  transition-duration: 260ms;
+  visibility: visible;
+  transition: -webkit-backdrop-filter 600ms var(--ease-out),
+              backdrop-filter 600ms var(--ease-out),
+              background-color 600ms var(--ease-out),
+              visibility 0s linear 0s;
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .navcue::before {
+  .navcue::before,
+  .navcue.is-open::before {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    background: color-mix(in srgb, var(--paper) 90%, transparent);
+  }
+  .navcue.is-open::before { background: color-mix(in srgb, var(--paper) 90%, transparent); }
+}
+
+/* Reduced motion: a focus pull is a large change across the whole
+   screen, so the sheet simply fades instead, quickly. */
+@media (prefers-reduced-motion: reduce) {
+  .navcue::before {
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--paper) 55%, transparent);
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .navcue.is-open::before {
+    opacity: 1;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 0s;
   }
 }
 

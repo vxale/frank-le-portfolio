@@ -3067,7 +3067,14 @@ html.is-showing { overflow: hidden; }
   place-items: center;
   touch-action: pan-y;      /* a horizontal drag is ours; a vertical one is the browser's */
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
+
+/* The browser's own image drag would otherwise start on the first
+   pixel of a mouse swipe and cancel the pointer. */
+.show__media img,
+.show__media video { -webkit-user-drag: none; user-select: none; }
 
 .show__media {
   --ratio: 16 / 9;

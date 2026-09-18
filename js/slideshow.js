@@ -39,8 +39,9 @@
    a step moves the whole row at once. Moving: arrows, ← →, a press
    on a preview (goes there) or on the current picture (next), or a
    swipe that drags the row 1:1 and lets go on velocity, the way the
-   canvas does. Under reduced motion the row does not travel; slides
-   dissolve in place.
+   canvas does — or a two-finger swipe on a trackpad, which reaches
+   the page as horizontal wheel events. Under reduced motion the row
+   does not travel; slides dissolve in place.
 
    Clips in the show play from the start, muted, with the same SOUND
    OFF / SOUND ON switch as the page. The page's own clips are paused
@@ -171,8 +172,8 @@
     const ratio = item.width && item.height ? `--ratio: ${Number(item.width)} / ${Number(item.height)}` : '--ratio: 16 / 9';
     const alt = esc(item.alt || `Slide ${i + 1}`);
     const inner = item.type === 'video'
-      ? `<video src="${esc(item.src)}"${item.poster ? ` poster="${esc(item.poster)}"` : ''} muted loop playsinline autoplay aria-label="${alt}"></video>`
-      : `<img src="${esc(item.src)}" alt="${alt}">`;
+      ? `<video src="${esc(item.src)}"${item.poster ? ` poster="${esc(item.poster)}"` : ''} muted loop playsinline autoplay draggable="false" aria-label="${alt}"></video>`
+      : `<img src="${esc(item.src)}" alt="${alt}" draggable="false">`;
     return `<figure class="show__media" style="${ratio}" data-slide="${i}">${inner}</figure>`;
   }
 
@@ -497,6 +498,46 @@
     stage.addEventListener('click', (event) => {
       if (swallowClick) { event.preventDefault(); event.stopPropagation(); swallowClick = false; }
     }, true);
+
+    /* A trackpad swipe arrives as a run of wheel events with a
+       horizontal delta — and, after the fingers lift, a tail of
+       decaying ones the trackpad invents for inertia. One gesture is
+       one slide: the row follows the fingers for the first few dozen
+       pixels (so the hand is answered at once), commits the moment
+       the run passes WHEEL_COMMIT, and then ignores the tail until the
+       wheel has been quiet for a beat. A run that never reaches the
+       threshold settles back. Vertical scrolling is left alone: the
+       page under the show is locked, and a carousel is a row. */
+    const WHEEL_COMMIT = 60;
+    const WHEEL_QUIET = 160;
+    let wheelAcc = 0;
+    let wheelLocked = false;
+    let wheelTimer = null;
+
+    stage.addEventListener('wheel', (event) => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      window.clearTimeout(wheelTimer);
+      wheelTimer = window.setTimeout(() => {
+        const nudged = !wheelLocked && wheelAcc !== 0;
+        wheelAcc = 0;
+        wheelLocked = false;
+        slides.forEach((el) => { el.style.transition = ''; });
+        if (nudged) layout();                       // never committed: home
+      }, WHEEL_QUIET);
+      if (wheelLocked || items.length < 2) return;
+
+      wheelAcc += event.deltaX;
+      if (Math.abs(wheelAcc) >= WHEEL_COMMIT) {
+        wheelLocked = true;
+        slides.forEach((el) => { el.style.transition = ''; });
+        goTo(index + Math.sign(wheelAcc), true);
+        wheelAcc = 0;
+      } else {
+        slides.forEach((el) => { el.style.transition = 'none'; });
+        layout(-wheelAcc);
+      }
+    }, { passive: false });
   }
 
   /* ---- Wiring ---------------------------------------------------- */

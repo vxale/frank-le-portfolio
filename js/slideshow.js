@@ -525,6 +525,8 @@
     let lastAbs = 0;
     let lastSign = 0;
     let committedAt = 0;
+    let tailLow = false;      // the run has died down to a few pixels since the commit
+    let recent = [];          // the last few deltas while locked, for the surge test
 
     stage.addEventListener('wheel', (event) => {
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
@@ -534,6 +536,8 @@
         wheelAcc = 0;
         wheelLocked = false;
         lastAbs = 0;
+        tailLow = false;
+        recent = [];
       }, WHEEL_QUIET);
 
       const abs = Math.abs(event.deltaX);
@@ -547,15 +551,30 @@
            swipe's own ramp and stepped again: one swipe skipped one
            or two slides (Frank, Sept 18 2026). Three signs are safe:
            the direction turns round; the run has died down to a few
-           pixels and something arrives after that; or, once the ramp
-           is well behind us, a delta more than doubles. A long slow
-           swipe does none of these. */
+           pixels and something clearly bigger than a few pixels
+           arrives after that; or, once the ramp is well behind us,
+           the last three deltas add up to more than twice the three
+           before them — a surge, which a decaying tail cannot produce
+           and a swipe's own jitter does not. A long slow swipe does
+           none of these — and neither does the tail itself: its last
+           stretch is dozens of one- and two-pixel events, which add
+           up past the commit threshold on their own, and an earlier
+           "died down, then anything" rule let them (Frank, Sept 18:
+           it moved on, then moved on again by itself). */
+        if (abs <= 4) tailLow = true;
+        recent.push(abs); if (recent.length > 6) recent.shift();
+        const sum = (a) => a.reduce((x, y) => x + y, 0);
+        const surge = recent.length === 6
+          && performance.now() - committedAt > 250
+          && sum(recent.slice(3)) > 24
+          && sum(recent.slice(3)) > 2 * sum(recent.slice(0, 3));
         const flipped = lastSign !== 0 && sign !== lastSign;
-        const ended = lastAbs <= 4;
-        const jump = performance.now() - committedAt > 250 && abs > lastAbs * 2 + 8;
+        const ended = tailLow && abs > 8;
         lastAbs = abs; lastSign = sign;
-        if (!(flipped || ended || jump)) return;
+        if (!(flipped || ended || surge)) return;
         wheelLocked = false;
+        tailLow = false;
+        recent = [];
         wheelAcc = 0;
       }
       lastAbs = abs; lastSign = sign;
@@ -564,6 +583,8 @@
       wheelAcc += event.deltaX;
       if (Math.abs(wheelAcc) >= WHEEL_COMMIT) {
         wheelLocked = true;
+        tailLow = false;
+        recent = [];
         committedAt = performance.now();
         goTo(index + Math.sign(wheelAcc));
         wheelAcc = 0;

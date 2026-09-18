@@ -2112,6 +2112,51 @@ main { display: block; }
 .navcue .filter-btn,
 .navcue .tool-btn { pointer-events: auto; }
 
+/* The page blurs behind an open branch (Frank, Sept 18 2026: "that
+   way will give it better readability"). A fixed sheet the size of
+   the viewport, drawn by the cue itself so it opens and closes with
+   the branch and needs no markup: frosted with a backdrop blur and
+   a wash of the paper at 55%, so the page is still there — you can
+   see where you are — but no longer competes with the words. At that
+   strength even a dark picture comes up to a mid tone in light mode
+   (and down to one in dark), so an open cue's words are plain ink on
+   it: js/navcue.js gives the white-over-media treatment only to the
+   closed trigger, the one word that sits straight on the page.
+   z-index -1 puts it under the cue's own words and above
+   everything else on the page (the cue is a stacking context at 6);
+   the stepper, at 30, stays crisp, which is right — it is chrome,
+   not content. Same figures as the branch: 260ms in, 170ms out, on
+   opacity, which is the cheap thing to animate and reads as the
+   blur arriving. Nothing to press: the sheet takes no pointer, so a
+   press outside the cue still closes it through the document.
+
+   Someone who has asked for less transparency gets a near-solid
+   sheet and no blur — the same readability by a plainer route. */
+.navcue::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms var(--ease-out);
+}
+.navcue.is-open::before {
+  opacity: 1;
+  transition-duration: 260ms;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .navcue::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .navcue.is-open { pointer-events: auto; }
 }

@@ -126,8 +126,13 @@
     cues.forEach((cue) => {
       const open = cue.classList.contains('is-open');
       cue.querySelectorAll(WORDS).forEach((el) => {
-        // A folded rung is under nothing: its state clears with the cue.
-        const counts = open || el.classList.contains('navcue__trigger');
+        /* An open cue stands on its frosted sheet (the ::before in the
+           CSS), which washes whatever is under it towards the paper —
+           so its words read best in plain ink, and the white-over-
+           media treatment is for the closed trigger alone, the one
+           word that sits straight on the page. A folded rung is under
+           nothing: its state clears with the cue. */
+        const counts = !open && el.classList.contains('navcue__trigger');
         el.classList.toggle('is-over-media', counts && overAny(el, media));
       });
       cue.querySelectorAll('.navcue__item').forEach((item) => {

@@ -3012,7 +3012,7 @@ cite {
   background: var(--paper);
   color: var(--ink);
   opacity: 0;
-  transition: opacity 200ms var(--ease-out);
+  transition: opacity 320ms var(--ease-out);
 }
 .show.is-open { opacity: 1; }
 .show[hidden] { display: none; }
@@ -3041,8 +3041,19 @@ html.is-showing { overflow: hidden; }
   aspect-ratio: var(--ratio);
   max-height: 100%;
   cursor: pointer;
-  transition: transform 220ms var(--ease-out), opacity 220ms var(--ease-out);
+  /* The row moving one slide along is on-screen movement, so the
+     strong ease-in-out; js/slideshow.js overrides this inline for the
+     lift-off and landing, which are arrivals and get --ease-out. */
+  transition: transform 380ms var(--ease-in-out), opacity 380ms var(--ease-in-out);
   will-change: transform, opacity;
+}
+
+/* With company, the current picture leaves room either side for the
+   previews to stand in — 72% of the stage at most, so a wide slide
+   does not push its neighbours off the screen. A lone picture keeps
+   the whole stage. */
+.show--many .show__media {
+  width: min(72%, calc((100vh - var(--gutter) * 3 - 1.6rem) * var(--ratio)));
 }
 
 .show__media img,
@@ -3053,15 +3064,14 @@ html.is-showing { overflow: hidden; }
   object-fit: contain;
 }
 
-/* Between slides: a crossfade with a 4% push in the direction of
-   travel, so the in-between frames say which way the show went. Both
-   are transitions, not keyframes: a second press mid-change retargets
-   from wherever the slide is rather than starting over. */
-.show__media.is-from-right { transform: translate3d(4%, 0, 0); opacity: 0; }
-.show__media.is-from-left  { transform: translate3d(-4%, 0, 0); opacity: 0; }
-.show__media.is-to-left    { transform: translate3d(-4%, 0, 0); }
-.show__media.is-to-right   { transform: translate3d(4%, 0, 0); }
-.show__media.is-leaving    { opacity: 0; pointer-events: none; }
+/* The carousel's three states, by distance from the current slide.
+   Positions are set inline by js/slideshow.js from the slides' own
+   widths; this is what each state looks like once it is there. All
+   transitions, not keyframes: a second press mid-move retargets the
+   row from wherever it is rather than starting over. */
+.show__media.is-current { z-index: 1; opacity: 1; }
+.show__media.is-peek    { opacity: 0.4; }
+.show__media.is-far     { opacity: 0; pointer-events: none; }
 
 /* The bottom row. */
 .show__mode,
@@ -3135,9 +3145,7 @@ html.is-showing { overflow: hidden; }
    lifts, lands or pushes. */
 @media (prefers-reduced-motion: reduce) {
   .show { transition: opacity 200ms var(--ease-out); }
-  .show__media { transition: opacity 220ms var(--ease-out); }
-  .show__media.is-from-right, .show__media.is-from-left,
-  .show__media.is-to-left, .show__media.is-to-right { transform: none; }
+  .show__media { transition: opacity 220ms var(--ease-out); }   /* the row cuts to its new places; the fade stays */
   .show-mark:active, .show__mode:active, .show__arrow:active { transform: none; }
 }
 

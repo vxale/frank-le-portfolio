@@ -27,10 +27,17 @@
    The media sits above that row at its native ratio, as large as the
    space allows, never cropped — the same rule as everywhere else.
 
-   Moving between slides: arrows, ← →, a click on the picture (next),
-   or a swipe that tracks the finger 1:1 and lets go on velocity, the
-   way the canvas does. Slides crossfade with a short push in the
-   direction of travel; under reduced motion they cut.
+   It is a carousel (Frank, Sept 18 2026, second brief): with more
+   than one asset the slide before and the slide after stand either
+   side of the current one, smaller and dimmed, so the visitor can see
+   what is coming and what they passed. Every slide is mounted once
+   and placed by its distance from the current one — 0 is centre and
+   full size, ±1 is a preview, ±2 is off the edge and invisible — and
+   a step moves the whole row at once. Moving: arrows, ← →, a press
+   on a preview (goes there) or on the current picture (next), or a
+   swipe that drags the row 1:1 and lets go on velocity, the way the
+   canvas does. Under reduced motion the row does not travel; slides
+   dissolve in place.
 
    Clips in the show play from the start, muted, with the same SOUND
    OFF / SOUND ON switch as the page. The page's own clips are paused
@@ -51,9 +58,17 @@
      dropdown range; a slide change happens tens of times in a sitting
      and must not feel like waiting. All --ease-out: every one of
      these is something arriving or leaving. */
-  const OPEN_MS = 260;    // the picture lifting off its frame (entrance figure)
-  const CLOSE_MS = 200;   // and landing back on it (exits faster)
-  const SLIDE_MS = 220;   // between slides
+  /* Slower than the site's UI figures, deliberately: Frank tried the
+     first cut (260 / 200 / 220) and asked for more. These are the
+     canvas's camera figures — a picture crossing the screen is a
+     camera move, not a menu opening. The row between slides moves
+     on --ease-in-out (it is on-screen movement); lift-off and landing
+     stay on --ease-out (they arrive and leave). */
+  const OPEN_MS = 420;    // the picture lifting off its frame
+  const CLOSE_MS = 320;   // and landing back on it (exits faster)
+  const SLIDE_MS = 380;   // the row moving one slide along
+  const PEEK_SCALE = 0.55;                                   // a preview's size against its own
+  const PEEK_GAP = () => (window.innerWidth < 600 ? 20 : 40); // between the current and a preview
   const SWIPE_COMMIT = 0.22;   // of the stage width
   const SWIPE_FLICK = 450;     // px/s
 
@@ -106,7 +121,8 @@
     show.addEventListener('click', (event) => {
       if (event.target.closest('button')) return;
       if (event.defaultPrevented) return;
-      if (event.target.closest('.show__media')) step(1);
+      const hit = event.target.closest('.show__media');
+      if (hit) { const i = Number(hit.dataset.slide); if (i === index) step(1); else goTo(i); }
       else if (event.target === show || event.target.closest('[data-show-stage]') === event.target) close();
     });
 
@@ -131,41 +147,78 @@
     return `<figure class="show__media" style="${ratio}" data-slide="${i}">${inner}</figure>`;
   }
 
-  function render(dir) {
+  let slides = [];
+
+  /** Every slide, once. Clips start paused; only the current one plays. */
+  function mount() {
     const stage = show.querySelector('[data-show-stage]');
-    const item = items[index];
-    const leaving = stage.querySelector('.show__media');
-    const still = reduce.matches;
-
-    const next = document.createElement('div');
-    next.innerHTML = slideMarkup(item, index);
-    const slide = next.firstElementChild;
-    if (!still && dir) slide.classList.add(dir > 0 ? 'is-from-right' : 'is-from-left');
-    stage.appendChild(slide);
-    void slide.offsetWidth;                      // flush the start state
-    slide.classList.remove('is-from-right', 'is-from-left');
-
-    if (leaving) {
-      const v = leaving.querySelector('video');
-      if (v) v.pause();
-      if (still) leaving.remove();
-      else {
-        leaving.classList.add(dir > 0 ? 'is-to-left' : 'is-to-right', 'is-leaving');
-        window.setTimeout(() => leaving.remove(), SLIDE_MS + 40);
-      }
-    }
-
-    show.querySelector('[data-show-index]').textContent = pad(index + 1);
+    stage.innerHTML = items.map(slideMarkup).join('');
+    slides = [...stage.querySelectorAll('.show__media')];
+    slides.forEach((el) => { const v = el.querySelector('video'); if (v) { v.autoplay = false; v.pause(); } });
     show.querySelector('[data-show-total]').textContent = pad(items.length);
-    const soundBtn = show.querySelector('[data-show-sound]');
-    soundBtn.hidden = item.type !== 'video';
-    setSound(false);
+  }
 
-    // Neighbours warm in the cache, so the next press is not a wait.
-    [index + 1, index - 1].forEach((n) => {
-      const it = items[(n + items.length) % items.length];
-      if (it && it.type !== 'video') { const im = new Image(); im.src = it.src; }
-    });
+  /** Signed distance from the current slide, the short way round. */
+  function offsetOf(i) {
+    const n = items.length;
+    let off = ((i - index) % n + n) % n;
+    if (off > n / 2) off -= n;
+    return off;
+  }
+
+  /** Where each slide stands for the current index. Positions are
+      built outward from the centre from the slides' own widths, so a
+      wide preview beside a narrow current one still leaves the gap.
+      `dragX` shifts the whole row while a finger holds it. */
+  function layout(dragX = 0) {
+    const n = items.length;
+    const gap = PEEK_GAP();
+    const cur = slides[index];
+    const half = cur.offsetWidth / 2;
+    const place = (el, off) => {
+      const w = el.offsetWidth;
+      let x = 0;
+      if (off !== 0) {
+        const sign = Math.sign(off);
+        x = sign * (half + gap);
+        // Walk past the previews between here and the centre.
+        for (let k = 1; k < Math.abs(off); k++) {
+          const between = slides[(index + sign * k + n) % n];
+          x += sign * (between.offsetWidth * PEEK_SCALE + gap);
+        }
+        x += sign * (w * PEEK_SCALE) / 2;
+      }
+      const scale = off === 0 ? 1 : PEEK_SCALE;
+      el.style.transform = `translate3d(${(x + dragX).toFixed(2)}px, 0, 0) scale(${scale})`;
+      el.classList.toggle('is-current', off === 0);
+      el.classList.toggle('is-peek', Math.abs(off) === 1);
+      el.classList.toggle('is-far', Math.abs(off) > 1);
+      el.setAttribute('aria-hidden', String(off !== 0));
+    };
+    slides.forEach((el, i) => place(el, offsetOf(i)));
+  }
+
+  function goTo(i, viaDrag) {
+    if (!open || !slides.length) return;
+    const was = index;
+    index = ((i % items.length) + items.length) % items.length;
+    if (!viaDrag) slides.forEach((el) => { el.style.transition = ''; });
+    layout();
+    if (was !== index) {
+      const v0 = slides[was].querySelector('video');
+      if (v0) v0.pause();
+    }
+    const v = slides[index].querySelector('video');
+    if (v) {
+      const play = () => { const p = v.play(); if (p) p.catch(() => {}); };
+      play();
+      // A clip that has no data yet plays when it does, if it is still
+      // the one in the middle by then.
+      if (v.readyState < 2) v.addEventListener('loadeddata', () => { if (slides[index] === v.closest('.show__media')) play(); }, { once: true });
+    }
+    show.querySelector('[data-show-index]').textContent = pad(index + 1);
+    show.querySelector('[data-show-sound]').hidden = items[index].type !== 'video';
+    setSound(false);
   }
 
   /** The transform that lays an element's current box over a target
@@ -180,7 +233,18 @@
     return `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
   }
 
-  function currentMedia() { return show.querySelector('.show__media:not(.is-leaving)'); }
+  function currentMedia() { return slides[index] || null; }
+
+  /** A slide's box as laid out, before any transform: a FLIP has to be
+      computed against this, not against getBoundingClientRect — if
+      the slide is mid-move when the show closes, the client rect is
+      the transformed one and the landing would miss. The slides are
+      absolutely positioned in the stage, so offsetLeft/Top are stage
+      coordinates. */
+  function layoutBox(el) {
+    const st = el.offsetParent.getBoundingClientRect();
+    return { left: st.left + el.offsetLeft, top: st.top + el.offsetTop, width: el.offsetWidth, height: el.offsetHeight };
+  }
   function shotFor(i) { return document.querySelector(`.work-field [data-slide="${i}"]`); }
 
   /** A clip in flight should show the same frame on both sides of the
@@ -193,15 +257,14 @@
 
   function step(dir) {
     if (!open || items.length < 2 || !dir) return;
-    index = (index + dir + items.length) % items.length;
-    render(dir);
+    goTo(index + dir);
   }
 
   /* ---- Sound ----------------------------------------------------- */
 
   function setSound(on) {
     const btn = show.querySelector('[data-show-sound]');
-    const video = show.querySelector('.show__media:not(.is-leaving) video');
+    const video = currentMedia() && currentMedia().querySelector('video');
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on');
     btn.textContent = on ? 'Sound on' : 'Sound off';
@@ -234,9 +297,14 @@
     document.documentElement.classList.add('is-showing');
 
     show.hidden = false;
-    show.querySelector('[data-show-stage]').innerHTML = '';
-    render(0);
     show.classList.toggle('show--single', items.length < 2);
+    show.classList.toggle('show--many', items.length > 1);
+    mount();
+    slides.forEach((el) => { el.style.transition = 'none'; });
+    layout();
+    goTo(index);
+    void show.offsetWidth;
+    slides.forEach((el) => { el.style.transition = ''; });
 
     /* Lift-off. The show's picture starts exactly over the frame on
        the page — same box, same clip frame — and grows to its place
@@ -247,13 +315,11 @@
     if (media && source && !reduce.matches) {
       syncClip(source, media);
       media.style.transition = 'none';
-      media.style.transform = fitTo(media.getBoundingClientRect(), source.getBoundingClientRect());
+      media.style.transform = fitTo(layoutBox(media), source.getBoundingClientRect());
       void media.offsetWidth;
       media.style.transition = `transform ${OPEN_MS}ms var(--ease-out)`;
-      media.style.transform = '';
+      layout();                                   // back to its place: identity at the centre
       window.setTimeout(() => { if (media.isConnected) media.style.transition = ''; }, OPEN_MS + 20);
-    } else {
-      void show.offsetWidth;
     }
     show.classList.add('is-open');
 
@@ -299,13 +365,14 @@
       if (r.top < 0 || r.bottom > window.innerHeight) target.scrollIntoView({ block: 'center', behavior: 'instant' });
       syncClip(media, target);
       media.style.transition = `transform ${CLOSE_MS}ms var(--ease-out)`;
-      media.style.transform = fitTo(media.getBoundingClientRect(), target.getBoundingClientRect());
+      media.style.transform = fitTo(layoutBox(media), target.getBoundingClientRect());
     }
     show.classList.remove('is-open');
 
     const finish = () => {
       show.hidden = true;
       show.querySelector('[data-show-stage]').innerHTML = '';
+      slides = [];
     };
     window.setTimeout(finish, (reduce.matches ? SLIDE_MS : CLOSE_MS) + 20);
 
@@ -346,8 +413,6 @@
       window.addEventListener('pointercancel', onUp);
     });
 
-    function current() { return stage.querySelector('.show__media:not(.is-leaving)'); }
-
     function onMove(event) {
       if (!drag || event.pointerId !== drag.id) return;
       const dx = event.clientX - drag.x0;
@@ -356,11 +421,12 @@
         if (Math.hypot(dx, dy) < 6) return;
         if (Math.abs(dy) > Math.abs(dx)) { onUp(event); return; }   // a vertical pull is not a swipe
         drag.moved = true;
+        slides.forEach((el) => { el.style.transition = 'none'; });
       }
       drag.samples.push({ t: performance.now(), x: event.clientX });
       while (drag.samples.length > 2 && performance.now() - drag.samples[0].t > 100) drag.samples.shift();
-      const media = current();
-      if (media) { media.style.transition = 'none'; media.style.transform = `translate3d(${dx}px, 0, 0)`; }
+      // The whole row follows the finger, previews and all.
+      layout(items.length > 1 ? dx : dx * 0.3);
     }
 
     function onUp(event) {
@@ -378,22 +444,15 @@
       const s = d.samples;
       const v = s.length >= 2 ? (s[s.length - 1].x - s[0].x) / Math.max(1, s[s.length - 1].t - s[0].t) * 1000 : 0;
       const width = stage.getBoundingClientRect().width || 1;
-      const media = current();
       const commit = Math.abs(dx) > width * SWIPE_COMMIT || Math.abs(v) > SWIPE_FLICK;
       // Direction from velocity when there is one, else from position.
       const dir = commit ? -Math.sign(Math.abs(v) > SWIPE_FLICK ? v : dx) : 0;
 
-      if (media) {
-        media.style.transition = '';
-        if (dir && items.length > 1) {
-          // Carry on from where the finger left it, out the far side;
-          // the inline transform outranks the class render() adds.
-          media.style.transform = `translate3d(${-dir * width}px, 0, 0)`;
-        } else {
-          media.style.transform = '';               // back to centre
-        }
-      }
-      if (dir && items.length > 1) step(dir);
+      // Transitions back on: the row travels from wherever the finger
+      // left it to the new positions, or home.
+      slides.forEach((el) => { el.style.transition = ''; });
+      if (dir && items.length > 1) goTo(index + dir, true);
+      else layout();
     }
 
     stage.addEventListener('click', (event) => {

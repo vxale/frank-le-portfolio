@@ -41,8 +41,19 @@
 (() => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const ARROW = '<svg viewBox="0 0 12 15" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="square" focusable="false"><path d="M6 1.5V13"/><path d="M2 9.5 6 13.5 10 9.5"/></svg>';
-  const SLIDE_MS = 170;   // between slides: the site's exit figure
-  const OPEN_MS = 220;    // the layer arriving
+  /* Timing. The switch between modes is a shared element: the picture
+     the visitor pressed lifts off its frame and grows into the show,
+     and on the way back the show's picture lands on the frame it
+     belongs to. That is a move across the screen, so it gets the
+     site's entrance figure in and a quicker exit out — the paper
+     arrives underneath at the same time. Between slides the pair
+     cross-fade with a 4% push in the direction of travel, over the
+     dropdown range; a slide change happens tens of times in a sitting
+     and must not feel like waiting. All --ease-out: every one of
+     these is something arriving or leaving. */
+  const OPEN_MS = 260;    // the picture lifting off its frame (entrance figure)
+  const CLOSE_MS = 200;   // and landing back on it (exits faster)
+  const SLIDE_MS = 220;   // between slides
   const SWIPE_COMMIT = 0.22;   // of the stage width
   const SWIPE_FLICK = 450;     // px/s
 
@@ -157,6 +168,29 @@
     });
   }
 
+  /** The transform that lays an element's current box over a target
+      rectangle: translate the centres together, then scale about the
+      centre. transform-origin is the default centre, so this is the
+      whole FLIP — measure both, apply, release. */
+  function fitTo(box, target) {
+    const sx = target.width / box.width;
+    const sy = target.height / box.height;
+    const dx = (target.left + target.width / 2) - (box.left + box.width / 2);
+    const dy = (target.top + target.height / 2) - (box.top + box.height / 2);
+    return `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
+  }
+
+  function currentMedia() { return show.querySelector('.show__media:not(.is-leaving)'); }
+  function shotFor(i) { return document.querySelector(`.work-field [data-slide="${i}"]`); }
+
+  /** A clip in flight should show the same frame on both sides of the
+      hand-off, or the picture changes mid-air. */
+  function syncClip(from, to) {
+    const a = from && from.querySelector('video');
+    const b = to && to.querySelector('video');
+    if (a && b && Number.isFinite(a.currentTime)) { try { b.currentTime = a.currentTime; } catch (e) { /* not seekable yet */ } }
+  }
+
   function step(dir) {
     if (!open || items.length < 2 || !dir) return;
     index = (index + dir + items.length) % items.length;
@@ -202,9 +236,26 @@
     show.hidden = false;
     show.querySelector('[data-show-stage]').innerHTML = '';
     render(0);
-    void show.offsetWidth;
-    show.classList.add('is-open');
     show.classList.toggle('show--single', items.length < 2);
+
+    /* Lift-off. The show's picture starts exactly over the frame on
+       the page — same box, same clip frame — and grows to its place
+       while the paper comes up underneath. Under reduced motion the
+       paper simply fades up with the picture already in place. */
+    const media = currentMedia();
+    const source = shotFor(index);
+    if (media && source && !reduce.matches) {
+      syncClip(source, media);
+      media.style.transition = 'none';
+      media.style.transform = fitTo(media.getBoundingClientRect(), source.getBoundingClientRect());
+      void media.offsetWidth;
+      media.style.transition = `transform ${OPEN_MS}ms var(--ease-out)`;
+      media.style.transform = '';
+      window.setTimeout(() => { if (media.isConnected) media.style.transition = ''; }, OPEN_MS + 20);
+    } else {
+      void show.offsetWidth;
+    }
+    show.classList.add('is-open');
 
     if (show.requestFullscreen) {
       const p = show.requestFullscreen({ navigationUI: 'hide' });
@@ -236,13 +287,27 @@
     closing = null;
     [...document.body.children].forEach((el) => { el.inert = false; });
     document.documentElement.classList.remove('is-showing');
+
+    /* Landing. The picture goes back to the frame it belongs to — the
+       current slide's, which is not always the one that was pressed —
+       so the page underneath is first scrolled, unseen, to put that
+       frame in view, and the clip is set to the same moment. */
+    const media = currentMedia();
+    const target = shotFor(index);
+    if (media && target && !reduce.matches) {
+      const r = target.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > window.innerHeight) target.scrollIntoView({ block: 'center', behavior: 'instant' });
+      syncClip(media, target);
+      media.style.transition = `transform ${CLOSE_MS}ms var(--ease-out)`;
+      media.style.transform = fitTo(media.getBoundingClientRect(), target.getBoundingClientRect());
+    }
     show.classList.remove('is-open');
 
     const finish = () => {
       show.hidden = true;
       show.querySelector('[data-show-stage]').innerHTML = '';
     };
-    if (reduce.matches) finish(); else window.setTimeout(finish, SLIDE_MS + 20);
+    window.setTimeout(finish, (reduce.matches ? SLIDE_MS : CLOSE_MS) + 20);
 
     pausedClips.forEach((v) => { const p = v.play(); if (p) p.catch(() => {}); });
     pausedClips = [];

@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const marks = [
     typeLabel(work.type),
     work.year,
-    work.commercial ? 'Commercial' : 'Personal',
+    madeForLabel(work),
   ].filter(Boolean);
 
   const facts = [

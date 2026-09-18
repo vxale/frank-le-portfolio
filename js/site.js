@@ -42,8 +42,29 @@ function typeLabel(type) {
   return map[type] || (type ? type.charAt(0).toUpperCase() + type.slice(1) : '');
 }
 
+/** Who a piece was made for: `madeFor` in data/works.json is one of
+    commercial / personal / academic (Frank, Sept 17 2026 — Academic
+    arrived with the GBDA 101 posters). The older `commercial: true /
+    false` shape still reads correctly, so an entry can carry either. */
+function madeForKey(work) {
+  if (work.madeFor) return String(work.madeFor).toLowerCase();
+  return work.commercial ? 'commercial' : 'personal';
+}
+
+const MADE_FOR = [
+  ['commercial', 'Commercial'],
+  ['personal', 'Personal'],
+  ['academic', 'Academic'],
+];
+
+function madeForLabel(work) {
+  const key = madeForKey(work);
+  const found = MADE_FOR.find(([k]) => k === key);
+  return found ? found[1] : key.charAt(0).toUpperCase() + key.slice(1);
+}
+
 function workMetaLine(work) {
-  const parts = [typeLabel(work.type), String(work.year), work.commercial ? 'Commercial' : 'Personal'];
+  const parts = [typeLabel(work.type), String(work.year), madeForLabel(work)];
   return parts.filter(Boolean).join(' · ');
 }
 

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let works = [];
   // ?type=film etc. lets the node-tree branches land on a filtered grid.
   const requestedType = new URLSearchParams(window.location.search).get('type');
-  const active = { type: requestedType || 'all', year: 'all', commercial: 'all' };
+  const active = { type: requestedType || 'all', year: 'all', madeFor: 'all' };
 
   /* Newest first to begin with - that is what a portfolio is for. The
      button flips it, and says which way round it is with an arrow
@@ -31,10 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filtered = works.filter((w) => {
       if (active.type !== 'all' && w.type !== active.type) return false;
       if (active.year !== 'all' && String(w.year) !== active.year) return false;
-      if (active.commercial !== 'all') {
-        const wantCommercial = active.commercial === 'commercial';
-        if (Boolean(w.commercial) !== wantCommercial) return false;
-      }
+      if (active.madeFor !== 'all' && madeForKey(w) !== active.madeFor) return false;
       return true;
     });
 
@@ -238,13 +235,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const types = [...new Set(works.map((w) => w.type))].map((t) => ({ label: typeLabel(t), value: t }));
     const years = [...new Set(works.map((w) => String(w.year)))].sort((a, b) => b - a).map((y) => ({ label: y, value: y }));
 
+    // Like the types: only the answers the work actually gives, in a
+    // fixed order, so Academic appears the day an academic piece does.
+    const present = new Set(works.map(madeForKey));
+    const madeFor = MADE_FOR.filter(([k]) => present.has(k)).map(([value, label]) => ({ label, value }));
+
     const groups = [
       ['Type', 'type', types],
       ['Year', 'year', years],
-      ['Made for', 'commercial', [
-        { label: 'Commercial', value: 'commercial' },
-        { label: 'Personal', value: 'personal' },
-      ]],
+      ['Made for', 'madeFor', madeFor],
     ];
 
     groups.forEach((g) => filterBar.appendChild(buildFilterGroup(...g)));

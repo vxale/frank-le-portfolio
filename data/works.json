@@ -527,5 +527,52 @@
         "alt": "Gái Đẹp Không Phải Buồn — thumbnail"
       }
     ]
+  },
+  {
+    "id": "what-took-you-so-long",
+    "title": "What Took You So Long?",
+    "type": "design",
+    "year": 2024,
+    "madeFor": "academic",
+    "featured": true,
+    "role": "Designer",
+    "tools": "Sony Alpha 7C, Photoshop, Illustrator",
+    "credits": [
+      {
+        "name": "Lê Vũ Xuân Anh",
+        "role": "Designer"
+      },
+      {
+        "name": "Brubey Hu",
+        "role": "Instructor"
+      },
+      {
+        "name": "Lê Vũ Xuân Anh, Andrew VanDongen, Giancarlo Haidar, Michael Gvozdek, and The Elf",
+        "role": "Featuring"
+      }
+    ],
+    "awards": [],
+    "insight": {
+      "what": "Two film posters for a story that never got made: a roommate is found dead in the bathroom, all by himself, and the apartment turns to one another — and to the elf doll — for suspects. Horror, mixed with dark comedy and a detective mystery. Made in 2024 for GBDA 101: Introduction to Digital Media Design, instructor Brubey Hu.",
+      "problem": "Take the language of old film posters — the horror genre above all — and push a whodunnit through it, with each colour tied to a character and an emotion so the question keeps asking itself.",
+      "process": "A mix of digital illustration, typography and processed digital photography. The first version takes direct influence from traditional poster design, focusing on the narrative and the relations between the characters. The second is more experimental and contemporary — shapes, negative space, contrast and an emphasis of scale tell the story.",
+      "result": "And yes, the elf is alive."
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "assets/what-took-you-so-long-poster-1.jpg",
+        "width": 1294,
+        "height": 2000,
+        "alt": "What Took You So Long? — poster 1: a reader behind a newspaper, a red question mark sprayed over his face, WHAT TOOK YOU SO LONG down the left"
+      },
+      {
+        "type": "image",
+        "src": "assets/what-took-you-so-long-poster-2.jpg",
+        "width": 1294,
+        "height": 2000,
+        "alt": "What Took You So Long? — poster 2: the reader behind a BUSINESS page stamped CLOSED, five suspects in coloured panels down the right, WHAT? TOOK YOU SO LONG"
+      }
+    ]
   }
 ]

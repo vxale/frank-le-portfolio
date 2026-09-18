@@ -199,7 +199,12 @@
   /** Where each slide stands for the current index. Positions are
       built outward from the centre from the slides' own widths, so a
       wide preview beside a narrow current one still leaves the gap.
-      `dragX` shifts the whole row while a finger holds it. */
+      `dragX` shifts the CENTRE piece while a finger holds it — the
+      previews stand where they are (Frank, Sept 18 2026: the first
+      cut carried the whole row off with the hand, and it read as
+      everything leaving before the next piece arrived). On release
+      the row re-forms: the piece that was pushed aside settles into
+      its preview place and the next one comes to the centre. */
   function layout(dragX = 0) {
     const n = items.length;
     const gap = PEEK_GAP();
@@ -219,7 +224,8 @@
         x += sign * (w * PEEK_SCALE) / 2;
       }
       const scale = off === 0 ? 1 : PEEK_SCALE;
-      el.style.transform = `translate3d(${(x + dragX).toFixed(2)}px, 0, 0) scale(${scale})`;
+      const shift = off === 0 ? dragX : 0;
+      el.style.transform = `translate3d(${(x + shift).toFixed(2)}px, 0, 0) scale(${scale})`;
       el.classList.toggle('is-current', off === 0);
       el.classList.toggle('is-peek', Math.abs(off) === 1);
       el.classList.toggle('is-far', Math.abs(off) > 1);
@@ -465,7 +471,7 @@
       }
       drag.samples.push({ t: performance.now(), x: event.clientX });
       while (drag.samples.length > 2 && performance.now() - drag.samples[0].t > 100) drag.samples.shift();
-      // The whole row follows the finger, previews and all.
+      // The centre piece follows the finger; a lone picture resists.
       layout(items.length > 1 ? dx : dx * 0.3);
     }
 
@@ -488,8 +494,9 @@
       // Direction from velocity when there is one, else from position.
       const dir = commit ? -Math.sign(Math.abs(v) > SWIPE_FLICK ? v : dx) : 0;
 
-      // Transitions back on: the row travels from wherever the finger
-      // left it to the new positions, or home.
+      // Transitions back on: the pushed piece travels from wherever the
+      // finger left it into its preview place and the next comes to
+      // the centre — or, uncommitted, it comes home.
       slides.forEach((el) => { el.style.transition = ''; });
       if (dir && items.length > 1) goTo(index + dir, true);
       else layout();
@@ -513,6 +520,8 @@
     let wheelAcc = 0;
     let wheelLocked = false;
     let wheelTimer = null;
+    let lastAbs = 0;
+    let lastSign = 0;
 
     stage.addEventListener('wheel', (event) => {
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
@@ -522,10 +531,27 @@
         const nudged = !wheelLocked && wheelAcc !== 0;
         wheelAcc = 0;
         wheelLocked = false;
+        lastAbs = 0;
         slides.forEach((el) => { el.style.transition = ''; });
         if (nudged) layout();                       // never committed: home
       }, WHEEL_QUIET);
-      if (wheelLocked || items.length < 2) return;
+
+      const abs = Math.abs(event.deltaX);
+      const sign = Math.sign(event.deltaX);
+      if (wheelLocked) {
+        /* The tail after a commit only ever decays. A delta that jumps
+           back up, or turns round, is a NEW swipe — the trackpad has
+           no "fingers down" event to say so, and waiting for the tail
+           to end meant no second swipe could land for a second or more
+           (Frank, Sept 18 2026: "couldn't swipe after one swipe"). */
+        const fresh = abs > lastAbs * 1.5 + 4 || (lastSign && sign !== lastSign);
+        lastAbs = abs; lastSign = sign;
+        if (!fresh) return;
+        wheelLocked = false;
+        wheelAcc = 0;
+      }
+      lastAbs = abs; lastSign = sign;
+      if (items.length < 2) return;
 
       wheelAcc += event.deltaX;
       if (Math.abs(wheelAcc) >= WHEEL_COMMIT) {

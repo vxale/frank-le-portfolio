@@ -78,7 +78,13 @@
       <button class="show__sound shot__sound" type="button" data-show-sound aria-pressed="false" aria-label="Turn sound on" hidden>Sound off</button>`;
     document.body.appendChild(show);
 
-    show.querySelector('[data-show-close]').addEventListener('click', close);
+    // Wrapped, not `close` itself: a listener is handed the event, and
+    // the first version of close() read its one argument as "the
+    // browser already left fullscreen, don't ask it to". Wired bare,
+    // Default closed the layer and left the window in fullscreen for
+    // the visitor to Esc out of (Frank, Sept 18 2026). close() takes
+    // no argument now, and this stays wrapped so it never can again.
+    show.querySelector('[data-show-close]').addEventListener('click', () => close());
     show.querySelectorAll('[data-show-dir]').forEach((btn) => {
       btn.addEventListener('click', () => step(Number(btn.dataset.showDir)));
     });
@@ -93,8 +99,10 @@
       else if (event.target === show || event.target.closest('[data-show-stage]') === event.target) close();
     });
 
+    // The browser leaving fullscreen — by our request, or by its own
+    // Esc or banner — is the moment the layer goes.
     document.addEventListener('fullscreenchange', () => {
-      if (open && !document.fullscreenElement) close(true);
+      if (open && !document.fullscreenElement) finishClose();
     });
 
     setupSwipe(show.querySelector('[data-show-stage]'));
@@ -205,12 +213,27 @@
     show.focus({ preventScroll: true });
   }
 
-  function close(fromBrowser) {
+  /* Closing has two halves when the browser is in fullscreen: ask it
+     to leave, then take the layer down once it has — otherwise the
+     page shows for half a second inside a window that is still
+     fullscreen while the exit animates. A safety timer covers a
+     browser that never answers. */
+  let closing = null;
+  function close() {
+    if (!open || closing) return;
+    if (document.fullscreenElement === show && document.exitFullscreen) {
+      closing = window.setTimeout(finishClose, 1200);
+      document.exitFullscreen().catch(() => finishClose());
+      return;
+    }
+    finishClose();
+  }
+
+  function finishClose() {
     if (!open) return;
     open = false;
-    if (!fromBrowser && document.fullscreenElement === show && document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
-    }
+    window.clearTimeout(closing);
+    closing = null;
     [...document.body.children].forEach((el) => { el.inert = false; });
     document.documentElement.classList.remove('is-showing');
     show.classList.remove('is-open');

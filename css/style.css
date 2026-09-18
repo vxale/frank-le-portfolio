@@ -2220,24 +2220,37 @@ main { display: block; }
    a photograph, and drops the rest-state fade so the white actually
    reads - 40% white on a mid-tone frame is no colour at all. Same in
    both modes: a photograph is a photograph whichever paper it sits
-   on. "Under it" is measured by js/navcue.js, not guessed. */
-.navcue.is-over-media .navcue__trigger,
-.navcue.is-over-media .navcue__link,
-.navcue.is-over-media .filter-btn,
-.navcue.is-over-media .filter-group__label {
+   on. "Under it" is measured by js/navcue.js, not guessed — and
+   measured PER WORD (Sept 17 2026): the class lands on each trigger,
+   rung, button and label from its own box, so a branch that opens
+   from white paper up onto a picture is ink at the bottom and white
+   at the top, with the change wherever the picture's edge falls. One
+   state for the whole cue had two failures Frank found: top rungs
+   over a picture left in ink, and a trigger on paper turned white
+   because one rung above it touched a frame. */
+
+/* The page you are already standing on is named, not offered. */
+.navcue__link[aria-current="page"] { color: var(--ink-soft); }
+
+.navcue__trigger.is-over-media,
+.navcue__link.is-over-media,
+.navcue .filter-btn.is-over-media,
+.navcue .filter-group__label.is-over-media,
+.navcue .tool-btn.is-over-media {
   color: #fff;
   opacity: 1;
 }
 
-.navcue.is-over-media .navcue__item::after { background: #fff; }
+/* Named, not offered, still — but in white on a picture. */
+.navcue__link[aria-current="page"].is-over-media { color: #fff; opacity: 0.6; }
+
+/* The hairline takes the state of the rung it hangs off. */
+.navcue__item.is-over-media::after { background: #fff; }
 
 @media (hover: hover) and (pointer: fine) {
-  .navcue.is-over-media .navcue__link:hover,
-  .navcue.is-over-media .filter-btn:hover { border-bottom-color: #fff; }
+  .navcue__link.is-over-media:hover,
+  .navcue .filter-btn.is-over-media:hover { border-bottom-color: #fff; }
 }
-
-/* The page you are already standing on is named, not offered. */
-.navcue__link[aria-current="page"] { color: var(--ink-soft); }
 
 @media (hover: hover) and (pointer: fine) {
   .navcue__link:hover { border-bottom-color: var(--ink); }
@@ -2392,8 +2405,8 @@ main { display: block; }
 .stepper__btn--up .stepper__glyph { transform: rotate(180deg); }
 
 /* Over a picture the arrows go white and full, like the cues. */
-.stepper.is-over-media .stepper__btn { color: #fff; opacity: 1; }
-.stepper.is-over-media .stepper__btn.is-end { opacity: 0.35; }
+.stepper__btn.is-over-media { color: #fff; opacity: 1; }
+.stepper__btn.is-over-media.is-end { opacity: 0.35; }
 
 /* ---------- Touch targets (Sept 16 2026) ----------
    Every control in the corners is drawn small on purpose — a quiet
@@ -2913,7 +2926,7 @@ cite {
   .zoom__range::-moz-range-track { opacity: 1; }
 
   .stepper__btn.is-end,
-  .stepper.is-over-media .stepper__btn.is-end { opacity: 0.5; }
+  .stepper__btn.is-over-media.is-end { opacity: 0.5; }
 
   .canvas__edge { stroke-opacity: 1; }
 }

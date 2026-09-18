@@ -21,12 +21,13 @@
   const nav = document.createElement('nav');
   nav.className = 'stepper';
   nav.setAttribute('aria-label', 'Sections');
-  nav.dataset.overMedia = '';
   nav.hidden = true;
+  // Each arrow asks for the over-media check on its own box, so the
+  // pair can split across a picture's edge like the cues' words do.
   nav.innerHTML = `
-    <button class="stepper__btn stepper__btn--up" type="button" data-dir="-1"
+    <button class="stepper__btn stepper__btn--up" type="button" data-dir="-1" data-over-media
             aria-label="Previous section"><span class="stepper__glyph" aria-hidden="true">${ARROW}</span></button>
-    <button class="stepper__btn stepper__btn--down" type="button" data-dir="1"
+    <button class="stepper__btn stepper__btn--down" type="button" data-dir="1" data-over-media
             aria-label="Next section"><span class="stepper__glyph" aria-hidden="true">${ARROW}</span></button>`;
   document.body.appendChild(nav);
   const up = nav.querySelector('[data-dir="-1"]');

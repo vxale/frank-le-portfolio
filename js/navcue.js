@@ -35,6 +35,9 @@
     function open(state) {
       cue.classList.toggle('is-open', state);
       trigger.setAttribute('aria-expanded', String(state));
+      // The rungs unfold over ~400ms and land somewhere new; each word
+      // is re-measured every frame until the branch has settled.
+      requestCheck(650);
     }
 
     trigger.addEventListener('click', () => {
@@ -81,27 +84,37 @@
   }
 
   /* ---- Over media ------------------------------------------------
-     A cue with a picture under it turns white (see the CSS). Whether
-     one is under it is measured: the trigger's box - plus the rungs'
-     boxes while the branch is open - against every media frame on the
-     page. Checked when a drag or resize lands (cards:moved), live
-     while a button is held so the words change as the frame arrives,
-     on scroll (a fixed corner passes over a page that moves), and on
-     resize. rAF-throttled, so the cost is a handful of rects a frame
-     at most, and nothing at all while the pointer is idle. */
-  const cues = new Set();
-  let checkPending = false;
+     A word with a picture under it turns white (see the CSS). Whether
+     one is under it is measured, and it is measured PER WORD (Sept 17
+     2026): the trigger, and while the branch is open every rung, every
+     filter button and every group label, each against every media
+     frame on the page, each carrying its own state. The first version
+     kept one state for the whole cue — if any part touched a picture
+     the lot went white — and Frank found the two ways that fails: a
+     branch opens upward from a trigger on paper and its top rungs
+     land on a picture and stay ink, invisible; or one rung touches a
+     picture and the trigger on white paper goes white with it. A
+     hairline edge takes the state of the rung it hangs off.
 
-  function cueBoxes(cue) {
-    const parts = [cue.querySelector('.navcue__trigger')];
-    if (cue.classList.contains('is-open')) {
-      parts.push(...cue.querySelectorAll('.navcue__link, .filter-btn, .filter-group__label'));
-    }
-    return parts.map((el) => el.getBoundingClientRect()).filter((b) => b.width && b.height);
-  }
+     Checked when a drag or resize lands (cards:moved), live while a
+     button is held so the words change as the frame arrives, on
+     scroll (a fixed corner passes over a page that moves), on resize,
+     and — the case the first version missed — for the ~400ms after a
+     cue opens or closes, while the rungs are still unfolding to where
+     they will be measured. rAF-throttled, so the cost is a handful of
+     rects a frame at most, and nothing at all while idle. */
+  const cues = new Set();
+  const WORDS = '.navcue__trigger, .navcue__link, .filter-btn, .filter-group__label, .tool-btn';
+  let checkPending = false;
+  let checkUntil = 0;
 
   function overlaps(a, b) {
     return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  }
+
+  function overAny(el, media) {
+    const b = el.getBoundingClientRect();
+    return Boolean(b.width && b.height) && media.some((m) => overlaps(m, b));
   }
 
   function checkOverMedia() {
@@ -109,29 +122,41 @@
     const media = [...document.querySelectorAll('.media-frame, .floater')]
       .map((el) => el.getBoundingClientRect())
       .filter((b) => b.width && b.height);
+
     cues.forEach((cue) => {
-      const boxes = cueBoxes(cue);
-      const over = media.some((m) => boxes.some((b) => overlaps(m, b)));
-      cue.classList.toggle('is-over-media', over);
+      const open = cue.classList.contains('is-open');
+      cue.querySelectorAll(WORDS).forEach((el) => {
+        // A folded rung is under nothing: its state clears with the cue.
+        const counts = open || el.classList.contains('navcue__trigger');
+        el.classList.toggle('is-over-media', counts && overAny(el, media));
+      });
+      cue.querySelectorAll('.navcue__item').forEach((item) => {
+        const lit = [...item.querySelectorAll(WORDS)].some((w) => w.classList.contains('is-over-media'));
+        item.classList.toggle('is-over-media', lit);
+      });
     });
-    // Anything else that asks for it — the section stepper — gets the
-    // same check on its own box, so the bottom row changes together.
+
+    // Anything else that asks for it — each of the section stepper's
+    // arrows — gets the same check on its own box.
     document.querySelectorAll('[data-over-media]').forEach((el) => {
-      const b = el.getBoundingClientRect();
-      if (!b.width) return;
-      el.classList.toggle('is-over-media', media.some((m) => overlaps(m, b)));
+      el.classList.toggle('is-over-media', overAny(el, media));
     });
+
+    if (performance.now() < checkUntil) requestCheck();
   }
 
-  function requestCheck() {
+  /** Check on the next frame; with `forMs`, keep checking every frame
+      for that long — for anything that is still moving into place. */
+  function requestCheck(forMs) {
+    if (forMs) checkUntil = Math.max(checkUntil, performance.now() + forMs);
     if (checkPending) return;
     checkPending = true;
     requestAnimationFrame(checkOverMedia);
   }
 
-  window.addEventListener('cards:moved', requestCheck);
-  window.addEventListener('scroll', requestCheck, { passive: true });
-  window.addEventListener('resize', requestCheck);
+  window.addEventListener('cards:moved', () => requestCheck());
+  window.addEventListener('scroll', () => requestCheck(), { passive: true });
+  window.addEventListener('resize', () => requestCheck());
   window.addEventListener('pointermove', (event) => {
     if (event.buttons) requestCheck(); // a held button is a drag or a resize in progress
   }, { passive: true });

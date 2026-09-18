@@ -4,7 +4,7 @@ Name: Lê Vũ Xuân Anh (Frank Le)
 
 ## Public on the site
 - Email: vxale@uwaterloo.ca (academic inquiries), frank.lvxa@gmail.com (business inquiries)
-- LinkedIn: https://www.linkedin.com/in/frank-lvxa/
+- LinkedIn: https://www.linkedin.com/in/vxale/
 - Downloadable CV — placeholder slot only for now, file not yet provided
 
 ## Not displayed

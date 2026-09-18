@@ -67,8 +67,8 @@
      camera move, not a menu opening. The row between slides moves
      on --ease-in-out (it is on-screen movement); lift-off and landing
      stay on --ease-out (they arrive and leave). */
-  const OPEN_MS = 420;    // the picture lifting off its frame
-  const CLOSE_MS = 320;   // and landing back on it (exits faster)
+  const OPEN_MS = 600;    // the picture lifting off its frame (Frank, Sept 18: slower again)
+  const CLOSE_MS = 480;   // and landing back on it (exits faster)
   const SLIDE_MS = 380;   // the row moving one slide along
   const PEEK_SCALE = 0.55;                                   // a preview's size against its own
   const PEEK_GAP = () => (window.innerWidth < 600 ? 20 : 40); // between the current and a preview

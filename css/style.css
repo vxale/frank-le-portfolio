@@ -3012,7 +3012,7 @@ cite {
   background: var(--paper);
   color: var(--ink);
   opacity: 0;
-  transition: opacity 320ms var(--ease-out);
+  transition: opacity 480ms var(--ease-out);   /* lands with the picture: CLOSE_MS in js/slideshow.js */
 }
 .show.is-open { opacity: 1; }
 .show[hidden] { display: none; }

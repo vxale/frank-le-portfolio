@@ -167,19 +167,18 @@ Two knock-on changes came with it:
 
 The card is no longer one big `<a>`. The media is something the visitor picks up and resizes now, so it cannot also be a link waiting to fire on mouseup; **the caption carries the link**, the way a node's label does on the homepage.
 
-It is four nested elements, and the nesting is load-bearing — four things want a transform, and two on one element means the second silently wins:
+It is three nested elements, and the nesting is load-bearing — three things want a transform, and two on one element means the second silently wins:
 
 | element | transform | owner |
 | --- | --- | --- |
 | `.work-card` | drag offset | `js/drag.js` |
 | `.work-card__body` | scroll reveal | `js/site.js` |
-| `.media-frame__move` | scroll parallax | CSS view timeline |
 | `img` / `video` | hover scale | CSS |
 
-Four things to know before touching it:
+**There was a fourth — `.media-frame__move`, a scroll parallax on a CSS view timeline — and it is gone (Sept 17 2026).** Frank saw Winter Cries and What Took You So Long? cropped on the grid, and they were, all of them: to have room to move, the parallax layer was `inset: -4% 0` — 8% taller than the frame — and `object-fit: cover` scaled the media up to fill it, so every card showed 92% of its picture, 4% gone at every edge (measured: 17.5px top and bottom on the 16:9 trailer, 25px on each 630px-tall poster). The frame's *ratio* was right; the *picture inside it* was not. A parallax cannot be had without a crop, and the standing rule is the original file, uncropped, so the layer, its keyframes, the `view-timeline-name` on `.media-frame` and the resize/reduced-motion rules for it are all deleted; the media is a direct child of the frame at `100%/100%`. Verified after: media box equals frame box on all eight cards at 1440 and at 375, zero hidden pixels. The two view-timeline lessons (declare it on the frame, not inside `overflow: hidden`; longhands, not the `animation` shorthand) are in git history if a scroll-driven effect ever comes back — as something that moves a whole card, never something inside a clipped frame. The hover `scale(1.03)` on a fine pointer is the one remaining thing that hides an edge, transiently.
 
-- **The view timeline is declared on `.media-frame`, not on the layer that uses it.** `.media-frame` has `overflow: hidden`, which makes it a scroll container — a `view()` timeline created *inside* it measures the layer against the frame, which never scrolls, and sits frozen at 50% progress forever. That was the first version, and it looked exactly like working code. Declared on the frame as `view-timeline-name: --card-view`, it measures against the page. Verified: progress runs 0.29 → 1.00 as a card crosses the viewport, moving the media about 33px.
-- **Longhands, not the `animation` shorthand.** `animation: name linear both` sets `animation-duration: 0s`, and a progress-based timeline needs it left at `auto`.
+Two things to know before touching it:
+
 - **Dragging is attached only where `(hover: hover) and (pointer: fine)` matches.** A drag needs `touch-action: none` on the card, and the cards cover most of this page — on a phone that would be a grid you cannot scroll past. Resizing is safe everywhere: only the small grip takes the press.
 - **The resize grip calls `stopPropagation`**, which is what keeps one press from being a resize and a card drag at once. It clears `aspect-ratio` on first move (or the ratio rule fights the height) and clamps between 120px and 92% of the viewport width, so a frame can never push a horizontal scrollbar across the page.
 

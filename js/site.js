@@ -80,14 +80,21 @@ function workHref(work) {
 
 /** The works-grid card.
 
-    Four nested elements, because four separate things want a transform
-    and no two of them may share one - the last one written wins and
-    the others silently stop:
+    Three nested elements, because three separate things want a
+    transform and no two of them may share one - the last one written
+    wins and the others silently stop:
 
       .work-card          drag offset        js/drag.js
       .work-card__body    scroll reveal      js/site.js
-      .media-frame__move  scroll parallax    CSS view() timeline
       img / video         hover scale        CSS
+
+    There used to be a fourth, .media-frame__move, a scroll parallax
+    on a view() timeline. It went on Sept 17 2026: to have room to
+    move, the layer was 8% taller than the frame and object-fit
+    scaled the media up to fill it, so every card lost 4% of its
+    picture at every edge - the credits line at the foot of a poster,
+    the title in a trailer frame. Frank's rule is the original ratio,
+    uncropped, and a parallax cannot be had without a crop.
 
     The media and the caption both open the project. The media also
     drags and resizes, so both of those have to be able to swallow the
@@ -115,7 +122,7 @@ function cardMarkup(work, index, className) {
     <article class="${className}" data-stop>
       <div class="work-card__body" data-reveal>
         <a class="${frameClass}"${frameStyle} href="${workHref(work)}" tabindex="-1">
-          <div class="media-frame__move">${mediaFrameInner(item, work.title)}</div>
+          ${mediaFrameInner(item, work.title)}
           <span class="media-frame__grip" data-resize-grip aria-hidden="true"></span>
         </a>
         <a class="caption" href="${workHref(work)}">

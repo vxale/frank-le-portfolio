@@ -312,14 +312,6 @@ main { display: block; }
   width: 100%;
   overflow: hidden;
   background: var(--paper-dim);
-  /* The frame declares the scroll timeline that the layer inside it
-     reads. It has to be declared HERE and not on that layer: overflow
-     makes this frame a scroll container, so a view() timeline created
-     inside it would measure the layer against the frame - which never
-     scrolls - and sit frozen at 50% forever. Measured from the frame,
-     it measures against the page, which is the thing moving. */
-  view-timeline-name: --card-view;
-  view-timeline-axis: block;
 }
 
 .media-frame img,
@@ -2268,43 +2260,26 @@ main { display: block; }
 }
 
 
-/* ---------- Works grid: parallax, hover, resize ----------
-   Three behaviours on one card, each on its own element.
+/* ---------- Works grid: hover, resize ----------
+   Two behaviours on one card, each on its own element.
 
-   SCROLL. The media drifts a few per cent against the page as the
-   card crosses the viewport - enough to separate the image from the
-   paper it sits on, not enough to notice as an effect. It is a
-   view() scroll timeline rather than a scroll handler, so it runs off
-   the main thread and cannot stutter while images decode; where the
-   browser has no such timeline nothing moves, which is a fine place
-   to land.
+   There was a third, a scroll parallax (`.media-frame__move` on a
+   view() timeline, Sept 11 2026), removed Sept 17 2026. To have
+   anywhere to move, that layer was 8% taller than the frame and
+   object-fit scaled the media up to fill it, so every card showed
+   92% of its picture: 4% gone at every edge, measured at 17.5px top
+   and bottom on the Winter Cries trailer and 25px on each poster.
+   Frank's rule is the original ratio, uncropped, and a parallax
+   cannot be had without a crop, so the frame now holds exactly the
+   picture. Nothing else moves the media at rest.
 
    HOVER. 1.03 over 400ms, the same figure the site already uses on
    media elsewhere. A grid is browsed dozens of times in a sitting, so
-   this stays at the near-imperceptible end.
+   this stays at the near-imperceptible end. It is the one remaining
+   thing that hides an edge, transiently, under a fine pointer.
 
    RESIZE. A corner grip, two hairlines, that waits for the pointer
    the way the outward-link mark on Contact does. ---------- */
-
-.media-frame__move {
-  position: absolute;
-  inset: -4% 0;           /* taller than the frame, so no edge shows */
-  /* Longhands, not the shorthand: `animation: name linear both` sets
-     animation-duration to 0s, and a progress-based timeline needs it
-     left at auto to stretch across the range. */
-  animation-name: card-parallax;
-  animation-duration: auto;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-  animation-timeline: --card-view;
-  animation-range: cover 0% cover 100%;
-  will-change: transform;
-}
-
-@keyframes card-parallax {
-  from { transform: translate3d(0, -3%, 0); }
-  to   { transform: translate3d(0, 3%, 0); }
-}
 
 .media-frame__grip {
   position: absolute;
@@ -2330,10 +2305,6 @@ main { display: block; }
 .media-frame__grip::before { width: 1.15rem; height: 1px; }
 .media-frame__grip::after  { width: 1px; height: 1.15rem; }
 
-/* While a frame is being re-cropped it should track the hand exactly,
-   so the image inside holds still and nothing eases. */
-.media-frame.is-resizing .media-frame__move { animation-play-state: paused; }
-
 @media (hover: hover) and (pointer: fine) {
   .work-card:hover .media-frame img,
   .work-card:hover .media-frame video { transform: scale(1.03); }
@@ -2358,10 +2329,6 @@ main { display: block; }
 /* Nothing drifts and nothing scales. The frame keeps its media, the
    grip keeps working - resizing is a thing the visitor asked for, not
    motion the page decided on. */
-@media (prefers-reduced-motion: reduce) {
-  .media-frame__move { animation: none; inset: 0; }
-}
-
 
 /* ---------- The filter cue ----------
    The same object as the Navigate cue in every way that matters -

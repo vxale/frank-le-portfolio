@@ -509,12 +509,14 @@
     /* A trackpad swipe arrives as a run of wheel events with a
        horizontal delta — and, after the fingers lift, a tail of
        decaying ones the trackpad invents for inertia. One gesture is
-       one slide: the row follows the fingers for the first few dozen
-       pixels (so the hand is answered at once), commits the moment
-       the run passes WHEEL_COMMIT, and then ignores the tail until the
-       wheel has been quiet for a beat. A run that never reaches the
-       threshold settles back. Vertical scrolling is left alone: the
-       page under the show is locked, and a carousel is a row. */
+       one slide: the run accumulates unseen, commits the moment it
+       passes WHEEL_COMMIT, and then ignores the tail until the wheel
+       has been quiet for a beat. Nothing moves before the commit —
+       the first cut nudged the centre piece along with the fingers
+       and Frank read it as a shift before the swap (Sept 18 2026);
+       a trackpad swipe is a flick, not a hold, so the answer is the
+       swap itself. Vertical scrolling is left alone: the page under
+       the show is locked, and a carousel is a row. */
     const WHEEL_COMMIT = 60;
     const WHEEL_QUIET = 160;
     let wheelAcc = 0;
@@ -528,12 +530,9 @@
       event.preventDefault();
       window.clearTimeout(wheelTimer);
       wheelTimer = window.setTimeout(() => {
-        const nudged = !wheelLocked && wheelAcc !== 0;
         wheelAcc = 0;
         wheelLocked = false;
         lastAbs = 0;
-        slides.forEach((el) => { el.style.transition = ''; });
-        if (nudged) layout();                       // never committed: home
       }, WHEEL_QUIET);
 
       const abs = Math.abs(event.deltaX);
@@ -556,12 +555,8 @@
       wheelAcc += event.deltaX;
       if (Math.abs(wheelAcc) >= WHEEL_COMMIT) {
         wheelLocked = true;
-        slides.forEach((el) => { el.style.transition = ''; });
-        goTo(index + Math.sign(wheelAcc), true);
+        goTo(index + Math.sign(wheelAcc));
         wheelAcc = 0;
-      } else {
-        slides.forEach((el) => { el.style.transition = 'none'; });
-        layout(-wheelAcc);
       }
     }, { passive: false });
   }

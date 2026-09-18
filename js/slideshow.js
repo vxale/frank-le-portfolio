@@ -524,6 +524,7 @@
     let wheelTimer = null;
     let lastAbs = 0;
     let lastSign = 0;
+    let committedAt = 0;
 
     stage.addEventListener('wheel', (event) => {
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
@@ -538,14 +539,22 @@
       const abs = Math.abs(event.deltaX);
       const sign = Math.sign(event.deltaX);
       if (wheelLocked) {
-        /* The tail after a commit only ever decays. A delta that jumps
-           back up, or turns round, is a NEW swipe — the trackpad has
-           no "fingers down" event to say so, and waiting for the tail
-           to end meant no second swipe could land for a second or more
-           (Frank, Sept 18 2026: "couldn't swipe after one swipe"). */
-        const fresh = abs > lastAbs * 1.5 + 4 || (lastSign && sign !== lastSign);
+        /* Telling a new swipe from the rest of the old one. The commit
+           lands early — 60px in, while the fingers are still on the
+           pad and still speeding up — so for the first while every
+           delta is bigger than the last, and the first rule here
+           ("a delta that jumps back up is a new swipe") fired on the
+           swipe's own ramp and stepped again: one swipe skipped one
+           or two slides (Frank, Sept 18 2026). Three signs are safe:
+           the direction turns round; the run has died down to a few
+           pixels and something arrives after that; or, once the ramp
+           is well behind us, a delta more than doubles. A long slow
+           swipe does none of these. */
+        const flipped = lastSign !== 0 && sign !== lastSign;
+        const ended = lastAbs <= 4;
+        const jump = performance.now() - committedAt > 250 && abs > lastAbs * 2 + 8;
         lastAbs = abs; lastSign = sign;
-        if (!fresh) return;
+        if (!(flipped || ended || jump)) return;
         wheelLocked = false;
         wheelAcc = 0;
       }
@@ -555,6 +564,7 @@
       wheelAcc += event.deltaX;
       if (Math.abs(wheelAcc) >= WHEEL_COMMIT) {
         wheelLocked = true;
+        committedAt = performance.now();
         goTo(index + Math.sign(wheelAcc));
         wheelAcc = 0;
       }

@@ -70,6 +70,7 @@
   const OPEN_MS = 600;    // the picture lifting off its frame (Frank, Sept 18: slower again)
   const CLOSE_MS = 480;   // and landing back on it (exits faster)
   const SLIDE_MS = 380;   // the row moving one slide along
+  const SHEET_MS = 160;   // the paper cutting in and out — quick, so the page never ghosts under a moving picture
   const PEEK_SCALE = 0.55;                                   // a preview's size against its own
   const PEEK_GAP = () => (window.innerWidth < 600 ? 20 : 40); // between the current and a preview
   const SWIPE_COMMIT = 0.22;   // of the stage width
@@ -108,6 +109,11 @@
         <button class="show__sound shot__sound" type="button" data-show-sound aria-pressed="false" aria-label="Turn sound on" hidden>Sound off</button>
         <button class="show__full shot__sound" type="button" data-show-full aria-pressed="false" aria-label="Enter full screen" hidden>Full screen</button>
       </div>`;
+    // The stylesheet sequences the company (previews, the bottom row)
+    // and the paper against these; one source for the numbers.
+    show.style.setProperty('--open-ms', `${OPEN_MS}ms`);
+    show.style.setProperty('--close-ms', `${CLOSE_MS}ms`);
+    show.style.setProperty('--sheet-ms', `${SHEET_MS}ms`);
     document.body.appendChild(show);
 
     // Wrapped, not `close` itself: a listener is handed the event, and
@@ -344,7 +350,12 @@
       layout();                                   // back to its place: identity at the centre
       window.setTimeout(() => { if (media.isConnected) media.style.transition = ''; }, OPEN_MS + 20);
     }
-    show.classList.add('is-open');
+    /* Sequence: the paper cuts in fast; the picture is already on its
+       way; the company — previews, the bottom row — arrives once the
+       picture has landed. `is-arriving` carries the delays and comes
+       off afterwards, or every later row move would wait its turn. */
+    show.classList.add('is-open', 'is-arriving');
+    window.setTimeout(() => show.classList.remove('is-arriving'), reduce.matches ? 0 : OPEN_MS);
     show.focus({ preventScroll: true });
   }
 
@@ -385,14 +396,19 @@
       media.style.transition = `transform ${CLOSE_MS}ms var(--ease-out)`;
       media.style.transform = fitTo(layoutBox(media), target.getBoundingClientRect());
     }
-    show.classList.remove('is-open');
+    /* Sequence in reverse: the company goes at once, the picture lands
+       on its frame on plain paper, and only then does the paper cut
+       away — the page appears around a picture that is already where
+       it belongs, so nothing ghosts and nothing jumps. */
+    show.classList.add('is-landing');
 
     const finish = () => {
       show.hidden = true;
+      show.classList.remove('is-open', 'is-landing', 'is-arriving');
       show.querySelector('[data-show-stage]').innerHTML = '';
       slides = [];
     };
-    window.setTimeout(finish, (reduce.matches ? SLIDE_MS : CLOSE_MS) + 20);
+    window.setTimeout(finish, (reduce.matches ? SLIDE_MS : CLOSE_MS + SHEET_MS) + 40);
 
     pausedClips.forEach((v) => { const p = v.play(); if (p) p.catch(() => {}); });
     pausedClips = [];

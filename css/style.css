@@ -3003,8 +3003,21 @@ cite {
   .show-mark:hover { opacity: 1; }
 }
 
-/* The paper comes up under the picture in flight (js/slideshow.js
-   moves the picture; this only fades the sheet) and goes out with it. */
+/* The sheet, and the order things happen in.
+
+   The first cut faded the paper up over the whole lift-off, and the
+   page ghosted under a picture crossing it — Frank: "the fading
+   effect doesn't work well" (Sept 18 2026). Now nothing crossfades
+   with the page. OPENING: the paper cuts in over --sheet-ms (160)
+   while the picture is already lifting; the previews and the bottom
+   row wait and arrive once the picture has landed (--open-ms). CLOSING
+   is the reverse: the company goes at once, the picture lands on its
+   frame on plain paper, then the paper cuts away (delayed --close-ms)
+   — the page appears around a picture that is already where it
+   belongs. The three figures come from js/slideshow.js, one source.
+   `.is-arriving` carries the open delays and is removed afterwards,
+   or every later row move would wait its turn; `.is-landing` carries
+   the close sequence. */
 .show {
   position: fixed;
   inset: 0;
@@ -3012,10 +3025,35 @@ cite {
   background: var(--paper);
   color: var(--ink);
   opacity: 0;
-  transition: opacity 480ms var(--ease-out);   /* lands with the picture: CLOSE_MS in js/slideshow.js */
+  transition: opacity var(--sheet-ms, 160ms) var(--ease-out);
 }
 .show.is-open { opacity: 1; }
+.show.is-landing { opacity: 0; transition-delay: var(--close-ms, 480ms); }
 .show[hidden] { display: none; }
+
+/* The company: held at nothing while the picture is in flight
+   (`.is-arriving`, which js/slideshow.js removes the moment the
+   picture lands — the removal is what starts the fade up), and gone
+   first on the way out. The peek's resting 0.4 lives with its state
+   below; its own 380ms transition carries it up. */
+.show__step,
+.show__tools { transition: opacity 220ms var(--ease-out); }
+
+.show.is-arriving .show__mode,
+.show.is-arriving .show__step,
+.show.is-arriving .show__tools,
+.show.is-arriving .show__media.is-peek {
+  opacity: 0;
+  transition: none;
+}
+
+.show.is-landing .show__mode,
+.show.is-landing .show__step,
+.show.is-landing .show__tools,
+.show.is-landing .show__media.is-peek {
+  opacity: 0;
+  transition: opacity var(--sheet-ms, 160ms) var(--ease-out);
+}
 
 /* The page behind cannot scroll while the show is up. */
 html.is-showing { overflow: hidden; }
@@ -3165,6 +3203,7 @@ html.is-showing { overflow: hidden; }
    lifts, lands or pushes. */
 @media (prefers-reduced-motion: reduce) {
   .show { transition: opacity 200ms var(--ease-out); }
+  .show.is-landing { transition-delay: 0s; }            /* nothing lands, so nothing to wait for */
   .show__media { transition: opacity 220ms var(--ease-out); }   /* the row cuts to its new places; the fade stays */
   .show-mark:active, .show__mode:active, .show__arrow:active { transform: none; }
 }
